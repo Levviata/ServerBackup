@@ -33,8 +33,8 @@ public class JoinListener implements Listener {
                             String latest = scanner.next();
                             String current = ServerBackup.getInstance().getDescription().getVersion();
 
-                            int late = Integer.parseInt(latest.replaceAll("\\.", ""));
-                            int curr = Integer.parseInt(current.replaceAll("\\.", ""));
+                            int late = Integer.parseInt(latest.replaceAll("\\.", ""));  // Somewhat reasonable replaceAll() usage
+                            int curr = Integer.parseInt(current.replaceAll("\\.", "")); // This too
 
                             if (curr >= late) {
                             } else {
@@ -64,7 +64,7 @@ public class JoinListener implements Listener {
 
                                             int bVer = Integer.parseInt(
                                                     Bukkit.getVersion().split(" ")[Bukkit.getVersion().split(" ").length
-                                                            - 1].replaceAll("\\)", "").replaceAll("\\.", ""));
+                                                            - 1].replaceAll("\\)", "").replaceAll("\\.", "")); // Somewhat reasonable replaceAll() usage
 
                                             if (bVer < 118) {
                                                 url = new URL(

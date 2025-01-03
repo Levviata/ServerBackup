@@ -51,13 +51,13 @@ public class Backup {
                 if (!backupFolder.exists()) {
                     for (Player all : Bukkit.getOnlinePlayers()) {
                         if (all.hasPermission("backup.notification")) {
-                            all.sendMessage(OperationHandler.processMessage("Info.BackupStarted").replaceAll("%file%", worldFolder.getName()));
+                            all.sendMessage(OperationHandler.processMessage("Info.BackupStarted").replace("%file%", worldFolder.getName()));
                         }
                     }
 
                     ZipManager zm = new ZipManager(
                             worldFolder.getPath(), Configuration.backupDestination + "//backup-"
-                            + df.format(date) + "-" + filePath.replaceAll("/", "-") + ".zip",
+                            + df.format(date) + "-" + filePath.replace("/", "-") + ".zip",
                             Bukkit.getConsoleSender(), true, true, isFullBackup);
 
                     zm.zip();
@@ -83,19 +83,19 @@ public class Backup {
                     try {
                         FileUtils.deleteDirectory(file);
 
-                        sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replaceAll("%file%", backupFilePath));
+                        sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replace("%file%", backupFilePath));
                     } catch (IOException e) {
                         e.printStackTrace();
 
-                        sender.sendMessage(OperationHandler.processMessage("Error.DeletionFailed").replaceAll("%file%", backupFilePath));
+                        sender.sendMessage(OperationHandler.processMessage("Error.DeletionFailed").replace("%file%", backupFilePath));
                     }
                 } else {
                     file.delete();
 
-                    sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replaceAll("%file%", backupFilePath));
+                    sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replace("%file%", backupFilePath));
                 }
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replaceAll("%file%", backupFilePath));
+                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace("%file%", backupFilePath));
             }
         });
     }

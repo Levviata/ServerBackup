@@ -39,7 +39,7 @@ public class CommandSearch {
             }
 
             if (backupsMatch.size() == 0) {
-                sender.sendMessage(OperationHandler.processMessage("NoBackupSearch").replaceAll("%input%", args[1]));
+                sender.sendMessage(OperationHandler.processMessage("NoBackupSearch").replace("%input%", args[1]));
 
                 return;
             }
@@ -98,7 +98,7 @@ public class CommandSearch {
                 sender.sendMessage("");
                 sender.sendMessage("-------- Page " + page + "/" + maxPages + " --------");
             } catch (Exception e) {
-                sender.sendMessage(OperationHandler.processMessage("Error.NotANumber").replaceAll("%input%", args[2]));
+                sender.sendMessage(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[2]));
             }
         });
     }

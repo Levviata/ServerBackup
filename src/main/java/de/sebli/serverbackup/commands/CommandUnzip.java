@@ -14,7 +14,7 @@ public class CommandUnzip {
         String filePath = args[1];
 
         if (!args[1].contains(".zip")) {
-            sender.sendMessage(OperationHandler.processMessage("Error.NotAZip").replaceAll("%file%", args[1]));
+            sender.sendMessage(OperationHandler.processMessage("Error.NotAZip").replace("%file%", args[1]));
 
             return;
         }
@@ -34,10 +34,10 @@ public class CommandUnzip {
 
                 zm.unzip();
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replaceAll("%file%", args[1]));
+                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace("%file%", args[1]));
             }
         } else {
-            sender.sendMessage(OperationHandler.processMessage("Error.ZipExists").replaceAll("%file%", args[1]));
+            sender.sendMessage(OperationHandler.processMessage("Error.ZipExists").replace("%file%", args[1]));
         }
     }
 

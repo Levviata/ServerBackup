@@ -82,7 +82,7 @@ public class CommandList {
                 sender.sendMessage("");
                 sender.sendMessage("-------- Page " + page + "/" + maxPages + " --------");
             } catch (Exception e) {
-                sender.sendMessage(OperationHandler.processMessage("Error.NotANumber").replaceAll("%input%", args[1]));
+                sender.sendMessage(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[1]));
             }
         });
     }

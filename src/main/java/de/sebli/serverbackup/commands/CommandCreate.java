@@ -38,7 +38,7 @@ public class CommandCreate {
                 public void run() {
                     try {
                         File des = new File(Configuration.backupDestination + "//Files//"
-                                + file.getName().replaceAll("/", "-"));
+                                + file.getName().replace("/", "-"));
 
                         if (des.exists()) {
                             des = new File(des.getPath()
@@ -49,9 +49,9 @@ public class CommandCreate {
 
                         Files.copy(file, des);
 
-                        sender.sendMessage(OperationHandler.processMessage("Info.BackupFinished").replaceAll("%file%", args[1]));
+                        sender.sendMessage(OperationHandler.processMessage("Info.BackupFinished").replace("%file%", args[1]));
                     } catch (IOException e) {
-                        sender.sendMessage(OperationHandler.processMessage("Error.BackupFailed").replaceAll("%file%", args[1]));
+                        sender.sendMessage(OperationHandler.processMessage("Error.BackupFailed").replace("%file%", args[1]));
                         e.printStackTrace();
                     }
                 }

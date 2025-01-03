@@ -30,7 +30,7 @@ public class DropboxManager {
     public void uploadToDropbox(String filePath) {
         File file = new File(filePath);
 
-        if (!file.getPath().contains(Configuration.backupDestination.replaceAll("/", ""))) {
+        if (!file.getPath().contains(Configuration.backupDestination.replace("/", ""))) {
             file = new File(Configuration.backupDestination + "//" + filePath);
             filePath = file.getPath();
         }
@@ -70,7 +70,7 @@ public class DropboxManager {
 
         sender.sendMessage("Dropbox: Uploading backup [" + file.getName() + "] ...");
 
-        String des = ServerBackup.getInstance().getConfig().getString("CloudBackup.Options.Destination").replaceAll("/", "");
+        String des = ServerBackup.getInstance().getConfig().getString("CloudBackup.Options.Destination").replace("/", "");
         des = "/" + (des.equals("") ? "" : des + "/");
 
         if(file.length() > (100 * 1000 * 1000)) {

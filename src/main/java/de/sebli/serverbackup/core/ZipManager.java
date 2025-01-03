@@ -64,7 +64,7 @@ public class ZipManager {
                 Path pp = Paths.get(sourceFilePath);
                 Files.walk(pp).filter(path -> !Files.isDirectory(path)).forEach(path -> {
                     if (!path.toString().contains(ServerBackup.getInstance().getConfig().getString("BackupDestination")
-                            .replaceAll("/", "")) || !isSaving) {
+                            .replace("/", "")) || !isSaving) {
                         ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
 
                         for (String blacklist : ServerBackup.getInstance().getConfig().getStringList("Blacklist")) {
@@ -155,7 +155,7 @@ public class ZipManager {
                 }
             }
 
-            sender.sendMessage(OperationHandler.processMessage("Command.Zip.Footer").replaceAll("%file%", sourceFilePath));
+            sender.sendMessage(OperationHandler.processMessage("Command.Zip.Footer").replace("%file%", sourceFilePath));
 
             OperationHandler.tasks.remove("CREATE {" + sourceFilePath.replace("\\", "/") + "}");
 
@@ -186,7 +186,7 @@ public class ZipManager {
 
             for (Player all : Bukkit.getOnlinePlayers()) {
                 if (all.hasPermission("backup.notification")) {
-                    all.sendMessage(OperationHandler.processMessage("Info.BackupFinished").replaceAll("%file%", sourceFilePath));
+                    all.sendMessage(OperationHandler.processMessage("Info.BackupFinished").replace("%file%", sourceFilePath));
                 }
             }
         });
@@ -199,7 +199,7 @@ public class ZipManager {
                     @Override
                     public void run() {
                         if (OperationHandler.tasks.size() == 0) {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), ServerBackup.getInstance().getConfig().getString("CommandAfterAutomaticBackup").replaceAll("/", ""));
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), ServerBackup.getInstance().getConfig().getString("CommandAfterAutomaticBackup").replace("/", ""));
 
                             isCommandTimerRunning = false;
 
@@ -269,7 +269,7 @@ public class ZipManager {
 
             file.delete();
 
-            sender.sendMessage(OperationHandler.processMessage("Command.Unzip.Footer").replaceAll("%file%", sourceFilePath));
+            sender.sendMessage(OperationHandler.processMessage("Command.Unzip.Footer").replace("%file%", sourceFilePath));
         });
     }
 

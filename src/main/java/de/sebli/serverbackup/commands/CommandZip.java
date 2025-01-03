@@ -14,7 +14,7 @@ public class CommandZip {
         String filePath = args[1];
 
         if (args[1].contains(".zip")) {
-            sender.sendMessage(OperationHandler.processMessage("Error.AlreadyZip").replaceAll("%file%", args[1]));
+            sender.sendMessage(OperationHandler.processMessage("Error.AlreadyZip").replace("%file%", args[1]));
             return;
         }
 
@@ -34,10 +34,10 @@ public class CommandZip {
                     e.printStackTrace();
                 }
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replaceAll("%file%", args[1]));
+                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace("%file%", args[1]));
             }
         } else {
-            sender.sendMessage(OperationHandler.processMessage("Error.FolderExists").replaceAll("%file%", args[1]));
+            sender.sendMessage(OperationHandler.processMessage("Error.FolderExists").replace("%file%", args[1]));
         }
     }
 
