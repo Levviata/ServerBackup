@@ -1,13 +1,17 @@
+main: de.sebli.serverbackup.ServerBackup
 name: ServerBackup
-author: Seblii
-version: '${project.version}'
+version: $version
+description: A backup plugin for instant backup creation with little to no performance impact
+load: STARTUP
+authors:
+  - Seblii
+  - onetwoeight
+website: https://github.com/128931/ServerBackup
 api-version: 1.18
-
-main: de.seblii.serverbackup.ServerBackup
 
 commands:
   backup:
-    aliases: [serverbackup]
+    aliases: [ serverbackup ]
     permission: backup.admin
 
 permissions:
