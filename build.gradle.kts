@@ -18,8 +18,12 @@ repositories {
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT")
     implementation("commons-io:commons-io:2.11.0")
-    implementation("commons-net:commons-net:3.8.0")
+    implementation("commons-net:commons-net:3.9.0") // Updated version from 3.8.0
     compileOnly("org.junit.jupiter:junit-jupiter:5.8.2")
+
+    // Added dependencies
+    implementation("com.dropbox.core:dropbox-core-sdk:5.4.4")
+    implementation("org.bstats:bstats-bukkit:3.0.2")
 }
 
 val targetJavaVersion = 8
