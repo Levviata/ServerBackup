@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "de.sebli"
-version = "2.10"
+version = "2.10.0"
 
 repositories {
     mavenCentral()
