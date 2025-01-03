@@ -10,4 +10,6 @@ Discord server for support or suggestions: https://discord.gg/rNzngsCWFC
 
 # Objectives/Intentions
 
-In general, I want to fix bugs here and there, possibly improve code quality, basic documentation, and neatly pack everything together for better support down the line.
+In general, I want to fix bugs here and there, possibly improve code quality, basic documentation, and neatly pack everything together for better support down the line. 
+
+_No promises._
