@@ -22,6 +22,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static de.sebli.serverbackup.utils.GlobalConstants.BACKUP_DESTINATION;
+import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
+
 public class ZipManager {
 
     private final String sourceFilePath;
@@ -32,6 +35,8 @@ public class ZipManager {
     private final boolean isFullBackup;
 
     private static boolean isCommandTimerRunning = false;
+    private static String ERROR_ZIPPING = "Error while zipping files.";
+    private static String PATH_COMMAND_AFTER_AUTOMATIC_BACKUP = "CommandAfterAutomaticBackup";
 
     public ZipManager(String sourceFilePath, String targetFilePath, CommandSender sender, boolean sendDebugMessage,
                       boolean isSaving, boolean isFullBackup) {
@@ -43,7 +48,7 @@ public class ZipManager {
         this.isFullBackup = isFullBackup;
     }
 
-    public void zip() throws IOException {
+    public void zip() throws IOException { // cognitive complexity of 123, gg
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
             long sTime = System.nanoTime();
 
@@ -56,14 +61,14 @@ public class ZipManager {
                 p = Files.createFile(Paths.get(targetFilePath));
             } catch (IOException e) {
                 e.printStackTrace();
-                Bukkit.getLogger().log(Level.WARNING, "Error while zipping files.");
+                Bukkit.getLogger().log(Level.WARNING, ERROR_ZIPPING);
                 return;
             }
 
             try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
                 Path pp = Paths.get(sourceFilePath);
                 Files.walk(pp).filter(path -> !Files.isDirectory(path)).forEach(path -> {
-                    if (!path.toString().contains(ServerBackup.getInstance().getConfig().getString("BackupDestination")
+                    if (!path.toString().contains(ServerBackup.getInstance().getConfig().getString(BACKUP_DESTINATION)
                             .replace("/", "")) || !isSaving) {
                         ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
 
@@ -129,13 +134,13 @@ public class ZipManager {
                             zs.closeEntry();
                         } catch (IOException e) {
                             e.printStackTrace();
-                            ServerBackup.getInstance().getLogger().log(Level.WARNING, "Error while zipping files.");
+                            ServerBackup.getInstance().getLogger().log(Level.WARNING, ERROR_ZIPPING);
                         }
                     }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
-                ServerBackup.getInstance().getLogger().log(Level.WARNING, "Error while zipping files.");
+                ServerBackup.getInstance().getLogger().log(Level.WARNING, ERROR_ZIPPING);
                 return;
             }
 
@@ -155,7 +160,7 @@ public class ZipManager {
                 }
             }
 
-            sender.sendMessage(OperationHandler.processMessage("Command.Zip.Footer").replace("%file%", sourceFilePath));
+            sender.sendMessage(OperationHandler.processMessage("Command.Zip.Footer").replace(FILE_NAME_PLACEHOLDER, sourceFilePath));
 
             OperationHandler.tasks.remove("CREATE {" + sourceFilePath.replace("\\", "/") + "}");
 
@@ -164,7 +169,7 @@ public class ZipManager {
                     if (!sourceFilePath.equalsIgnoreCase(".")) {
                         Configuration.backupInfo.set("Data." + sourceFilePath, "");
 
-                        new File(targetFilePath).renameTo(new File(targetFilePath.split("backup")[0] + "dynamic-backup"
+                        new File(targetFilePath).renameTo(new File(targetFilePath.split("backup")[0] + "dynamic-backup" // wont comply to java:S1192, no comment
                                 + targetFilePath.split("backup")[1]));
                         targetFilePath = targetFilePath.split("backup")[0] + "dynamic-backup"
                                 + targetFilePath.split("backup")[1];
@@ -186,20 +191,20 @@ public class ZipManager {
 
             for (Player all : Bukkit.getOnlinePlayers()) {
                 if (all.hasPermission("backup.notification")) {
-                    all.sendMessage(OperationHandler.processMessage("Info.BackupFinished").replace("%file%", sourceFilePath));
+                    all.sendMessage(OperationHandler.processMessage("Info.BackupFinished").replace(FILE_NAME_PLACEHOLDER, sourceFilePath));
                 }
             }
         });
 
-        if (ServerBackup.getInstance().getConfig().getString("CommandAfterAutomaticBackup") != null && !isCommandTimerRunning) {
-            if (!ServerBackup.getInstance().getConfig().getString("CommandAfterAutomaticBackup").equalsIgnoreCase("/")) {
+        if (ServerBackup.getInstance().getConfig().getString(PATH_COMMAND_AFTER_AUTOMATIC_BACKUP) != null && !isCommandTimerRunning) {
+            if (!ServerBackup.getInstance().getConfig().getString(PATH_COMMAND_AFTER_AUTOMATIC_BACKUP).equalsIgnoreCase("/")) {
                 isCommandTimerRunning = true;
 
                 new BukkitRunnable() {
                     @Override
                     public void run() {
                         if (OperationHandler.tasks.size() == 0) {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), ServerBackup.getInstance().getConfig().getString("CommandAfterAutomaticBackup").replace("/", ""));
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), ServerBackup.getInstance().getConfig().getString(PATH_COMMAND_AFTER_AUTOMATIC_BACKUP).replace("/", ""));
 
                             isCommandTimerRunning = false;
 
@@ -269,7 +274,7 @@ public class ZipManager {
 
             file.delete();
 
-            sender.sendMessage(OperationHandler.processMessage("Command.Unzip.Footer").replace("%file%", sourceFilePath));
+            sender.sendMessage(OperationHandler.processMessage("Command.Unzip.Footer").replace(FILE_NAME_PLACEHOLDER, sourceFilePath));
         });
     }
 

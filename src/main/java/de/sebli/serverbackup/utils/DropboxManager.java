@@ -26,6 +26,7 @@ public class DropboxManager {
     }
 
     private static final String ACCESS_TOKEN = Configuration.cloudInfo.getString("Cloud.Dropbox.AccessToken");
+    private static final String CLOUD_RT = "Cloud.Dropbox.RT";
 
     public void uploadToDropbox(String filePath) {
         File file = new File(filePath);
@@ -49,7 +50,7 @@ public class DropboxManager {
         DbxClientV2 client = null;
         DbxCredential credential = null;
 
-        if(!Configuration.cloudInfo.contains("Cloud.Dropbox.RT")) {
+        if(!Configuration.cloudInfo.contains(CLOUD_RT)) {
             DbxAppInfo appInfo = new DbxAppInfo(appKey, secretKey);
             DbxWebAuth webAuth = new DbxWebAuth(config, appInfo);
             DbxAuthFinish authFinish = null;
@@ -60,10 +61,10 @@ public class DropboxManager {
             }
             credential = new DbxCredential(authFinish.getAccessToken(), 60L, authFinish.getRefreshToken(), appKey, secretKey);
 
-            Configuration.cloudInfo.set("Cloud.Dropbox.RT", authFinish.getRefreshToken());
+            Configuration.cloudInfo.set(CLOUD_RT, authFinish.getRefreshToken());
             Configuration.saveCloud();
         } else {
-            credential = new DbxCredential("isly", 0L, Configuration.cloudInfo.getString("Cloud.Dropbox.RT"), appKey, secretKey);
+            credential = new DbxCredential("isly", 0L, Configuration.cloudInfo.getString(CLOUD_RT), appKey, secretKey);
         }
 
         client = new DbxClientV2(config, credential);
@@ -174,7 +175,7 @@ public class DropboxManager {
     }
 
     private static void uploadFile(CommandSender sender, DbxClientV2 client, File file, String dbxPath) {
-        OperationHandler.tasks.add("DROPBOX UPLOAD {" + file.getName() + "}");
+        OperationHandler.tasks.add("DROPBOX UPLOAD {" + file.getName() + "}"); // wont comply to java:S1192, we are never refactoring this
 
         try (InputStream in = new FileInputStream(file.getPath())) {
             client.files().uploadBuilder(dbxPath + file.getName()).uploadAndFinish(in);
@@ -186,7 +187,7 @@ public class DropboxManager {
             throw new RuntimeException(e);
         } finally {
             sender.sendMessage("Dropbox: Upload successfully. Backup stored on your dropbox account.");
-            OperationHandler.tasks.remove("DROPBOX UPLOAD {" + file.getName() + "}");
+            OperationHandler.tasks.remove("DROPBOX UPLOAD {" + file.getName() + "}"); // same as line 178
 
             if (ServerBackup.getInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                 file.delete();
@@ -201,14 +202,14 @@ public class DropboxManager {
         }
 
         if(!finished) {
-            String progress = "DROPBOX UPLOAD {" + fileName + ", Progress: " + Math.round((uploaded / (double) size) * 100) + "%}";
+            String progress = "DROPBOX UPLOAD {" + fileName + ", Progress: " + Math.round((uploaded / (double) size) * 100) + "%}"; // same as line 178
             OperationHandler.tasks.add(progress);
             lastProgress = progress;
 
             return progress;
         }
 
-        return "DROPBOX UPLOAD {" + fileName + ", Progress: finished}";
+        return "DROPBOX UPLOAD {" + fileName + ", Progress: finished}"; // same as line 178
     }
 
 }

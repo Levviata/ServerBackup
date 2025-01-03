@@ -18,6 +18,10 @@ import java.util.Scanner;
 
 public class JoinListener implements Listener {
 
+    static final String TITLE = "§8=====§fServerBackup§8=====";
+    static final String AUTHOR = "§8=====§9Plugin by Seblii§8=====";
+    static final String PAGE = "§7, you are on - §c";
+
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
@@ -39,23 +43,23 @@ public class JoinListener implements Listener {
                             if (curr >= late) {
                             } else {
                                 if (OperationHandler.isUpdated) {
-                                    p.sendMessage("§8=====§fServerBackup§8=====");
+                                    p.sendMessage(TITLE);
                                     p.sendMessage("");
                                     p.sendMessage("§7There was a newer version available - §a" + latest
-                                            + "§7, you are on - §c" + current);
+                                            + PAGE + current);
                                     p.sendMessage(
                                             "\n§7The latest version has been downloaded automatically, please reload the server to complete the update.");
                                     p.sendMessage("");
-                                    p.sendMessage("§8=====§9Plugin by Seblii§8=====");
+                                    p.sendMessage(AUTHOR);
                                 } else {
                                     if (ServerBackup.getInstance().getConfig().getBoolean("AutomaticUpdates")) {
                                         if (p.hasPermission("backup.admin")) {
-                                            p.sendMessage("§8=====§fServerBackup§8=====");
+                                            p.sendMessage(TITLE);
                                             p.sendMessage("");
                                             p.sendMessage("§7There is a newer version available - §a" + latest
-                                                    + "§7, you are on - §c" + current);
+                                                    + PAGE + current);
                                             p.sendMessage("");
-                                            p.sendMessage("§8=====§9Plugin by Seblii§8=====");
+                                            p.sendMessage(AUTHOR);
                                             p.sendMessage("");
                                             p.sendMessage("ServerBackup§7: Automatic update started...");
 
@@ -84,14 +88,14 @@ public class JoinListener implements Listener {
                                             }
                                         }
                                     } else {
-                                        p.sendMessage("§8=====§fServerBackup§8=====");
+                                        p.sendMessage(TITLE);
                                         p.sendMessage("");
                                         p.sendMessage("§7There is a newer version available - §a" + latest
-                                                + "§7, you are on - §c" + current);
+                                                + PAGE + current);
                                         p.sendMessage(
                                                 "§7Please download the latest version - §4https://server-backup.net/");
                                         p.sendMessage("");
-                                        p.sendMessage("§8=====§9Plugin by Seblii§8=====");
+                                        p.sendMessage(AUTHOR);
                                     }
                                 }
                             }

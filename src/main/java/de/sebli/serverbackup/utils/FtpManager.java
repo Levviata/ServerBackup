@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
+
 public class FtpManager {
 
     private CommandSender sender;
@@ -24,6 +26,10 @@ public class FtpManager {
     private static final int port = ServerBackup.getInstance().getConfig().getInt("Ftp.Server.Port");
     private static final String user = ServerBackup.getInstance().getConfig().getString("Ftp.Server.User");
     private static final String pass = ServerBackup.getInstance().getConfig().getString("Ftp.Server.Password");
+
+    private static final String ERROR_FTP_DOWNLOAD_FAILED = "Error.FtpDownloadFailed";
+    private static final String ERROR_FTP_UPLOAD_FAILED = "Error.FtpUploadFailed";
+    private static final String ERROR_FTP_NOT_FOUND = "Error.FtpNotFound";
 
     public FtpManager(CommandSender sender) {
         this.sender = sender;
@@ -42,7 +48,7 @@ public class FtpManager {
         }
 
         if (!file.exists()) {
-            sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace("%file%", file.getName()));
+            sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
             return;
         }
@@ -54,8 +60,8 @@ public class FtpManager {
             if (!isSSL) {
                 connect(ftpClient);
 
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpUpload").replace("%file%", file.getName()));
-                OperationHandler.tasks.add("FTP UPLOAD {" + filePath + "}");
+                sender.sendMessage(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+                OperationHandler.tasks.add("FTP UPLOAD {" + filePath + "}"); // wont comply to java:S1192, we are never refactoring this
 
                 InputStream inputStream = new FileInputStream(file);
 
@@ -85,7 +91,7 @@ public class FtpManager {
                         }
                     }
                 } else {
-                    sender.sendMessage(OperationHandler.processMessage("Error.FtpUploadFailed"));
+                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
                 }
 
                 OperationHandler.tasks.remove("FTP UPLOAD {" + filePath + "}");
@@ -121,7 +127,7 @@ public class FtpManager {
                             }
                         }
                     } else {
-                        sender.sendMessage(OperationHandler.processMessage("Error.FtpUploadFailed"));
+                        sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
                     }
 
                     if (OperationHandler.tasks.contains("FTP UPLOAD {" + filePath + "}")) {
@@ -133,7 +139,7 @@ public class FtpManager {
                 }
             }
         } catch (IOException e) {
-            sender.sendMessage(OperationHandler.processMessage("Error.FtpUploadFailed"));
+            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
             e.printStackTrace();
         } finally {
             disconnect(ftpsClient);
@@ -158,12 +164,12 @@ public class FtpManager {
                 }
 
                 if (!exists) {
-                    sender.sendMessage(OperationHandler.processMessage("Error.FtpNotFound").replace("%file%", file.getName()));
+                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
                     return;
                 }
 
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace("%file%", file.getName()));
+                sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
                 OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
                 boolean success = ftpClient.retrieveFile(file.getName(), outputStream);
@@ -186,7 +192,7 @@ public class FtpManager {
                 if (success) {
                     sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
                 } else {
-                    sender.sendMessage(OperationHandler.processMessage("Error.FtpDownloadFailed"));
+                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
                 }
             } else {
                 try {
@@ -199,12 +205,12 @@ public class FtpManager {
                     }
 
                     if (!exists) {
-                        sender.sendMessage(OperationHandler.processMessage("Error.FtpNotFound").replace("%file%", file.getName()));
+                        sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
                         return;
                     }
 
-                    sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace("%file%", file.getName()));
+                    sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
                     OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
                     boolean success = ftpsClient.retrieveFile(file.getName(), outputStream);
@@ -227,7 +233,7 @@ public class FtpManager {
                     if (success) {
                         sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
                     } else {
-                        sender.sendMessage(OperationHandler.processMessage("Error.FtpDownloadFailed"));
+                        sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
                     }
                 } catch (Exception e) {
                     isSSL = false;
@@ -235,7 +241,7 @@ public class FtpManager {
                 }
             }
         } catch (IOException e) {
-            sender.sendMessage(OperationHandler.processMessage("Error.FtpDownloadFailed"));
+            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
             e.printStackTrace();
         } finally {
             disconnect(ftpsClient);
@@ -260,19 +266,19 @@ public class FtpManager {
                 }
 
                 if (!exists) {
-                    sender.sendMessage(OperationHandler.processMessage("Error.FtpNotFound").replace("%file%", file.getName()));
+                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
                     return;
                 }
 
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace("%file%", file.getName()));
+                sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
                 boolean success = ftpClient.deleteFile(file.getPath());
 
                 if (success) {
                     sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletionSuccess"));
                 } else {
-                    sender.sendMessage(OperationHandler.processMessage("Error.FtpDeletionFailed"));
+                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
                 }
             } else {
                 try {
@@ -285,12 +291,12 @@ public class FtpManager {
                     }
 
                     if (!exists) {
-                        sender.sendMessage(OperationHandler.processMessage("Error.FtpNotFound").replace("%file%", file.getName()));
+                        sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
                         return;
                     }
 
-                    sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace("%file%", file.getName()));
+                    sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
                     boolean success = ftpsClient.deleteFile(file.getPath());
 

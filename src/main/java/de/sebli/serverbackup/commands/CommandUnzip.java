@@ -8,13 +8,15 @@ import org.bukkit.command.CommandSender;
 
 import java.io.File;
 
+import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
+
 public class CommandUnzip {
 
     public static void execute(CommandSender sender, String[] args) {
         String filePath = args[1];
 
         if (!args[1].contains(".zip")) {
-            sender.sendMessage(OperationHandler.processMessage("Error.NotAZip").replace("%file%", args[1]));
+            sender.sendMessage(OperationHandler.processMessage("Error.NotAZip").replace(FILE_NAME_PLACEHOLDER, args[1]));
 
             return;
         }
@@ -34,10 +36,10 @@ public class CommandUnzip {
 
                 zm.unzip();
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace("%file%", args[1]));
+                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, args[1]));
             }
         } else {
-            sender.sendMessage(OperationHandler.processMessage("Error.ZipExists").replace("%file%", args[1]));
+            sender.sendMessage(OperationHandler.processMessage("Error.ZipExists").replace(FILE_NAME_PLACEHOLDER, args[1]));
         }
     }
 

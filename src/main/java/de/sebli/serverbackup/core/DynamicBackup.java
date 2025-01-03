@@ -31,7 +31,7 @@ public class DynamicBackup  implements Listener {
 
                     @Override
                     public void run() {
-                        String chunkInf = "Data." + e.getTo().getWorld().getName() + ".Chunk." + "r." + regX + "."
+                        String chunkInf = "Data." + e.getTo().getWorld().getName() + ".Chunk." + "r." + regX + "." // wont comply to java:S1192, we are never refactoring this
                                 + regZ + ".mca";
 
                         if (!Bukkit.getWorldContainer().toString().equalsIgnoreCase(".")) {

@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import static de.sebli.serverbackup.utils.GlobalConstants.BACKUP_DESTINATION;
+
 public class Configuration {
 
     public static String prefix;
@@ -26,6 +28,8 @@ public class Configuration {
     private static File messagesFile = new File("plugins//ServerBackup//messages.yml");
     public static YamlConfiguration messages = YamlConfiguration.loadConfiguration(messagesFile);
 
+    private static final String CLOUD_KEY = "Cloud.Dropbox.AppKey";
+
     public static void loadUp() {
         loadConfig();
         loadCloud();
@@ -34,8 +38,8 @@ public class Configuration {
     }
 
     public static void loadConfig() {
-        if (ServerBackup.getInstance().getConfig().contains("BackupDestination")) {
-            backupDestination = ServerBackup.getInstance().getConfig().getString("BackupDestination");
+        if (ServerBackup.getInstance().getConfig().contains(BACKUP_DESTINATION)) {
+            backupDestination = ServerBackup.getInstance().getConfig().getString(BACKUP_DESTINATION);
         }
 
         if (!Files.exists(Paths.get(backupDestination))) {
@@ -105,7 +109,7 @@ public class Configuration {
         ServerBackup.getInstance().getConfig().addDefault("UpdateAvailableMessage", true);
         ServerBackup.getInstance().getConfig().addDefault("AutomaticUpdates", true);
 
-        ServerBackup.getInstance().getConfig().addDefault("BackupDestination", "Backups//");
+        ServerBackup.getInstance().getConfig().addDefault(BACKUP_DESTINATION, "Backups//");
 
         ServerBackup.getInstance().getConfig().addDefault("CloudBackup.Dropbox", false);
         ServerBackup.getInstance().getConfig().addDefault("CloudBackup.Options.Destination", "/");
@@ -124,7 +128,7 @@ public class Configuration {
 
         ServerBackup.getInstance().saveConfig();
 
-        backupDestination = ServerBackup.getInstance().getConfig().getString("BackupDestination");
+        backupDestination = ServerBackup.getInstance().getConfig().getString(BACKUP_DESTINATION);
     }
 
     public static void loadCloud() {
@@ -139,11 +143,11 @@ public class Configuration {
         cloudInfo.options().header("Dropbox - Watch this video for explanation: https://youtu.be/k-0aIohxRUA");
 
         if (!cloudInfo.contains("Cloud.Dropbox")) {
-            cloudInfo.set("Cloud.Dropbox.AppKey", "appKey");
+            cloudInfo.set(CLOUD_KEY, "appKey");
             cloudInfo.set("Cloud.Dropbox.AppSecret", "appSecret");
         } else {
-            if (cloudInfo.getString("Cloud.Dropbox.AppKey") != "appKey" && !cloudInfo.contains("Cloud.Dropbox.ActivationLink")) {
-                cloudInfo.set("Cloud.Dropbox.ActivationLink", "https://www.dropbox.com/oauth2/authorize?client_id=" + cloudInfo.getString("Cloud.Dropbox.AppKey") + "&response_type=code&token_access_type=offline");
+            if (cloudInfo.getString(CLOUD_KEY) != "appKey" && !cloudInfo.contains("Cloud.Dropbox.ActivationLink")) {
+                cloudInfo.set("Cloud.Dropbox.ActivationLink", "https://www.dropbox.com/oauth2/authorize?client_id=" + cloudInfo.getString(CLOUD_KEY) + "&response_type=code&token_access_type=offline");
                 if (!cloudInfo.contains("Cloud.Dropbox.AccessToken")) {
                     cloudInfo.set("Cloud.Dropbox.AccessToken", "accessToken");
                 }
@@ -210,9 +214,9 @@ public class Configuration {
         String oldDes = backupDestination;
 
         if (!oldDes
-                .equalsIgnoreCase(ServerBackup.getInstance().getConfig().getString("BackupDestination"))) {
+                .equalsIgnoreCase(ServerBackup.getInstance().getConfig().getString(BACKUP_DESTINATION))) {
             backupDestination = ServerBackup.getInstance().getConfig()
-                    .getString("BackupDestination");
+                    .getString(BACKUP_DESTINATION);
 
             ServerBackup.getInstance().getLogger().log(Level.INFO,
                     "ServerBackup: Backup destination [" + oldDes + " >> "

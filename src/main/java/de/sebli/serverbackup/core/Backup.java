@@ -14,6 +14,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
+import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
+
 public class Backup {
 
     private final String backupFilePath;
@@ -51,7 +53,7 @@ public class Backup {
                 if (!backupFolder.exists()) {
                     for (Player all : Bukkit.getOnlinePlayers()) {
                         if (all.hasPermission("backup.notification")) {
-                            all.sendMessage(OperationHandler.processMessage("Info.BackupStarted").replace("%file%", worldFolder.getName()));
+                            all.sendMessage(OperationHandler.processMessage("Info.BackupStarted").replace(FILE_NAME_PLACEHOLDER, worldFolder.getName()));
                         }
                     }
 
@@ -83,19 +85,19 @@ public class Backup {
                     try {
                         FileUtils.deleteDirectory(file);
 
-                        sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replace("%file%", backupFilePath));
+                        sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath));
                     } catch (IOException e) {
                         e.printStackTrace();
 
-                        sender.sendMessage(OperationHandler.processMessage("Error.DeletionFailed").replace("%file%", backupFilePath));
+                        sender.sendMessage(OperationHandler.processMessage("Error.DeletionFailed").replace(FILE_NAME_PLACEHOLDER, backupFilePath));
                     }
                 } else {
                     file.delete();
 
-                    sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replace("%file%", backupFilePath));
+                    sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath));
                 }
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace("%file%", backupFilePath));
+                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, backupFilePath));
             }
         });
     }
