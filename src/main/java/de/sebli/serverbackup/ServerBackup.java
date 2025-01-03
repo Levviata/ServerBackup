@@ -5,7 +5,6 @@ import de.sebli.serverbackup.commands.TabCompleter;
 import de.sebli.serverbackup.core.DynamicBackup;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.listeners.JoinListener;
-import de.sebli.serverbackup.utils.BStats;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -54,7 +53,7 @@ public class ServerBackup extends JavaPlugin {
             OperationHandler.checkVersion();
         }
 
-        BStats.initialize();
+        //BStats.initialize();
     }
 
 }
