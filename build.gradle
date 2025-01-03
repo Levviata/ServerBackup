@@ -1,0 +1,134 @@
+import com.github.spotbugs.snom.SpotBugsTask
+import java.text.SimpleDateFormat
+
+plugins {
+    id 'com.github.spotbugs' version "6.0.27"
+    id 'com.gradleup.shadow' version '8.3.5'
+    id 'java-library'
+}
+
+group 'de.sebli'
+
+static def getTime() {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd-HHmm")
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return sdf.format(new Date()).toString()
+}
+
+// Set version to version property if supplied
+String shortVersion = null
+if (hasProperty('ver')) {
+    if (ver.charAt(0) == "v") {
+        shortVersion = ver.substring(1).toUpperCase()
+    } else {
+        shortVersion = ver.toUpperCase()
+    }
+}
+
+// If the tag includes "-RC-" or no tag is supplied, append "-SNAPSHOT"
+int rcIdx
+if (shortVersion == null || shortVersion == "") {
+    version = getTime() + "-SNAPSHOT"
+} else if ((rcIdx = shortVersion.indexOf("-RC-")) != -1) {
+    version = shortVersion.substring(0, rcIdx) + "-SNAPSHOT"
+} else {
+    version = shortVersion
+}
+
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    maven {
+        name 'papermc'
+        url 'https://repo.papermc.io/repository/maven-public/'
+        content {
+            includeModule("io.papermc.paper", "paper-api")
+            includeModule("io.papermc", "paperlib")
+            includeModule("net.md-5", "bungeecord-chat")
+        }
+    }
+
+    maven {
+        name 'minecraft'
+        url 'https://libraries.minecraft.net'
+        content {
+            includeModule("com.mojang", "brigadier")
+        }
+    }
+    
+    maven {
+        name 'sonatype'
+        url 'https://oss.sonatype.org/content/groups/public/'
+    }
+
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'commons-net:commons-net:3.9.0'
+    compileOnly 'org.junit.jupiter:junit-jupiter:5.8.2'
+    implementation 'com.dropbox.core:dropbox-core-sdk:5.4.4'
+
+    // Added dependencies
+    compileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
+    implementation 'io.papermc:paperlib:1.0.8'
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+processResources {
+    filesMatching("**/plugin.yml") {
+        expand ( NAME: rootProject.name, VERSION: version, PACKAGE: project.group.toString() )
+    }
+}
+
+tasks.withType(SpotBugsTask).configureEach {
+    reports.create("html") {
+        required = true
+    }
+    reports.create("xml") {
+        required = false
+    }
+}
+
+tasks.named('spotbugsMain') {
+    enabled = false
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    relocate 'io.papermc.lib', 'shadow.io.papermc.paperlib'
+    minimize()
+}
+
+// Disable jar and replace with shadowJar
+jar.enabled = false
+assemble.dependsOn(shadowJar)
+
+tasks.register('printProjectName') {
+    doLast {
+        println rootProject.name
+    }
+}
+
+tasks.register('release') {
+    dependsOn build
+
+    doLast {
+        if (!version.endsWith("-SNAPSHOT")) {
+            // Rename final JAR to trim off version information
+            shadowJar.archiveFile.get().getAsFile()
+                    .renameTo(layout.buildDirectory.get().toString() + File.separator + 'libs' + File.separator
+                            + rootProject.name + '.jar')
+        }
+    }
+}
