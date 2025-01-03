@@ -1,13 +1,13 @@
-package net.server_backup.utils;
+package de.sebli.serverbackup.utils;
 
 import com.dropbox.core.*;
 import com.dropbox.core.oauth.DbxCredential;
 import com.dropbox.core.util.IOUtil;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.*;
-import net.server_backup.Configuration;
-import net.server_backup.ServerBackup;
-import net.server_backup.core.OperationHandler;
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 

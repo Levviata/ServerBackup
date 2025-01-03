@@ -1,7 +1,7 @@
-package net.server_backup.utils;
+package de.sebli.serverbackup.utils;
 
-import net.server_backup.Configuration;
-import net.server_backup.ServerBackup;
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackup;
 import org.apache.commons.io.FileUtils;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;

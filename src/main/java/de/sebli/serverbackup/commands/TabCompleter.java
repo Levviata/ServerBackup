@@ -1,7 +1,7 @@
-package net.server_backup.commands;
+package de.sebli.serverbackup.commands;
 
-import net.server_backup.Configuration;
-import net.server_backup.utils.FtpManager;
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.utils.FtpManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;

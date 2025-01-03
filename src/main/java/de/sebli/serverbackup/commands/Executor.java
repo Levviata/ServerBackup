@@ -1,7 +1,7 @@
-package net.server_backup.commands;
+package de.sebli.serverbackup.commands;
 
-import net.server_backup.Configuration;
-import net.server_backup.core.OperationHandler;
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

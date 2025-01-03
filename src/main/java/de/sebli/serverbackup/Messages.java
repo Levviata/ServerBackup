@@ -1,4 +1,4 @@
-package net.server_backup;
+package de.sebli.serverbackup;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 

@@ -1,7 +1,7 @@
-package net.server_backup.listeners;
+package de.sebli.serverbackup.listeners;
 
-import net.server_backup.ServerBackup;
-import net.server_backup.core.OperationHandler;
+import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

@@ -1,9 +1,9 @@
-package net.server_backup.core;
+package de.sebli.serverbackup.core;
 
-import net.server_backup.Configuration;
-import net.server_backup.ServerBackup;
-import net.server_backup.utils.DropboxManager;
-import net.server_backup.utils.FtpManager;
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.utils.DropboxManager;
+import de.sebli.serverbackup.utils.FtpManager;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;

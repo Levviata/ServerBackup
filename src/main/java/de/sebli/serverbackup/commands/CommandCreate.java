@@ -1,10 +1,10 @@
-package net.server_backup.commands;
+package de.sebli.serverbackup.commands;
 
 import com.google.common.io.Files;
-import net.server_backup.Configuration;
-import net.server_backup.ServerBackup;
-import net.server_backup.core.Backup;
-import net.server_backup.core.OperationHandler;
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.core.Backup;
+import de.sebli.serverbackup.core.OperationHandler;
 import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;

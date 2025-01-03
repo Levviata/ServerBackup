@@ -1,6 +1,6 @@
-package net.server_backup;
+package de.sebli.serverbackup;
 
-import net.server_backup.core.OperationHandler;
+import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 

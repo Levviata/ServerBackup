@@ -1,7 +1,7 @@
-package net.server_backup.commands;
+package de.sebli.serverbackup.commands;
 
-import net.server_backup.ServerBackup;
-import net.server_backup.utils.DropboxManager;
+import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.utils.DropboxManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 

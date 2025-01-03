@@ -1,6 +1,6 @@
-package net.server_backup.commands;
+package de.sebli.serverbackup.commands;
 
-import net.server_backup.core.Backup;
+import de.sebli.serverbackup.core.Backup;
 import org.bukkit.command.CommandSender;
 
 public class CommandRemove {

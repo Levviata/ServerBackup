@@ -1,8 +1,8 @@
-package net.server_backup.utils;
+package de.sebli.serverbackup.utils;
 
-import net.server_backup.Configuration;
-import net.server_backup.ServerBackup;
-import net.server_backup.core.OperationHandler;
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.core.OperationHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;

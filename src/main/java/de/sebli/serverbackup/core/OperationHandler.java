@@ -1,7 +1,7 @@
-package net.server_backup.core;
+package de.sebli.serverbackup.core;
 
-import net.server_backup.Configuration;
-import net.server_backup.ServerBackup;
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackup;
 import org.bukkit.Bukkit;
 
 import java.io.FileOutputStream;
