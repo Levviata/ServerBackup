@@ -6,7 +6,7 @@ load: STARTUP
 authors:
   - Seblii
   - onetwoeight
-website: https://github.com/128931/ServerBackup
+website: https://github.com/Levviata/ServerBackup
 api-version: 1.18
 
 commands:
