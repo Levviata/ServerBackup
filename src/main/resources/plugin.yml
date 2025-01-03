@@ -1,0 +1,19 @@
+name: ServerBackup
+author: Seblii
+version: '${project.version}'
+api-version: 1.18
+
+main: de.seblii.serverbackup.ServerBackup
+
+commands:
+  backup:
+    aliases: [serverbackup]
+    permission: backup.admin
+
+permissions:
+  backup.admin:
+    description: Permission for all backup commands
+  backup.notification:
+    description: Permission for receiving information about backups
+  backup.update:
+    description: Permission for receiving update messages
