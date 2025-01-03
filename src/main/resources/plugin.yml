@@ -1,13 +1,14 @@
-main: de.sebli.serverbackup.ServerBackup
-name: ServerBackup
-version: $version
+main: ${PACKAGE}.${NAME}
+name: ${NAME}
+version: "${VERSION}"
 description: A backup plugin for instant backup creation with little to no performance impact
-load: STARTUP
 authors:
   - Seblii
   - onetwoeight
+
+api-version: "1.21.1"
 website: https://github.com/Levviata/ServerBackup
-api-version: 1.18
+load: STARTUP
 
 commands:
   backup:
