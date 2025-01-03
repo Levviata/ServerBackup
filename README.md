@@ -8,5 +8,6 @@ Spigot: https://www.spigotmc.org/resources/server-backup-ingame-dropbox-ftp-back
 
 Discord server for support or suggestions: https://discord.gg/rNzngsCWFC
 
-# Objectives
-_Higher to lower priority_
+# Objectives/Intentions
+
+In general, I want to fix bugs here and there, possibly improve code quality, basic documentation, and neatly pack everything together for better support down the line.
