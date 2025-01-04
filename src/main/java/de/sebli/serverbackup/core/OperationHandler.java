@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 
-public class OperationHandler {
+public class OperationHandler { // Wont comply to java:S1118, we actually instantiate this class
 
     public static boolean shutdownProgress = false;
     public static boolean isUpdated = false;

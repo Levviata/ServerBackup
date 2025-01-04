@@ -3,7 +3,10 @@ package de.sebli.serverbackup.commands;
 import de.sebli.serverbackup.core.Backup;
 import org.bukkit.command.CommandSender;
 
-public class CommandRemove {
+class CommandRemove {
+    private CommandRemove() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void execute(CommandSender sender, String[] args) {
         if (args[1].equalsIgnoreCase("Files")) {

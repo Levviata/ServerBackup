@@ -3,7 +3,10 @@ package de.sebli.serverbackup.commands;
 import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.command.CommandSender;
 
-public class CommandTasks {
+class CommandTasks {
+    private CommandTasks() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void execute(CommandSender sender, String[] args) {
         if (OperationHandler.tasks.size() > 0) {

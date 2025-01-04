@@ -13,7 +13,10 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class CommandFtp {
+class CommandFtp {
+    private CommandFtp() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void execute(CommandSender sender, String[] args) {
         if (args[1].equalsIgnoreCase("list")) {

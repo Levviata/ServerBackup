@@ -5,7 +5,10 @@ import de.sebli.serverbackup.utils.DropboxManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
-public class CommandDropbox {
+class CommandDropbox {
+    private CommandDropbox() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void execute(CommandSender sender, String[] args) {
         if(args[1].equalsIgnoreCase("upload")) {

@@ -6,7 +6,10 @@ import java.io.IOException;
 
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
-public class Messages {
+class Messages {
+    private Messages() {
+        throw new IllegalStateException("Utility class");
+    }
 
     private static YamlConfiguration messages = Configuration.messages;
 

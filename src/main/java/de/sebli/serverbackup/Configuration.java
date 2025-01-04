@@ -14,7 +14,7 @@ import java.util.logging.Level;
 
 import static de.sebli.serverbackup.utils.GlobalConstants.BACKUP_DESTINATION;
 
-public class Configuration {
+public class Configuration { // Wont comply to java:S1118, we actually instantiate this class
 
     public static String prefix;
     public static String backupDestination = "Backups//";

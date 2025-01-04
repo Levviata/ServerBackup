@@ -3,8 +3,11 @@ package de.sebli.serverbackup.commands;
 import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.command.CommandSender;
 
-public class CommandShutdown {
-
+class CommandShutdown {
+    private CommandShutdown() {
+        throw new IllegalStateException("Utility class");
+    }
+    
     public static void execute(CommandSender sender, String[] args) {
         if (OperationHandler.shutdownProgress) {
             OperationHandler.shutdownProgress = false;

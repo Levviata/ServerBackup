@@ -10,7 +10,10 @@ import java.io.File;
 
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
-public class CommandUnzip {
+class CommandUnzip {
+    private CommandUnzip() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void execute(CommandSender sender, String[] args) {
         String filePath = args[1];

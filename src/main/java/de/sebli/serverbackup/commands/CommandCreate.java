@@ -14,7 +14,10 @@ import java.io.IOException;
 
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
-public class CommandCreate {
+class CommandCreate {
+    private CommandCreate() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void execute(CommandSender sender, String[] args) {
         String fileName = args[1];

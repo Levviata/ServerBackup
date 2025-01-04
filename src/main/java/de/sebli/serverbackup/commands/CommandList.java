@@ -15,7 +15,10 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.util.Arrays;
 
-public class CommandList {
+class CommandList {
+    private CommandList() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void execute(CommandSender sender, String[] args) {
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {

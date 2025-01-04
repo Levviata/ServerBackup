@@ -17,7 +17,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CommandSearch {
+class CommandSearch {
+    private CommandSearch() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static void execute(CommandSender sender, String[] args) {
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
