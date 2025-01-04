@@ -5,7 +5,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
@@ -21,7 +21,7 @@ class CommandList {
     }
 
     public static void execute(CommandSender sender, String[] args) {
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
             File[] backups = new File(Configuration.backupDestination + "").listFiles();
 
             if (backups.length == 0

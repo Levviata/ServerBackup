@@ -1,7 +1,7 @@
 package de.sebli.serverbackup.core;
 
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -77,7 +77,7 @@ public class Backup {
     }
 
     public void remove() {
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
             File file = new File(Configuration.backupDestination + "//" + backupFilePath);
 
             if (file.exists()) {

@@ -38,8 +38,8 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
     }
 
     public static void loadConfig() {
-        if (ServerBackup.getInstance().getConfig().contains(BACKUP_DESTINATION)) {
-            backupDestination = ServerBackup.getInstance().getConfig().getString(BACKUP_DESTINATION);
+        if (ServerBackupPlugin.getInstance().getConfig().contains(BACKUP_DESTINATION)) {
+            backupDestination = ServerBackupPlugin.getInstance().getConfig().getString(BACKUP_DESTINATION);
         }
 
         if (!Files.exists(Paths.get(backupDestination))) {
@@ -56,7 +56,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
             files.mkdir();
         }
 
-        ServerBackup.getInstance().getConfig().options()
+        ServerBackupPlugin.getInstance().getConfig().options()
                 .header("BackupTimer = At what time should a Backup be created? The format is: 'hh-mm' e.g. '12-30'."
                         + "\nDeleteOldBackups = Deletes old backups automatically after a specific time (in days, standard = 7 days)"
                         + "\nDeleteOldBackups - Type '0' at DeleteOldBackups to disable the deletion of old backups."
@@ -68,10 +68,10 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
                         + "\nIf you use ftp backups, you can set 'DeleteLocalBackup' to 'true' if you want the plugin to remove the created backup from your server once it has been uploaded to your ftp server."
                         + "\nCompressBeforeUpload compresses the backup to a zip file before uploading it. Set it to 'false' if you want the files to be uploaded directly to your ftp server."
                         + "\nJoin the discord server if you need help or have a question: https://discord.gg/rNzngsCWFC");
-        ServerBackup.getInstance().getConfig().options().copyDefaults(true);
+        ServerBackupPlugin.getInstance().getConfig().options().copyDefaults(true);
 
-        ServerBackup.getInstance().getConfig().addDefault("AutomaticBackups", true);
-        ServerBackup.getInstance().getConfig().addDefault("CommandAfterAutomaticBackup", "/");
+        ServerBackupPlugin.getInstance().getConfig().addDefault("AutomaticBackups", true);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("CommandAfterAutomaticBackup", "/");
 
         List<String> days = new ArrayList<>();
         days.add("MONDAY");
@@ -85,50 +85,50 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
         List<String> times = new ArrayList<>();
         times.add("00-00");
 
-        ServerBackup.getInstance().getConfig().addDefault("BackupTimer.Days", days);
-        ServerBackup.getInstance().getConfig().addDefault("BackupTimer.Times", times);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("BackupTimer.Days", days);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("BackupTimer.Times", times);
 
         List<String> worlds = new ArrayList<>();
         worlds.add("world");
         worlds.add("world_nether");
         worlds.add("world_the_end");
 
-        ServerBackup.getInstance().getConfig().addDefault("BackupWorlds", worlds);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("BackupWorlds", worlds);
 
         List<String> blacklist = new ArrayList<>();
         blacklist.add("libraries");
         blacklist.add("plugins/ServerBackup/config.yml");
 
-        ServerBackup.getInstance().getConfig().addDefault("Blacklist", blacklist);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("Blacklist", blacklist);
 
-        ServerBackup.getInstance().getConfig().addDefault("DeleteOldBackups", 14);
-        ServerBackup.getInstance().getConfig().addDefault("BackupLimiter", 0);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("DeleteOldBackups", 14);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("BackupLimiter", 0);
 
-        ServerBackup.getInstance().getConfig().addDefault("KeepUniqueBackups", false);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("KeepUniqueBackups", false);
 
-        ServerBackup.getInstance().getConfig().addDefault("UpdateAvailableMessage", true);
-        ServerBackup.getInstance().getConfig().addDefault("AutomaticUpdates", true);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("UpdateAvailableMessage", true);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("AutomaticUpdates", true);
 
-        ServerBackup.getInstance().getConfig().addDefault(BACKUP_DESTINATION, "Backups//");
+        ServerBackupPlugin.getInstance().getConfig().addDefault(BACKUP_DESTINATION, "Backups//");
 
-        ServerBackup.getInstance().getConfig().addDefault("CloudBackup.Dropbox", false);
-        ServerBackup.getInstance().getConfig().addDefault("CloudBackup.Options.Destination", "/");
-        ServerBackup.getInstance().getConfig().addDefault("CloudBackup.Options.DeleteLocalBackup", false);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("CloudBackup.Dropbox", false);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("CloudBackup.Options.Destination", "/");
+        ServerBackupPlugin.getInstance().getConfig().addDefault("CloudBackup.Options.DeleteLocalBackup", false);
 
-        ServerBackup.getInstance().getConfig().addDefault("Ftp.UploadBackup", false);
-        ServerBackup.getInstance().getConfig().addDefault("Ftp.DeleteLocalBackup", false);
-        ServerBackup.getInstance().getConfig().addDefault("Ftp.Server.IP", "127.0.0.1");
-        ServerBackup.getInstance().getConfig().addDefault("Ftp.Server.Port", 21);
-        ServerBackup.getInstance().getConfig().addDefault("Ftp.Server.User", "username");
-        ServerBackup.getInstance().getConfig().addDefault("Ftp.Server.Password", "password");
-        ServerBackup.getInstance().getConfig().addDefault("Ftp.Server.BackupDirectory", "Backups/");
+        ServerBackupPlugin.getInstance().getConfig().addDefault("Ftp.UploadBackup", false);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("Ftp.DeleteLocalBackup", false);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("Ftp.Server.IP", "127.0.0.1");
+        ServerBackupPlugin.getInstance().getConfig().addDefault("Ftp.Server.Port", 21);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("Ftp.Server.User", "username");
+        ServerBackupPlugin.getInstance().getConfig().addDefault("Ftp.Server.Password", "password");
+        ServerBackupPlugin.getInstance().getConfig().addDefault("Ftp.Server.BackupDirectory", "Backups/");
 
-        ServerBackup.getInstance().getConfig().addDefault("DynamicBackup", false);
-        ServerBackup.getInstance().getConfig().addDefault("SendLogMessages", false);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("DynamicBackup", false);
+        ServerBackupPlugin.getInstance().getConfig().addDefault("SendLogMessages", false);
 
-        ServerBackup.getInstance().saveConfig();
+        ServerBackupPlugin.getInstance().saveConfig();
 
-        backupDestination = ServerBackup.getInstance().getConfig().getString(BACKUP_DESTINATION);
+        backupDestination = ServerBackupPlugin.getInstance().getConfig().getString(BACKUP_DESTINATION);
     }
 
     public static void loadCloud() {
@@ -206,7 +206,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
     }
 
     public static void reloadConfig(CommandSender sender) {
-        ServerBackup.getInstance().reloadConfig();
+        ServerBackupPlugin.getInstance().reloadConfig();
 
         OperationHandler.stopTimer();
         OperationHandler.startTimer();
@@ -214,11 +214,11 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
         String oldDes = backupDestination;
 
         if (!oldDes
-                .equalsIgnoreCase(ServerBackup.getInstance().getConfig().getString(BACKUP_DESTINATION))) {
-            backupDestination = ServerBackup.getInstance().getConfig()
+                .equalsIgnoreCase(ServerBackupPlugin.getInstance().getConfig().getString(BACKUP_DESTINATION))) {
+            backupDestination = ServerBackupPlugin.getInstance().getConfig()
                     .getString(BACKUP_DESTINATION);
 
-            ServerBackup.getInstance().getLogger().log(Level.INFO,
+            ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
                     "ServerBackup: Backup destination [" + oldDes + " >> "
                             + backupDestination + "] updated successfully.");
         }

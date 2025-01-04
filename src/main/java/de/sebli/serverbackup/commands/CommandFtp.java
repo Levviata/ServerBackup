@@ -4,7 +4,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.utils.FtpManager;
 import org.bukkit.Bukkit;
@@ -20,7 +20,7 @@ class CommandFtp {
 
     public static void execute(CommandSender sender, String[] args) {
         if (args[1].equalsIgnoreCase("list")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
                 FtpManager ftpm = new FtpManager(sender);
 
                 List<String> backups = ftpm.getFtpBackupList(false);
@@ -78,16 +78,16 @@ class CommandFtp {
                 }
             });
         } else if (args[1].equalsIgnoreCase("download")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
                 FtpManager ftpm = new FtpManager(sender);
 
                 ftpm.downloadFileFromFtp(args[2]);
             });
         } else if (args[1].equalsIgnoreCase("upload")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
                 FtpManager ftpm = new FtpManager(sender);
 
-                ftpm.uploadFileToFtp(args[2], !ServerBackup.getInstance().getConfig().getBoolean("Ftp.CompressBeforeUpload"));
+                ftpm.uploadFileToFtp(args[2], !ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.CompressBeforeUpload"));
             });
         }
     }

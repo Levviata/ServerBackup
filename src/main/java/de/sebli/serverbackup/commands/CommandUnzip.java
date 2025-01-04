@@ -1,7 +1,6 @@
 package de.sebli.serverbackup.commands;
 
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.core.ZipManager;
 import org.bukkit.command.CommandSender;

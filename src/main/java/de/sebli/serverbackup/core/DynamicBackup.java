@@ -1,7 +1,7 @@
 package de.sebli.serverbackup.core;
 
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
@@ -22,12 +22,12 @@ public class DynamicBackup  implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
-        if (ServerBackup.getInstance().getConfig().getBoolean("DynamicBackup")) {
+        if (ServerBackupPlugin.getInstance().getConfig().getBoolean("DynamicBackup")) {
             if (e.getFrom().getChunk() != e.getTo().getChunk()) {
                 int regX = e.getTo().getChunk().getX() >> 5;
                 int regZ = e.getTo().getChunk().getZ() >> 5;
 
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), new Runnable() {
+                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), new Runnable() {
 
                     @Override
                     public void run() {
@@ -72,12 +72,12 @@ public class DynamicBackup  implements Listener {
         if (!isSaving) {
             isSaving = true;
 
-            Bukkit.getScheduler().runTaskLaterAsynchronously(ServerBackup.getInstance(), new Runnable() {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(ServerBackupPlugin.getInstance(), new Runnable() {
 
                 @Override
                 public void run() {
                     Configuration.saveBackupInfo();;
-                    if (ServerBackup.getInstance().getConfig().getBoolean("SendLogMessages")) {
+                    if (ServerBackupPlugin.getInstance().getConfig().getBoolean("SendLogMessages")) {
                         Bukkit.getLogger().log(Level.INFO, "DynamicBP: file saved.");
                     }
 
@@ -90,13 +90,13 @@ public class DynamicBackup  implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        if (ServerBackup.getInstance().getConfig().getBoolean("DynamicBackup")) {
+        if (ServerBackupPlugin.getInstance().getConfig().getBoolean("DynamicBackup")) {
             Player p = e.getPlayer();
 
             int regX = p.getLocation().getChunk().getX() >> 5;
             int regZ = p.getLocation().getChunk().getZ() >> 5;
 
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), new Runnable() {
 
                 @Override
                 public void run() {

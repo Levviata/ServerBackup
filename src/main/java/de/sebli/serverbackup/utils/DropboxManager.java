@@ -6,7 +6,7 @@ import com.dropbox.core.util.IOUtil;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.*;
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -71,7 +71,7 @@ public class DropboxManager {
 
         sender.sendMessage("Dropbox: Uploading backup [" + file.getName() + "] ...");
 
-        String des = ServerBackup.getInstance().getConfig().getString("CloudBackup.Options.Destination").replace("/", "");
+        String des = ServerBackupPlugin.getInstance().getConfig().getString("CloudBackup.Options.Destination").replace("/", "");
         des = "/" + (des.equals("") ? "" : des + "/");
 
         if(file.length() > (100 * 1000 * 1000)) {
@@ -142,7 +142,7 @@ public class DropboxManager {
                 sender.sendMessage("Dropbox: Upload successfully. Backup stored on your dropbox account.");
                 getProgress(file.getName(), uploaded, size, true);
 
-                if (ServerBackup.getInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
+                if (ServerBackupPlugin.getInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                     file.delete();
                     System.out.println("File [" + file.getPath() + "] deleted.");
                 }
@@ -189,7 +189,7 @@ public class DropboxManager {
             sender.sendMessage("Dropbox: Upload successfully. Backup stored on your dropbox account.");
             OperationHandler.tasks.remove("DROPBOX UPLOAD {" + file.getName() + "}"); // same as line 178
 
-            if (ServerBackup.getInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
+            if (ServerBackupPlugin.getInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                 file.delete();
                 System.out.println("File [" + file.getPath() + "] deleted.");
             }

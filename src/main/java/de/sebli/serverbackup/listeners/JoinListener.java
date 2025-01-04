@@ -1,6 +1,6 @@
 package de.sebli.serverbackup.listeners;
 
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -27,15 +27,15 @@ public class JoinListener implements Listener {
         Player p = e.getPlayer();
 
         if (p.hasPermission("backup.update")) {
-            if (ServerBackup.getInstance().getConfig().getBoolean("UpdateAvailableMessage")) {
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
+            if (ServerBackupPlugin.getInstance().getConfig().getBoolean("UpdateAvailableMessage")) {
+                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
                     int resourceID = 79320;
                     try (InputStream inputStream = (new URL(
                             "https://api.spigotmc.org/legacy/update.php?resource=" + resourceID)).openStream();
                          Scanner scanner = new Scanner(inputStream)) {
                         if (scanner.hasNext()) {
                             String latest = scanner.next();
-                            String current = ServerBackup.getInstance().getDescription().getVersion();
+                            String current = ServerBackupPlugin.getInstance().getDescription().getVersion();
 
                             int late = Integer.parseInt(latest.replaceAll("\\.", ""));  // Somewhat reasonable replaceAll() usage
                             int curr = Integer.parseInt(current.replaceAll("\\.", "")); // This too
@@ -52,7 +52,7 @@ public class JoinListener implements Listener {
                                     p.sendMessage("");
                                     p.sendMessage(AUTHOR);
                                 } else {
-                                    if (ServerBackup.getInstance().getConfig().getBoolean("AutomaticUpdates")) {
+                                    if (ServerBackupPlugin.getInstance().getConfig().getBoolean("AutomaticUpdates")) {
                                         if (p.hasPermission("backup.admin")) {
                                             p.sendMessage(TITLE);
                                             p.sendMessage("");

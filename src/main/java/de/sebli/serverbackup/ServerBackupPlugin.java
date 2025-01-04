@@ -11,12 +11,12 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.logging.Level;
 
-public class ServerBackup extends JavaPlugin {
+public class ServerBackupPlugin extends JavaPlugin {
 
-    private static ServerBackup serverBackup;
+    private static ServerBackupPlugin serverBackupPlugin;
 
-    public static ServerBackup getInstance() {
-        return serverBackup;
+    public static ServerBackupPlugin getInstance() {
+        return serverBackupPlugin;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ServerBackup extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        serverBackup = this;
+        serverBackupPlugin = this;
 
         Configuration.loadUp();
 

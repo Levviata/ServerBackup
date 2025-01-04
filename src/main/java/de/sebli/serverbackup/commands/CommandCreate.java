@@ -2,7 +2,7 @@ package de.sebli.serverbackup.commands;
 
 import com.google.common.io.Files;
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.Backup;
 import de.sebli.serverbackup.core.OperationHandler;
 import org.apache.commons.io.FilenameUtils;
@@ -37,7 +37,7 @@ class CommandCreate {
         File file = new File(fileName);
 
         if (!file.isDirectory() && !args[1].equalsIgnoreCase("@server")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), new Runnable() {
 
                 @Override
                 public void run() {

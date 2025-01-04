@@ -1,7 +1,7 @@
 package de.sebli.serverbackup.utils;
 
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTP;
@@ -22,10 +22,10 @@ public class FtpManager {
 
     private CommandSender sender;
 
-    private static final String server = ServerBackup.getInstance().getConfig().getString("Ftp.Server.IP");
-    private static final int port = ServerBackup.getInstance().getConfig().getInt("Ftp.Server.Port");
-    private static final String user = ServerBackup.getInstance().getConfig().getString("Ftp.Server.User");
-    private static final String pass = ServerBackup.getInstance().getConfig().getString("Ftp.Server.Password");
+    private static final String server = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.IP");
+    private static final int port = ServerBackupPlugin.getInstance().getConfig().getInt("Ftp.Server.Port");
+    private static final String user = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.User");
+    private static final String pass = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.Password");
 
     private static final String ERROR_FTP_DOWNLOAD_FAILED = "Error.FtpDownloadFailed";
     private static final String ERROR_FTP_UPLOAD_FAILED = "Error.FtpUploadFailed";
@@ -37,7 +37,7 @@ public class FtpManager {
 
     boolean isSSL = true;
 
-    ServerBackup backup = ServerBackup.getInstance();
+    ServerBackupPlugin backup = ServerBackupPlugin.getInstance();
 
     public void uploadFileToFtp(String filePath, boolean direct) {
         File file = new File(filePath);
@@ -77,7 +77,7 @@ public class FtpManager {
                 if (done) {
                     sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
 
-                    if (ServerBackup.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
+                    if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
                         boolean exists = false;
                         for (FTPFile backup : ftpClient.listFiles()) {
                             if (backup.getName().equalsIgnoreCase(file.getName()))
@@ -113,7 +113,7 @@ public class FtpManager {
                     if (done) {
                         sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
 
-                        if (ServerBackup.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
+                        if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
                             boolean exists = false;
                             for (FTPFile backup : ftpsClient.listFiles()) {
                                 if (backup.getName().equalsIgnoreCase(file.getName()))
@@ -175,7 +175,7 @@ public class FtpManager {
                 boolean success = ftpClient.retrieveFile(file.getName(), outputStream);
                 outputStream.close();
 
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
+                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
                     File dFile = new File(Configuration.backupDestination + "//" + file.getPath());
 
                     try {
@@ -216,7 +216,7 @@ public class FtpManager {
                     boolean success = ftpsClient.retrieveFile(file.getName(), outputStream);
                     outputStream.close();
 
-                    Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
+                    Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
                         File dFile = new File(Configuration.backupDestination + "//" + file.getPath());
 
                         try {
@@ -388,7 +388,7 @@ public class FtpManager {
         client.setFileTransferMode(FTP.BINARY_FILE_TYPE);
 
         client.changeWorkingDirectory(
-                ServerBackup.getInstance().getConfig().getString("Ftp.Server.BackupDirectory"));
+                ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.BackupDirectory"));
     }
 
     private void connect(FTPSClient client) throws IOException {
@@ -403,7 +403,7 @@ public class FtpManager {
         client.setFileTransferMode(FTP.BINARY_FILE_TYPE);
 
         client.changeWorkingDirectory(
-                ServerBackup.getInstance().getConfig().getString("Ftp.Server.BackupDirectory"));
+                ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.BackupDirectory"));
     }
 
     private void disconnect(FTPClient client) {

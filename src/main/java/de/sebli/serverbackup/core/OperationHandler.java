@@ -1,7 +1,7 @@
 package de.sebli.serverbackup.core;
 
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import org.bukkit.Bukkit;
 
 import java.io.FileOutputStream;
@@ -27,39 +27,39 @@ public class OperationHandler { // Wont comply to java:S1118, we actually instan
     }
 
     public static void startTimer() {
-        if (ServerBackup.getInstance().getConfig().getBoolean("AutomaticBackups")) {
-            Bukkit.getScheduler().runTaskTimerAsynchronously(ServerBackup.getInstance(), new Timer(), 20 * 20, 20 * 20);
+        if (ServerBackupPlugin.getInstance().getConfig().getBoolean("AutomaticBackups")) {
+            Bukkit.getScheduler().runTaskTimerAsynchronously(ServerBackupPlugin.getInstance(), new Timer(), 20 * 20, 20 * 20);
         }
     }
 
     public static void stopTimer() {
-        Bukkit.getScheduler().cancelTasks(ServerBackup.getInstance());
+        Bukkit.getScheduler().cancelTasks(ServerBackupPlugin.getInstance());
     }
 
     public static void checkVersion() {
-        ServerBackup.getInstance().getLogger().log(Level.INFO, "ServerBackup: Searching for updates...");
+        ServerBackupPlugin.getInstance().getLogger().log(Level.INFO, "ServerBackup: Searching for updates...");
 
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
             int resourceID = 79320;
             try (InputStream inputStream = (new URL(
                     "https://api.spigotmc.org/legacy/update.php?resource=" + resourceID)).openStream();
                  Scanner scanner = new Scanner(inputStream)) {
                 if (scanner.hasNext()) {
                     String latest = scanner.next();
-                    String current = ServerBackup.getInstance().getDescription().getVersion();
+                    String current = ServerBackupPlugin.getInstance().getDescription().getVersion();
 
                     int late = Integer.parseInt(latest.replaceAll("\\.", ""));
                     int curr = Integer.parseInt(current.replaceAll("\\.", ""));
 
                     if (curr >= late) {
-                        ServerBackup.getInstance().getLogger().log(Level.INFO,
+                        ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
                                 "ServerBackup: No updates found. The server is running the latest version.");
                     } else {
-                        ServerBackup.getInstance().getLogger().log(Level.INFO, "ServerBackup: There is a newer version available - " + latest
+                        ServerBackupPlugin.getInstance().getLogger().log(Level.INFO, "ServerBackup: There is a newer version available - " + latest
                                 + ", you are on - " + current);
 
-                        if (ServerBackup.getInstance().getConfig().getBoolean("AutomaticUpdates")) {
-                            ServerBackup.getInstance().getLogger().log(Level.INFO, "ServerBackup: Downloading newest version...");
+                        if (ServerBackupPlugin.getInstance().getConfig().getBoolean("AutomaticUpdates")) {
+                            ServerBackupPlugin.getInstance().getLogger().log(Level.INFO, "ServerBackup: Downloading newest version...");
 
                             URL url = new URL("https://server-backup.net/assets/downloads/alt/ServerBackup.jar");
 
@@ -72,19 +72,19 @@ public class OperationHandler { // Wont comply to java:S1118, we actually instan
                                  FileOutputStream fos = new FileOutputStream("plugins/ServerBackup.jar")) {
                                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 
-                                ServerBackup.getInstance().getLogger().log(Level.INFO,
+                                ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
                                         "ServerBackup: Download finished. Please reload the server to complete the update.");
 
                                 isUpdated = true;
                             }
                         } else {
-                            ServerBackup.getInstance().getLogger().log(Level.INFO,
+                            ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
                                     "ServerBackup: Please download the latest version - https://server-backup.net/");
                         }
                     }
                 }
             } catch (IOException exception) {
-                ServerBackup.getInstance().getLogger().log(Level.WARNING,
+                ServerBackupPlugin.getInstance().getLogger().log(Level.WARNING,
                         "ServerBackup: Cannot search for updates - " + exception.getMessage());
             }
         });
