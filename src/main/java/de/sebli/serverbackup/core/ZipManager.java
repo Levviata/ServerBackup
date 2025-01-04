@@ -22,7 +22,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static de.sebli.serverbackup.utils.GlobalConstants.BACKUP_DESTINATION;
+import static de.sebli.serverbackup.utils.GlobalConstants.CONFIG_BACKUP_DESTINATION;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
 public class ZipManager {
@@ -68,7 +68,7 @@ public class ZipManager {
             try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
                 Path pp = Paths.get(sourceFilePath);
                 Files.walk(pp).filter(path -> !Files.isDirectory(path)).forEach(path -> {
-                    if (!path.toString().contains(ServerBackupPlugin.getInstance().getConfig().getString(BACKUP_DESTINATION)
+                    if (!path.toString().contains(ServerBackupPlugin.getInstance().getConfig().getString(CONFIG_BACKUP_DESTINATION)
                             .replace("/", "")) || !isSaving) {
                         ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
 

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import static de.sebli.serverbackup.utils.GlobalConstants.BACKUP_DESTINATION;
+import static de.sebli.serverbackup.utils.GlobalConstants.CONFIG_BACKUP_DESTINATION;
 
 public class Configuration { // Wont comply to java:S1118, we actually instantiate this class
 
@@ -38,8 +38,8 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
     }
 
     public static void loadConfig() {
-        if (ServerBackupPlugin.getInstance().getConfig().contains(BACKUP_DESTINATION)) {
-            backupDestination = ServerBackupPlugin.getInstance().getConfig().getString(BACKUP_DESTINATION);
+        if (ServerBackupPlugin.getInstance().getConfig().contains(CONFIG_BACKUP_DESTINATION)) {
+            backupDestination = ServerBackupPlugin.getInstance().getConfig().getString(CONFIG_BACKUP_DESTINATION);
         }
 
         if (!Files.exists(Paths.get(backupDestination))) {
@@ -109,7 +109,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
         ServerBackupPlugin.getInstance().getConfig().addDefault("UpdateAvailableMessage", true);
         ServerBackupPlugin.getInstance().getConfig().addDefault("AutomaticUpdates", true);
 
-        ServerBackupPlugin.getInstance().getConfig().addDefault(BACKUP_DESTINATION, "Backups//");
+        ServerBackupPlugin.getInstance().getConfig().addDefault(CONFIG_BACKUP_DESTINATION, "Backups//");
 
         ServerBackupPlugin.getInstance().getConfig().addDefault("CloudBackup.Dropbox", false);
         ServerBackupPlugin.getInstance().getConfig().addDefault("CloudBackup.Options.Destination", "/");
@@ -128,7 +128,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
 
         ServerBackupPlugin.getInstance().saveConfig();
 
-        backupDestination = ServerBackupPlugin.getInstance().getConfig().getString(BACKUP_DESTINATION);
+        backupDestination = ServerBackupPlugin.getInstance().getConfig().getString(CONFIG_BACKUP_DESTINATION);
     }
 
     public static void loadCloud() {
@@ -214,9 +214,9 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
         String oldDes = backupDestination;
 
         if (!oldDes
-                .equalsIgnoreCase(ServerBackupPlugin.getInstance().getConfig().getString(BACKUP_DESTINATION))) {
+                .equalsIgnoreCase(ServerBackupPlugin.getInstance().getConfig().getString(CONFIG_BACKUP_DESTINATION))) {
             backupDestination = ServerBackupPlugin.getInstance().getConfig()
-                    .getString(BACKUP_DESTINATION);
+                    .getString(CONFIG_BACKUP_DESTINATION);
 
             ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
                     "ServerBackup: Backup destination [" + oldDes + " >> "
