@@ -19,7 +19,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
     public static String prefix;
     public static String backupDestination = "Backups//";
 
-    private static File bpInf = new File("plugins//" + ServerBackupPlugin.getInstance().getName() + "//backupInfo.yml");
+    private static File bpInf = new File("plugins//" + ServerBackupPlugin.getInstance().getName() + "//backupInfo.yml"); // wont comply to java:S1192, possibly never refactoring this?
     public static YamlConfiguration backupInfo = YamlConfiguration.loadConfiguration(bpInf);
 
     private static File cloudInf = new File("plugins//" + ServerBackupPlugin.getInstance().getName() + "//cloudAccess.yml");
