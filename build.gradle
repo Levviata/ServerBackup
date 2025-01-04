@@ -7,7 +7,7 @@ plugins {
     id 'java-library'
 }
 
-group 'de.sebli'
+group 'de.sebli.serverbackup'
 
 static def getTime() {
     SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd-HHmm")
