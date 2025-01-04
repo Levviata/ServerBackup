@@ -1,4 +1,4 @@
-# ServerBackup
+# Server Backup
 
 A plugin that backups you minecraft server with a variety of features, learn more on the [original website](https://server-backup.net/).
 
