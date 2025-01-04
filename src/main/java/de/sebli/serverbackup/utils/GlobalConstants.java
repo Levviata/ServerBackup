@@ -10,6 +10,7 @@ public class GlobalConstants {
       throw new IllegalStateException("Utility class");
     }
 
+    public static final int RESOURCE_ID = 79320;
     public static final String FILE_NAME_PLACEHOLDER = "%file%";
     public static final String BACKUP_DESTINATION = "BackupDestination";
 }

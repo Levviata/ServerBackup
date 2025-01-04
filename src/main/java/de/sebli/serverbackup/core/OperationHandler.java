@@ -11,14 +11,23 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
+
+import static de.sebli.serverbackup.utils.GlobalConstants.RESOURCE_ID;
 
 public class OperationHandler { // Wont comply to java:S1118, we actually instantiate this class
 
     public static boolean shutdownProgress = false;
     public static boolean isUpdated = false;
+    private static final List<String> IDENTIFIERS_LIST = new ArrayList<>(Arrays.asList(
+            "-SNAPSHOT",
+            "-reobf",
+            "-RC-",
+            "-release"
+    ));
 
     public static List<String> tasks = new ArrayList<>();
 
@@ -40,18 +49,21 @@ public class OperationHandler { // Wont comply to java:S1118, we actually instan
         ServerBackupPlugin.getInstance().getLogger().log(Level.INFO, "ServerBackup: Searching for updates...");
 
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
-            int resourceID = 79320;
             try (InputStream inputStream = (new URL(
-                    "https://api.spigotmc.org/legacy/update.php?resource=" + resourceID)).openStream();
+                    "https://api.spigotmc.org/legacy/update.php?resource=" + RESOURCE_ID)).openStream();
                  Scanner scanner = new Scanner(inputStream)) {
                 if (scanner.hasNext()) {
                     String latest = scanner.next();
                     String current = ServerBackupPlugin.getInstance().getDescription().getVersion();
 
-                    int late = Integer.parseInt(latest.replaceAll("\\.", ""));
-                    int curr = Integer.parseInt(current.replaceAll("\\.", ""));
+                    // Normalize versions by removing numbers, snapshot and reobf tag (if present)
 
-                    if (curr >= late) {
+                    // Will not work as of right now because of how the original version formatting is like but that is intended
+                    String latestClean = cleanVersion(latest, IDENTIFIERS_LIST);
+
+                    String currentClean = cleanVersion(current, IDENTIFIERS_LIST);
+
+                    if (compareVersions(currentClean, latestClean) >= 0) {
                         ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
                                 "ServerBackup: No updates found. The server is running the latest version.");
                     } else {
@@ -88,5 +100,44 @@ public class OperationHandler { // Wont comply to java:S1118, we actually instan
                         "ServerBackup: Cannot search for updates - " + exception.getMessage());
             }
         });
+    }
+
+    /**
+     * Remove numbers and build identifiers/tags
+     *
+     * @param version Version string to clean.
+     * @param identifiers A list of build identifiers to clean.
+     * @return Cleaned version string without numbers and build identifiers.
+     */
+    private static String cleanVersion(String version, List<String> identifiers) {
+        for (String identifier : identifiers) {
+            if (identifier != null && !identifier.isEmpty()) {
+                version = version.replace(identifier, "");
+            } else ServerBackupPlugin.getInstance().getLogger().warning(
+                    "WARNING - ServerBackup: Identifier list is null or empty! Might not be able to auto update!");
+        }
+        return version;
+    }
+
+    /**
+     * Compare two version strings (e.g., "1.0.0" vs. "1.2.3").
+     *
+     * @param current Current version.
+     * @param latest Latest version.
+     * @return A negative integer if `current` is less than `latest`, zero if equal, and positive if greater.
+     */
+    private static int compareVersions(String current, String latest) {
+        String[] currentParts = current.split("\\.");
+        String[] latestParts = latest.split("\\.");
+        int length = Math.max(currentParts.length, latestParts.length);
+
+        for (int i = 0; i < length; i++) {
+            int currentPart = i < currentParts.length ? Integer.parseInt(currentParts[i]) : 0;
+            int latestPart = i < latestParts.length ? Integer.parseInt(latestParts[i]) : 0;
+            if (currentPart != latestPart) {
+                return currentPart - latestPart;
+            }
+        }
+        return 0;
     }
 }
