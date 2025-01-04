@@ -20,4 +20,4 @@ Get the original plugin here:
 
 - Discord server for support or suggestions: https://discord.gg/rNzngsCWFC
 
-Original code provided by SF-Sudio (Sebi) retains copyright.
+_Original code provided by SF-Sudio (Sebi) retains copyright._
