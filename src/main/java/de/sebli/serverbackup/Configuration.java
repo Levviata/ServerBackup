@@ -19,13 +19,13 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
     public static String prefix;
     public static String backupDestination = "Backups//";
 
-    private static File bpInf = new File("plugins//ServerBackup//backupInfo.yml");
+    private static File bpInf = new File("plugins//" + ServerBackupPlugin.getInstance().getName() + "//backupInfo.yml");
     public static YamlConfiguration backupInfo = YamlConfiguration.loadConfiguration(bpInf);
 
-    private static File cloudInf = new File("plugins//ServerBackup//cloudAccess.yml");
+    private static File cloudInf = new File("plugins//" + ServerBackupPlugin.getInstance().getName() + "//cloudAccess.yml");
     public static YamlConfiguration cloudInfo = YamlConfiguration.loadConfiguration(cloudInf);
 
-    private static File messagesFile = new File("plugins//ServerBackup//messages.yml");
+    private static File messagesFile = new File("plugins//" + ServerBackupPlugin.getInstance().getName() + "//messages.yml");
     public static YamlConfiguration messages = YamlConfiguration.loadConfiguration(messagesFile);
 
     private static final String CLOUD_KEY = "Cloud.Dropbox.AppKey";
