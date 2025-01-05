@@ -17,15 +17,12 @@ static def getTime() {
     return sdf.format(new Date()).toString()
 }
 
-String identifier = "" // Possibilities: rc
+String identifier = "" // Possibilities: rc-<number> (release candidate), release
 
-// If the tag includes "-RC-" or no tag is supplied, append "-SNAPSHOT", also TODO: Clarify tag formatting
-int rcIdx
 if (identifier == null || identifier == "") {
-    version = version + getTime() + "-SNAPSHOT"
-} /*else if ((rcIdx = identifier.indexOf("-RC-")) != -1) {
-    version = version + "-SNAPSHOT"
-}*/
+    version = "v" + version + "-" + getTime() + "-SNAPSHOT" // We construct our version here
+} else
+    version = "v" + version + "-" + identifier
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -201,7 +198,7 @@ tasks.register('verifyPluginYmlInJar') { // never run separately from debugBuild
 }
 
 tasks.register('debugBuild') {
-    group = 'debug'  // Categorizing the task under 'custom.tasks'
+    group = 'debug'
     description = 'Specialized build task for debugging.'
 
     dependsOn build
