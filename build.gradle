@@ -156,14 +156,6 @@ tasks.register('debugPluginYmlInJar') { // never run separately from debugBuild,
     }
 }
 
-tasks.register('debugBuild') {
-    group = 'debug'  // Categorizing the task under 'custom.tasks'
-    description = 'Specialized build task for debugging.'
-
-    dependsOn build
-    dependsOn debugPluginYmlInJar
-    dependsOn verifyPluginYmlInJar
-}
 
 tasks.register('verifyPluginYmlInJar') { // never run separately from debugBuild, will not work
     group = 'debug'
@@ -206,6 +198,15 @@ tasks.register('verifyPluginYmlInJar') { // never run separately from debugBuild
         // Ensure to close the ZipFile after you're done
         zipFile.close()
     }
+}
+
+tasks.register('debugBuild') {
+    group = 'debug'  // Categorizing the task under 'custom.tasks'
+    description = 'Specialized build task for debugging.'
+
+    dependsOn build
+    dependsOn debugPluginYmlInJar
+    dependsOn verifyPluginYmlInJar
 }
 
 tasks.build {
