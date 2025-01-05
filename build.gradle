@@ -150,6 +150,9 @@ tasks.register('debugPluginYmlInJar') { // never run separately from debugBuild,
         def pluginYmlContent = zipFile.getInputStream(pluginYmlEntry).text
         println "plugin.yml content inside the .jar:"
         println pluginYmlContent
+
+        // Ensure to close the ZipFile after you're done
+        zipFile.close()
     }
 }
 
@@ -199,6 +202,9 @@ tasks.register('verifyPluginYmlInJar') { // never run separately from debugBuild
 
         // If all checks pass
         println "plugin.yml content is correct!"
+
+        // Ensure to close the ZipFile after you're done
+        zipFile.close()
     }
 }
 
