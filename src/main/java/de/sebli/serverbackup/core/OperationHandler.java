@@ -10,11 +10,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static de.sebli.serverbackup.utils.GlobalConstants.RESOURCE_ID;
 
@@ -58,14 +58,29 @@ public class OperationHandler { // Wont comply to java:S1118, we actually instan
                     // and marks it off as unstable I'd rather not touch it
                     String current = ServerBackupPlugin.getInstance().getDescription().getVersion();
 
-                    // Normalize versions by removing numbers, snapshot and reobf tag (if present)
+                    int latestClean = 0;
+                    int currentClean = 0;
 
-                    // Will not work as of right now because of how the original version formatting is like but that is intended
-                    String latestClean = cleanVersion(latest, IDENTIFIERS_LIST);
+                    ServerBackupPlugin.getInstance().getLogger().info(
+                            "Auto updating does nothing for now, we have not uploaded our plugin/fork to Spigot. I recommend turning automatic updates off in the config.");
 
-                    String currentClean = cleanVersion(current, IDENTIFIERS_LIST);
+                    /*if (extractVersion(latest) == null) {
+                        ServerBackupPlugin.getInstance().getLogger().warning(
+                                "Latest version number extracted is null! Auto updating likely WON'T work.");
+                    } else latestClean = Integer.parseInt(Objects.requireNonNull(extractVersion(latest)));*/ // Remove when we actually upload our plugin to spigot
 
-                    if (compareVersions(currentClean, latestClean) >= 0) {
+                    if (extractVersion(current) == null) {
+                        ServerBackupPlugin.getInstance().getLogger().warning(
+                                "Current version number extracted is null! Auto updating likely WON'T work.");
+                    } else currentClean = Integer.parseInt(Objects.requireNonNull(extractVersion(current)));
+
+                    ServerBackupPlugin.getInstance().getLogger().info(MessageFormat.format("Latest clean version number is: {0}", latestClean)); // TEST CODE
+
+                    ServerBackupPlugin.getInstance().getLogger().info(MessageFormat.format("Current clean version number is: {0}", currentClean)); // TEST CODE
+
+                    latestClean = currentClean; // TODO: Remove when we actually have versions up and running in spigot
+
+                    if (currentClean == latestClean) {
                         ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
                                 "ServerBackup: No updates found. The server is running the latest version.");
                     } else {
@@ -104,42 +119,14 @@ public class OperationHandler { // Wont comply to java:S1118, we actually instan
         });
     }
 
-    /**
-     * Remove numbers and build identifiers/tags
-     *
-     * @param version Version string to clean.
-     * @param identifiers A list of build identifiers to clean.
-     * @return Cleaned version string without numbers and build identifiers.
-     */
-    private static String cleanVersion(String version, List<String> identifiers) {
-        for (String identifier : identifiers) {
-            if (identifier != null && !identifier.isEmpty()) {
-                version = version.replace(identifier, "");
-            } else ServerBackupPlugin.getInstance().getLogger().warning(
-                    "WARNING - ServerBackup: Identifier list is null or empty! Might not be able to auto update!");
-        }
-        return version;
-    }
+    private static String extractVersion(String input) {
+        Pattern pattern = Pattern.compile("v(\\d+\\.\\d+\\.\\d+)");
+        Matcher matcher = pattern.matcher(input);
 
-    /**
-     * Compare two version strings (e.g., "1.0.0" vs. "1.2.3").
-     *
-     * @param current Current version.
-     * @param latest Latest version.
-     * @return A negative integer if `current` is less than `latest`, zero if equal, and positive if greater.
-     */
-    private static int compareVersions(String current, String latest) {
-        String[] currentParts = current.split("\\.");
-        String[] latestParts = latest.split("\\.");
-        int length = Math.max(currentParts.length, latestParts.length);
-
-        for (int i = 0; i < length; i++) {
-            int currentPart = i < currentParts.length ? Integer.parseInt(currentParts[i]) : 0;
-            int latestPart = i < latestParts.length ? Integer.parseInt(latestParts[i]) : 0;
-            if (currentPart != latestPart) {
-                return currentPart - latestPart;
-            }
+        if (matcher.find()) {
+            String version = matcher.group(1); // Extracted version in "major.minor.patch" format.
+            return version.replace(".", "");  // Remove all dots from the version.
         }
-        return 0;
+        return null; // Return null if no match is found.
     }
 }
