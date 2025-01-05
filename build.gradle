@@ -202,6 +202,11 @@ tasks.register('verifyPluginYmlInJar') { // never run separately from debugBuild
     }
 }
 
+tasks.build {
+    tasks.build.mustRunAfter("clean") // we clean before building because plugin.yml caches wrong if we don't
+    dependsOn clean
+}
+
 tasks.register('release') {
     dependsOn build
 
