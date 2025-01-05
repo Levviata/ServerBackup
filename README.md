@@ -1,6 +1,6 @@
 # Server Backup
 
-A plugin that backups you minecraft server with a variety of features, learn more on the [original website](https://server-backup.net/).
+A plugin that backups you minecraft server with a variety of features, learn more on the [original website](https://server-backup.net/) or [original wiki](https://github.com/SF-Sudio/ServerBackup/wiki).
 
 # Objectives/Intentions
 
@@ -15,6 +15,8 @@ _No promises._
 Get the original plugin here: 
 
 - Website: https://server-backup.net/
+
+- Wiki: https://github.com/SF-Sudio/ServerBackup/wiki 
 
 - Spigot: https://www.spigotmc.org/resources/server-backup-ingame-dropbox-ftp-backup-1-18-1-20-multithreaded.79320/
 
