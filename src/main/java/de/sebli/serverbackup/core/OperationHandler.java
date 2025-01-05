@@ -54,6 +54,8 @@ public class OperationHandler { // Wont comply to java:S1118, we actually instan
                  Scanner scanner = new Scanner(inputStream)) {
                 if (scanner.hasNext()) {
                     String latest = scanner.next();
+                    // Won't comply to java:S1874: getPluginMeta.getVersion() does the same but until paper doesn't go off snapshot
+                    // and marks it off as unstable I'd rather not touch it
                     String current = ServerBackupPlugin.getInstance().getDescription().getVersion();
 
                     // Normalize versions by removing numbers, snapshot and reobf tag (if present)
