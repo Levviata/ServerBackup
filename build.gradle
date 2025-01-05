@@ -1,5 +1,6 @@
 import com.github.spotbugs.snom.SpotBugsTask
 import java.text.SimpleDateFormat
+import java.util.zip.ZipFile
 
 plugins {
     id 'com.github.spotbugs' version "6.0.27"
@@ -104,9 +105,100 @@ shadowJar {
 jar.enabled = false
 assemble.dependsOn(shadowJar)
 
+def checkPluginYmlInJar() {
+    // Path to the built .jar file
+    def jarFile = file("${layout.buildDirectory.get().toString()}/libs/${project.name}-${version}.jar")
+
+    // Path to plugin.yml inside the .jar
+    def pluginYmlPath = "plugin.yml"
+
+    if (!jarFile.exists()) {
+        throw new GradleException("The .jar file does not exist: ${jarFile}")
+    }
+
+    // Open the .jar file and extract plugin.yml content
+    def zipFile = new ZipFile(jarFile)
+    def pluginYmlEntry = zipFile.getEntry(pluginYmlPath)
+
+    if (pluginYmlEntry == null) {
+        throw new GradleException("plugin.yml not found in the .jar file.")
+    }
+
+    // Return both zipFile and pluginYmlEntry as a map
+    return [zipFile: zipFile, pluginYmlEntry: pluginYmlEntry]
+}
+
 tasks.register('printProjectName') {
     doLast {
         println rootProject.name
+    }
+}
+
+tasks.register('debugPluginYmlInJar') { // never run separately from debugBuild, will not work
+    group = 'debug'
+    description = 'Debugs plugin.yml content inside the .jar file.'
+
+    doLast {
+        // Call the method to get zipFile and pluginYmlEntry
+        def result = checkPluginYmlInJar()
+
+        // Access the zipFile and pluginYmlEntry from the map
+        def zipFile = result.zipFile
+        def pluginYmlEntry = result.pluginYmlEntry
+
+        // Read the content of plugin.yml
+        def pluginYmlContent = zipFile.getInputStream(pluginYmlEntry).text
+        println "plugin.yml content inside the .jar:"
+        println pluginYmlContent
+    }
+}
+
+tasks.register('debugBuild') {
+    group = 'debug'  // Categorizing the task under 'custom.tasks'
+    description = 'Specialized build task for debugging.'
+
+    dependsOn build
+    dependsOn debugPluginYmlInJar
+    dependsOn verifyPluginYmlInJar
+}
+
+tasks.register('verifyPluginYmlInJar') { // never run separately from debugBuild, will not work
+    group = 'debug'
+    description = 'Verifies plugin.yml content inside the .jar file.'
+
+    doLast {
+        // Call the method to get zipFile and pluginYmlEntry
+        def result = checkPluginYmlInJar()
+
+        // Access the zipFile and pluginYmlEntry from the map
+        def zipFile = result.zipFile
+        def pluginYmlEntry = result.pluginYmlEntry
+
+        // Read the content of plugin.yml
+        def pluginYmlContent = zipFile.getInputStream(pluginYmlEntry).text
+
+        // Expected values for comparison
+        def expectedMain = "de.sebli.serverbackup.ServerBackupPlugin"
+        def expectedName = "ServerBackupPlugin"
+        def expectedVersion = "${project.version}"
+
+        // Check if the 'main' entry matches
+        if (!pluginYmlContent.contains("main: ${expectedMain}")) {
+            throw new GradleException("plugin.yml 'main' value does not match the expected: ${expectedMain}")
+        }
+
+        // Check if the 'name' entry matches
+        if (!pluginYmlContent.contains("name: ${expectedName}")) {
+            throw new GradleException("plugin.yml 'name' value does not match the expected: ${expectedName}")
+        }
+
+        // Check if the 'version' entry matches
+        if (!pluginYmlContent.contains("version: \"${expectedVersion}\"")) {
+            throw new GradleException("plugin.yml 'version' value does not match the expected: ${expectedVersion}")
+        }
+
+        // If all checks pass
+        println "plugin.yml content is correct!"
     }
 }
 
