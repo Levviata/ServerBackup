@@ -8,6 +8,7 @@ plugins {
 }
 
 group 'de.sebli.serverbackup'
+version '2.10.0' // TODO: Clarify version formatting
 
 static def getTime() {
     SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd-HHmm")
@@ -15,26 +16,15 @@ static def getTime() {
     return sdf.format(new Date()).toString()
 }
 
-// Set version to version property if supplied
-String shortVersion = "2.10.0-release" // TODO: Clarify version formatting
-if (hasProperty('ver')) {
-    if (ver.charAt(0) == "v") {
-        shortVersion = ver.substring(1).toUpperCase()
-    } else {
-        shortVersion = ver.toUpperCase()
-    }
-}
+String identifier = "" // Possibilities: rc
 
 // If the tag includes "-RC-" or no tag is supplied, append "-SNAPSHOT", also TODO: Clarify tag formatting
 int rcIdx
-if (shortVersion == null || shortVersion == "") {
-    version = getTime() + "-SNAPSHOT"
-} else if ((rcIdx = shortVersion.indexOf("-RC-")) != -1) {
-    version = shortVersion.substring(0, rcIdx) + "-SNAPSHOT"
-} else {
-    version = shortVersion
-}
-
+if (identifier == null || identifier == "") {
+    version = version + getTime() + "-SNAPSHOT"
+} /*else if ((rcIdx = identifier.indexOf("-RC-")) != -1) {
+    version = version + "-SNAPSHOT"
+}*/
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -121,7 +111,6 @@ tasks.register('printProjectName') {
 }
 
 tasks.register('release') {
-    version = shortVersion
     dependsOn build
 
     doLast {
