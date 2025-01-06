@@ -27,7 +27,7 @@ public class FtpManager {
     private static final String SERVER_USER = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.User");
     private static final String SERVER_PASSWORD = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.Password");
 
-    // TODO: Convert all literal string errors to constants
+    // TODO: Convert all literal string messages to constants
     private static final String ERROR_FTP_DOWNLOAD_FAILED = "Error.FtpDownloadFailed";
     private static final String ERROR_FTP_UPLOAD_FAILED = "Error.FtpUploadFailed";
     private static final String ERROR_FTP_NOT_FOUND = "Error.FtpNotFound";
