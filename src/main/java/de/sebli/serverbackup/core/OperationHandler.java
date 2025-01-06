@@ -18,16 +18,10 @@ import java.util.regex.Pattern;
 
 import static de.sebli.serverbackup.utils.GlobalConstants.RESOURCE_ID;
 
-public class OperationHandler { // Wont comply to java:S1118, we actually instantiate this class
+public class OperationHandler { // Won't comply to java:S1118, we actually instantiate this class
 
     public static boolean shutdownProgress = false;
     public static boolean isUpdated = false;
-    private static final List<String> IDENTIFIERS_LIST = new ArrayList<>(Arrays.asList(
-            "-SNAPSHOT",
-            "-reobf",
-            "-RC-",
-            "-release"
-    ));
 
     public static List<String> tasks = new ArrayList<>();
 
@@ -78,7 +72,7 @@ public class OperationHandler { // Wont comply to java:S1118, we actually instan
 
                     ServerBackupPlugin.getInstance().getLogger().info(MessageFormat.format("Current clean version number is: {0}", currentClean)); // TEST CODE
 
-                    latestClean = currentClean; // TODO: Remove when we actually have versions up and running in spigot
+                    latestClean = currentClean; // DISABLE AUTO UPDATING TODO: Remove when we actually have versions up and running in spigot
 
                     if (currentClean == latestClean) {
                         ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
