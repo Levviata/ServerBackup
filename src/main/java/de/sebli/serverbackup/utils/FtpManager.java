@@ -20,13 +20,14 @@ import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
 public class FtpManager {
 
-    private CommandSender sender;
+    private final CommandSender sender;
 
-    private static final String server = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.IP");
-    private static final int port = ServerBackupPlugin.getInstance().getConfig().getInt("Ftp.Server.Port");
-    private static final String user = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.User");
-    private static final String pass = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.Password");
+    private static final String SERVER_IP = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.IP");
+    private static final int SERVER_PORT = ServerBackupPlugin.getInstance().getConfig().getInt("Ftp.Server.Port");
+    private static final String SERVER_USER = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.User");
+    private static final String SERVER_PASSWORD = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.Password");
 
+    // TODO: Convert all literal string errors to constants
     private static final String ERROR_FTP_DOWNLOAD_FAILED = "Error.FtpDownloadFailed";
     private static final String ERROR_FTP_UPLOAD_FAILED = "Error.FtpUploadFailed";
     private static final String ERROR_FTP_NOT_FOUND = "Error.FtpNotFound";
@@ -380,8 +381,8 @@ public class FtpManager {
     }
 
     private void connect(FTPClient client) throws IOException {
-        client.connect(server, port);
-        client.login(user, pass);
+        client.connect(SERVER_IP, SERVER_PORT);
+        client.login(SERVER_USER, SERVER_PASSWORD);
         client.enterLocalPassiveMode();
 
         client.setFileType(FTP.BINARY_FILE_TYPE);
@@ -392,8 +393,8 @@ public class FtpManager {
     }
 
     private void connect(FTPSClient client) throws IOException {
-        client.connect(server, port);
-        client.login(user, pass);
+        client.connect(SERVER_IP, SERVER_PORT);
+        client.login(SERVER_USER, SERVER_PASSWORD);
         client.enterLocalPassiveMode();
 
         client.execPBSZ(0);
