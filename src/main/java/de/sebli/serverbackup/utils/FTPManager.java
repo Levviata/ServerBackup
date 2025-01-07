@@ -80,10 +80,10 @@ public class FTPManager {
         FTPClient ftpClient = new FTPClient();
 
         try {
-            if (!isSSL) {
-                handleDownloadFromFTP(ftpClient, file);
-            } else {
+            if (isSSL) {
                 handleDownloadFromFTPS(ftpsClient, file);
+            } else {
+                handleDownloadFromFTP(ftpClient, file);
             }
         } catch (IOException e) {
             sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
