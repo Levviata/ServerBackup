@@ -69,8 +69,8 @@ public class FTPManager {
                 boolean done = ftpClient.storeFile(file.getName(), inputStream);
 
                 // DEBUG
-                Bukkit.getLogger().log(Level.INFO, "(BETA) FTP-DEBUG INFO: " + ftpClient.getReplyString());
-                Bukkit.getLogger().log(Level.INFO,
+                Bukkit.getLogger().info("(BETA) FTP-DEBUG INFO: " + ftpClient.getReplyString());
+                Bukkit.getLogger().info(
                         "Use this info for reporting ftp related bugs. Ignore it if everything is fine.");
 
                 inputStream.close();
