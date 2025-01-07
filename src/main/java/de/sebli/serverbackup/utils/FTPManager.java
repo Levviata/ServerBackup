@@ -45,7 +45,6 @@ public class FTPManager {
 
         if (!file.getPath().contains(Configuration.backupDestination.replace("/", ""))) {
             file = new File(Configuration.backupDestination + "//" + filePath);
-            filePath = file.getPath();
         }
 
         if (!file.exists()) {
