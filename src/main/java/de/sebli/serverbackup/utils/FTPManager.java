@@ -59,43 +59,7 @@ public class FTPManager {
 
         try {
             if (!isSSL) { // is NOT FTPS client
-                connectFTP(ftpClient);
-
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
-                OperationHandler.tasks.add("FTP UPLOAD {" + filePath + "}"); // wont comply to java:S1192, we are never refactoring this
-
-                InputStream inputStream = new FileInputStream(file);
-
-                boolean done = ftpClient.storeFile(file.getName(), inputStream);
-
-                // DEBUG
-                Bukkit.getLogger().info("(BETA) FTP-DEBUG INFO: " + ftpClient.getReplyString());
-                Bukkit.getLogger().info(
-                        "Use this info for reporting ftp related bugs. Ignore it if everything is fine.");
-
-                inputStream.close();
-
-                if (done) {
-                    sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
-
-                    if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
-                        boolean exists = false;
-                        for (FTPFile backup : ftpClient.listFiles()) {
-                            if (backup.getName().equalsIgnoreCase(file.getName()))
-                                exists = true;
-                        }
-
-                        if (exists) {
-                            file.delete();
-                        } else {
-                            sender.sendMessage(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"));
-                        }
-                    }
-                } else {
-                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
-                }
-
-                OperationHandler.tasks.remove("FTP UPLOAD {" + filePath + "}");
+                handleUploadToFTP(ftpClient, file);
             } else { // is FTPS client
                 try {
                     connectFTP(ftpsClient);
@@ -380,9 +344,48 @@ public class FTPManager {
         }
     }
 
-    @Deprecated
-    private void uploadBackupFTP() {
+    private void handleUploadToFTP(FTPClient client, File file) throws IOException {
+        if (client instanceof FTPSClient) {
+            throw new UnsupportedOperationException("Don't upload to FTP with a FTPS client! This is NOT supported and might cause security issues, just use handleUploadToFTPS!");
+        }
 
+        connectFTP(client);
+
+        sender.sendMessage(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+        OperationHandler.tasks.add("FTP UPLOAD {" + file.getPath() + "}"); // wont comply to java:S1192, we are never refactoring this
+
+        InputStream inputStream = new FileInputStream(file);
+
+        boolean done = client.storeFile(file.getName(), inputStream);
+
+        // DEBUG
+        Bukkit.getLogger().info("(BETA) FTP-DEBUG INFO: " + client.getReplyString());
+        Bukkit.getLogger().info(
+                "Use this info for reporting ftp related bugs. Ignore it if everything is fine.");
+
+        inputStream.close();
+
+        if (done) {
+            sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
+
+            if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
+                boolean exists = false;
+                for (FTPFile backup : client.listFiles()) {
+                    if (backup.getName().equalsIgnoreCase(file.getName()))
+                        exists = true;
+                }
+
+                if (exists) {
+                    file.delete();
+                } else {
+                    sender.sendMessage(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"));
+                }
+            }
+        } else {
+            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
+        }
+
+        OperationHandler.tasks.remove("FTP UPLOAD {" + file.getPath() + "}");
     }
 
     /**
