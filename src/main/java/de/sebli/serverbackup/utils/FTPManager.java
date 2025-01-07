@@ -155,47 +155,9 @@ public class FTPManager {
         FTPClient ftpClient = new FTPClient();
 
         try {
-            if (!isSSL) {
-                connectFTP(ftpClient);
-
-                boolean exists = false;
-                for (FTPFile backup : ftpClient.listFiles()) {
-                    if (backup.getName().equalsIgnoreCase(file.getName()))
-                        exists = true;
-                }
-
-                if (!exists) {
-                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
-
-                    return;
-                }
-
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
-
-                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-                boolean success = ftpClient.retrieveFile(file.getName(), outputStream);
-                outputStream.close();
-
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
-                    File dFile = new File(Configuration.backupDestination + "//" + file.getPath());
-
-                    try {
-                        FileUtils.copyFile(file, dFile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    if (dFile.exists()) {
-                        file.delete();
-                    }
-                });
-
-                if (success) {
-                    sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
-                } else {
-                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
-                }
-            } else {
+            if (!isSSL) { // NOT FTPS
+                handleUploadToFTP(ftpClient, file);
+            } else { // is FTPS
                 try {
                     connectFTP(ftpsClient);
 
@@ -380,9 +342,50 @@ public class FTPManager {
         }
     }
 
-    @Deprecated
-    private void uploadBackupFTP() {
+    private void handleUploadToFTP(FTPClient client, File file) throws IOException {
+        if (client instanceof FTPSClient) {
+            throw new UnsupportedOperationException("Don't upload to FTP with a FTPS client! This is NOT supported and might cause security issues, just use handleUploadToFTPS!");
+        }
 
+        connectFTP(client);
+
+        boolean exists = false;
+        for (FTPFile backup : client.listFiles()) {
+            if (backup.getName().equalsIgnoreCase(file.getName()))
+                exists = true;
+        }
+
+        if (!exists) {
+            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
+
+            return;
+        }
+
+        sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+
+        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
+        boolean success = client.retrieveFile(file.getName(), outputStream);
+        outputStream.close();
+
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+            File dFile = new File(Configuration.backupDestination + "//" + file.getPath());
+
+            try {
+                FileUtils.copyFile(file, dFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (dFile.exists()) {
+                file.delete();
+            }
+        });
+
+        if (success) {
+            sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
+        } else {
+            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
+        }
     }
 
     /**
