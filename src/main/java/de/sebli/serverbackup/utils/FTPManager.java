@@ -102,29 +102,7 @@ public class FTPManager {
 
         try {
             if (!isSSL) {
-                connectFTPorFTPS(ftpClient);
-
-                boolean exists = false;
-                for (FTPFile backup : ftpClient.listFiles()) {
-                    if (backup.getName().equalsIgnoreCase(file.getName()))
-                        exists = true;
-                }
-
-                if (!exists) {
-                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
-
-                    return;
-                }
-
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
-
-                boolean success = ftpClient.deleteFile(file.getPath());
-
-                if (success) {
-                    sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletionSuccess"));
-                } else {
-                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
-                }
+                handleDeleteFileFTP(ftpClient, file);
             } else {
                 try {
                     connectFTPorFTPS(ftpsClient);
@@ -401,14 +379,36 @@ public class FTPManager {
         }
     }
 
-    private void handleDeleteFileFTP() {
+    private void handleDeleteFileFTP(FTPClient client, File file) throws IOException {
+        connectFTPorFTPS(client);
 
+        boolean exists = false;
+        for (FTPFile backup : client.listFiles()) {
+            if (backup.getName().equalsIgnoreCase(file.getName()))
+                exists = true;
+        }
+
+        if (!exists) {
+            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
+
+            return;
+        }
+
+        sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+
+        boolean success = client.deleteFile(file.getPath());
+
+        if (success) {
+            sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletionSuccess"));
+        } else {
+            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
+        }
     }
 
     private void handleDeleteFileFTPS() {
 
     }
-    
+
     /**
      * Connects and configures an FTP or FTPS client.
      * <p>
