@@ -264,6 +264,10 @@ public class FTPManager {
     }
 
     private void handleDownloadFromFTP(FTPClient client, File file) throws IOException {
+        if (client instanceof FTPSClient) {
+            throw new UnsupportedOperationException("Don't download to FTP with a FTPS client! This is NOT supported and might cause security issues, use handleDownloadFromFTPS instead!");
+        }
+
         connectFTPorFTPS(client);
 
         boolean exists = false;
@@ -353,6 +357,10 @@ public class FTPManager {
     }
 
     private void handleDeleteFileFTP(FTPClient client, File file) throws IOException {
+        if (client instanceof FTPSClient) {
+            throw new UnsupportedOperationException("Don't delete to FTP with a FTPS client! This is NOT supported and might cause security issues, use handleDeleteFTPS instead!");
+        }
+
         connectFTPorFTPS(client);
 
         boolean exists = false;
