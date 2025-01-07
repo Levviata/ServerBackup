@@ -391,6 +391,13 @@ public class FTPManager {
         }
     }
 
+    private void handleDownloadFromFTP(FTPClient client, File file) throws IOException {
+        
+    }
+    private void handleDownloadFromFTPS() {
+
+    }
+
     /**
      * Connects and configures an FTP or FTPS client.
      * <p>
