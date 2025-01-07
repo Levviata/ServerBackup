@@ -246,7 +246,7 @@ public class FTPManager {
         OperationHandler.tasks.remove("FTP UPLOAD {" + file.getPath() + "}");
     }
 
-    private void handleUploadToFTPS(FTPSClient client, File file, boolean direct) throws IOException {
+    private void handleUploadToFTPS(FTPSClient client, File file, boolean direct) {
         try {
             connectFTPorFTPS(client);
 
