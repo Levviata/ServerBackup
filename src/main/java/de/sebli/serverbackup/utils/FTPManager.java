@@ -79,45 +79,7 @@ public class FTPManager {
 
         try {
             if (!isSSL) {
-                connectFTP(ftpClient);
-
-                boolean exists = false;
-                for (FTPFile backup : ftpClient.listFiles()) {
-                    if (backup.getName().equalsIgnoreCase(file.getName()))
-                        exists = true;
-                }
-
-                if (!exists) {
-                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
-
-                    return;
-                }
-
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
-
-                OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-                boolean success = ftpClient.retrieveFile(file.getName(), outputStream);
-                outputStream.close();
-
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
-                    File dFile = new File(Configuration.backupDestination + "//" + file.getPath());
-
-                    try {
-                        FileUtils.copyFile(file, dFile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    if (dFile.exists()) {
-                        file.delete();
-                    }
-                });
-
-                if (success) {
-                    sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
-                } else {
-                    sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
-                }
+                handleDownloadFromFTP(ftpClient, file);
             } else {
                 try {
                     connectFTP(ftpsClient);
@@ -392,8 +354,47 @@ public class FTPManager {
     }
 
     private void handleDownloadFromFTP(FTPClient client, File file) throws IOException {
-        
+        connectFTP(client);
+
+        boolean exists = false;
+        for (FTPFile backup : client.listFiles()) {
+            if (backup.getName().equalsIgnoreCase(file.getName()))
+                exists = true;
+        }
+
+        if (!exists) {
+            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
+
+            return;
+        }
+
+        sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+
+        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
+        boolean success = client.retrieveFile(file.getName(), outputStream);
+        outputStream.close();
+
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+            File dFile = new File(Configuration.backupDestination + "//" + file.getPath());
+
+            try {
+                FileUtils.copyFile(file, dFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (dFile.exists()) {
+                file.delete();
+            }
+        });
+
+        if (success) {
+            sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
+        } else {
+            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
+        }
     }
+
     private void handleDownloadFromFTPS() {
 
     }
