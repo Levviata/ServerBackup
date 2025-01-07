@@ -401,6 +401,14 @@ public class FTPManager {
         }
     }
 
+    private void handleDeleteFileFTP() {
+
+    }
+
+    private void handleDeleteFileFTPS() {
+
+    }
+    
     /**
      * Connects and configures an FTP or FTPS client.
      * <p>
