@@ -57,10 +57,10 @@ public class FTPManager {
         FTPClient ftpClient = new FTPClient();
 
         try {
-            if (!isSSL) { // is NOT FTPS client
-                handleUploadToFTP(ftpClient, file);
-            } else { // is FTPS client
+            if (isSSL) { // is FTPS
                 handleUploadToFTPS(ftpsClient, file, direct);
+            } else { // is NOT FTPS
+                handleUploadToFTP(ftpClient, file);
             }
             disconnectClient(ftpsClient);
             disconnectClient(ftpClient);
