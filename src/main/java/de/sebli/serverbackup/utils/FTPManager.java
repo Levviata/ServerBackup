@@ -82,7 +82,7 @@ public class FTPManager {
                 handleDownloadFromFTP(ftpClient, file);
             } else {
                 try {
-                    connectFTP(ftpsClient);
+                    connectFTPorFTPS(ftpsClient);
 
                     boolean exists = false;
                     for (FTPFile backup : ftpsClient.listFiles()) {
@@ -143,7 +143,7 @@ public class FTPManager {
 
         try {
             if (!isSSL) {
-                connectFTP(ftpClient);
+                connectFTPorFTPS(ftpClient);
 
                 boolean exists = false;
                 for (FTPFile backup : ftpClient.listFiles()) {
@@ -168,7 +168,7 @@ public class FTPManager {
                 }
             } else {
                 try {
-                    connectFTP(ftpsClient);
+                    connectFTPorFTPS(ftpsClient);
 
                     boolean exists = false;
                     for (FTPFile backup : ftpsClient.listFiles()) {
@@ -212,7 +212,7 @@ public class FTPManager {
         FTPClient ftpClient = new FTPClient();
 
         try {
-            connectFTP(ftpClient);
+            connectFTPorFTPS(ftpClient);
 
             FTPFile[] files = ftpClient.listFiles();
 
@@ -235,7 +235,7 @@ public class FTPManager {
             getFTPBackupList(rawList);
 
             try {
-                connectFTP(ftpsClient);
+                connectFTPorFTPS(ftpsClient);
 
                 FTPFile[] files = ftpsClient.listFiles();
 
@@ -270,7 +270,7 @@ public class FTPManager {
             throw new UnsupportedOperationException("Don't upload to FTP with a FTPS client! This is NOT supported and might cause security issues, use handleUploadToFTPS instead!");
         }
 
-        connectFTP(client);
+        connectFTPorFTPS(client);
 
         sender.sendMessage(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
         OperationHandler.tasks.add("FTP UPLOAD {" + file.getPath() + "}"); // wont comply to java:S1192, we are never refactoring this
@@ -311,7 +311,7 @@ public class FTPManager {
 
     private void handleUploadToFTPS(FTPSClient client, File file, boolean direct) throws IOException {
         try {
-            connectFTP(client);
+            connectFTPorFTPS(client);
 
             InputStream inputStream = new FileInputStream(file);
 
@@ -354,7 +354,7 @@ public class FTPManager {
     }
 
     private void handleDownloadFromFTP(FTPClient client, File file) throws IOException {
-        connectFTP(client);
+        connectFTPorFTPS(client);
 
         boolean exists = false;
         for (FTPFile backup : client.listFiles()) {
@@ -411,7 +411,7 @@ public class FTPManager {
      *               Can be either FTPClient or FTPSClient.
      * @throws IOException if an error occurs during the connection or configuration process.
      */
-    private void connectFTP(FTPClient client) throws IOException {
+    private void connectFTPorFTPS(FTPClient client) throws IOException {
         client.connect(SERVER_IP, SERVER_PORT);
         client.login(SERVER_USER, SERVER_PASSWORD);
         client.enterLocalPassiveMode();
