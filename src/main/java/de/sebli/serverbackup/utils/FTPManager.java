@@ -101,10 +101,10 @@ public class FTPManager {
         FTPClient ftpClient = new FTPClient();
 
         try {
-            if (!isSSL) {
-                handleDeleteFileFTP(ftpClient, file);
-            } else {
+            if (isSSL) {
                 handleDeleteFileFTPS(ftpsClient, file);
+            } else {
+                handleDeleteFileFTP(ftpClient, file);
             }
         } catch (IOException e) {
             sender.sendMessage(OperationHandler.processMessage("Error.FtpDeletionFailed"));
