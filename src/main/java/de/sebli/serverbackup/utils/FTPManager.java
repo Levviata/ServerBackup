@@ -61,47 +61,7 @@ public class FTPManager {
             if (!isSSL) { // is NOT FTPS client
                 handleUploadToFTP(ftpClient, file);
             } else { // is FTPS client
-                try {
-                    connectFTP(ftpsClient);
-
-                    InputStream inputStream = new FileInputStream(file);
-
-                    boolean done = ftpsClient.storeFile(file.getName(), inputStream);
-
-                    // DEBUG
-                    Bukkit.getLogger().log(Level.INFO, "(BETA) FTPS-DEBUG INFO: " + ftpsClient.getReplyString());
-                    Bukkit.getLogger().log(Level.INFO,
-                            "Use this info for reporting ftp related bugs. Ignore it if everything is fine.");
-
-                    inputStream.close();
-
-                    if (done) {
-                        sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
-
-                        if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
-                            boolean exists = false;
-                            for (FTPFile backup : ftpsClient.listFiles()) {
-                                if (backup.getName().equalsIgnoreCase(file.getName()))
-                                    exists = true;
-                            }
-
-                            if (exists) {
-                                file.delete();
-                            } else {
-                                sender.sendMessage(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"));
-                            }
-                        }
-                    } else {
-                        sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
-                    }
-
-                    if (OperationHandler.tasks.contains("FTP UPLOAD {" + filePath + "}")) {
-                        OperationHandler.tasks.remove("FTP UPLOAD {" + filePath + "}");
-                    }
-                } catch (Exception e) {
-                    isSSL = false;
-                    uploadFileToFTP(filePath, direct);
-                }
+                handleUploadToFTPS(ftpsClient, file, direct);
             }
             disconnectClient(ftpsClient);
             disconnectClient(ftpClient);
@@ -386,6 +346,50 @@ public class FTPManager {
         }
 
         OperationHandler.tasks.remove("FTP UPLOAD {" + file.getPath() + "}");
+    }
+
+    private void handleUploadToFTPS(FTPSClient client, File file, boolean direct) throws IOException {
+        try {
+            connectFTP(client);
+
+            InputStream inputStream = new FileInputStream(file);
+
+            boolean done = client.storeFile(file.getName(), inputStream);
+
+            // DEBUG
+            Bukkit.getLogger().log(Level.INFO, "(BETA) FTPS-DEBUG INFO: " + client.getReplyString());
+            Bukkit.getLogger().log(Level.INFO,
+                    "Use this info for reporting ftp related bugs. Ignore it if everything is fine.");
+
+            inputStream.close();
+
+            if (done) {
+                sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
+
+                if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
+                    boolean exists = false;
+                    for (FTPFile backup : client.listFiles()) {
+                        if (backup.getName().equalsIgnoreCase(file.getName()))
+                            exists = true;
+                    }
+
+                    if (exists) {
+                        file.delete();
+                    } else {
+                        sender.sendMessage(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"));
+                    }
+                }
+            } else {
+                sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
+            }
+
+            if (OperationHandler.tasks.contains("FTP UPLOAD {" + file.getPath() + "}")) {
+                OperationHandler.tasks.remove("FTP UPLOAD {" + file.getPath() + "}");
+            }
+        } catch (Exception e) {
+            isSSL = false;
+            uploadFileToFTP(file.getPath(), direct);
+        }
     }
 
     /**
