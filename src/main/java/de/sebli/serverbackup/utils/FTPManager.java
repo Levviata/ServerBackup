@@ -38,7 +38,7 @@ public class FTPManager {
 
     boolean isSSL = true;
 
-    ServerBackupPlugin backup = ServerBackupPlugin.getInstance();
+    ServerBackupPlugin instance = ServerBackupPlugin.getInstance();
 
     public void uploadFileToFTP(String filePath, boolean direct) { // OBJECTIVES: reduce complexity and move parts of code to their own methods
         File file = new File(filePath);
