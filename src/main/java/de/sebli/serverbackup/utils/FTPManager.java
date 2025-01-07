@@ -306,7 +306,7 @@ public class FTPManager {
 
     private void handleUploadToFTP(FTPClient client, File file) throws IOException {
         if (client instanceof FTPSClient) {
-            throw new UnsupportedOperationException("Don't upload to FTP with a FTPS client! This is NOT supported and might cause security issues, just use handleUploadToFTPS!");
+            throw new UnsupportedOperationException("Don't upload to FTP with a FTPS client! This is NOT supported and might cause security issues, use handleUploadToFTPS instead!");
         }
 
         connectFTP(client);
