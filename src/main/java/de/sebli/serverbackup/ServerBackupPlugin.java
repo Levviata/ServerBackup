@@ -26,7 +26,7 @@ public class ServerBackupPlugin extends JavaPlugin {
         for (BukkitTask task : Bukkit.getScheduler().getPendingTasks()) {
             task.cancel();
 
-            this.getLogger().log(Level.WARNING, "WARNING - ServerBackup: Task [" + task.getTaskId()
+            this.getLogger().warning( "WARNING - ServerBackup: Task [" + task.getTaskId()
                     + "] cancelled due to server shutdown. There might be some unfinished Backups.");
         }
 

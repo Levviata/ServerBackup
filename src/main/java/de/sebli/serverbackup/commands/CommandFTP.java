@@ -1,29 +1,29 @@
 package de.sebli.serverbackup.commands;
 
+import de.sebli.serverbackup.utils.FTPManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
-import de.sebli.serverbackup.utils.FtpManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
-class CommandFtp {
-    private CommandFtp() {
+class CommandFTP {
+    private CommandFTP() {
         throw new IllegalStateException("Utility class");
     }
 
     public static void execute(CommandSender sender, String[] args) {
         if (args[1].equalsIgnoreCase("list")) {
             Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
-                FtpManager ftpm = new FtpManager(sender);
+                FTPManager ftpm = new FTPManager(sender);
 
-                List<String> backups = ftpm.getFtpBackupList(false);
+                List<String> backups = ftpm.getFTPBackupList(false);
 
                 if (backups.size() == 0) {
                     sender.sendMessage(OperationHandler.processMessage("Error.NoFtpBackups"));
@@ -79,15 +79,15 @@ class CommandFtp {
             });
         } else if (args[1].equalsIgnoreCase("download")) {
             Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
-                FtpManager ftpm = new FtpManager(sender);
+                FTPManager ftpm = new FTPManager(sender);
 
-                ftpm.downloadFileFromFtp(args[2]);
+                ftpm.downloadFileFromFTP(args[2]);
             });
         } else if (args[1].equalsIgnoreCase("upload")) {
             Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
-                FtpManager ftpm = new FtpManager(sender);
+                FTPManager ftpm = new FTPManager(sender);
 
-                ftpm.uploadFileToFtp(args[2], !ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.CompressBeforeUpload"));
+                ftpm.uploadFileToFTP(args[2], !ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.CompressBeforeUpload"));
             });
         }
     }

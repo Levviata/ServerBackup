@@ -53,7 +53,7 @@ public class Executor implements CommandExecutor {
                 if (args[0].equalsIgnoreCase("search")) {
                     CommandSearch.execute(sender, args);
                 } else if (args[0].equalsIgnoreCase("ftp")) {
-                    CommandFtp.execute(sender, args);
+                    CommandFTP.execute(sender, args);
                 } else if (args[0].equalsIgnoreCase("dropbox")) {
                     CommandDropbox.execute(sender, args);
                 }

@@ -3,7 +3,7 @@ package de.sebli.serverbackup.core;
 import de.sebli.serverbackup.Configuration;
 import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.utils.DropboxManager;
-import de.sebli.serverbackup.utils.FtpManager;
+import de.sebli.serverbackup.utils.FTPManager;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -180,8 +180,8 @@ public class ZipManager {
             }
 
             if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.UploadBackup")) {
-                FtpManager ftpm = new FtpManager(sender);
-                ftpm.uploadFileToFtp(targetFilePath, false);
+                FTPManager ftpm = new FTPManager(sender);
+                ftpm.uploadFileToFTP(targetFilePath, false);
             }
 
             if (ServerBackupPlugin.getInstance().getConfig().getBoolean("CloudBackup.Dropbox")) {

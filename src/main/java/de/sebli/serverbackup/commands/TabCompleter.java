@@ -1,7 +1,7 @@
 package de.sebli.serverbackup.commands;
 
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.utils.FtpManager;
+import de.sebli.serverbackup.utils.FTPManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -90,9 +90,9 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
             } else if (args.length == 3) {
                 if (args[0].equalsIgnoreCase("ftp")) {
                     if (args[1].equalsIgnoreCase("download")) {
-                        FtpManager ftpm = new FtpManager(sender);
+                        FTPManager ftpm = new FTPManager(sender);
 
-                        List<String> backups = ftpm.getFtpBackupList(false);
+                        List<String> backups = ftpm.getFTPBackupList(false);
 
                         for (String backup : backups) {
                             commands.add(backup.split(" ")[1]);
