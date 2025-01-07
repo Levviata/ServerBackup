@@ -104,34 +104,7 @@ public class FTPManager {
             if (!isSSL) {
                 handleDeleteFileFTP(ftpClient, file);
             } else {
-                try {
-                    connectFTPorFTPS(ftpsClient);
-
-                    boolean exists = false;
-                    for (FTPFile backup : ftpsClient.listFiles()) {
-                        if (backup.getName().equalsIgnoreCase(file.getName()))
-                            exists = true;
-                    }
-
-                    if (!exists) {
-                        sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
-
-                        return;
-                    }
-
-                    sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
-
-                    boolean success = ftpsClient.deleteFile(file.getPath());
-
-                    if (success) {
-                        sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletionSuccess"));
-                    } else {
-                        sender.sendMessage(OperationHandler.processMessage("Error.FtpDeletionFailed"));
-                    }
-                } catch (Exception e) {
-                    isSSL = false;
-                    deleteFile(filePath);
-                }
+                handleDeleteFileFTPS(ftpsClient, file);
             }
         } catch (IOException e) {
             sender.sendMessage(OperationHandler.processMessage("Error.FtpDeletionFailed"));
@@ -405,8 +378,35 @@ public class FTPManager {
         }
     }
 
-    private void handleDeleteFileFTPS() {
+    private void handleDeleteFileFTPS(FTPSClient client, File file) {
+        try {
+            connectFTPorFTPS(client);
 
+            boolean exists = false;
+            for (FTPFile backup : client.listFiles()) {
+                if (backup.getName().equalsIgnoreCase(file.getName()))
+                    exists = true;
+            }
+
+            if (!exists) {
+                sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
+
+                return;
+            }
+
+            sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+
+            boolean success = client.deleteFile(file.getPath());
+
+            if (success) {
+                sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletionSuccess"));
+            } else {
+                sender.sendMessage(OperationHandler.processMessage("Error.FtpDeletionFailed"));
+            }
+        } catch (Exception e) {
+            isSSL = false;
+            deleteFile(file.getPath());
+        }
     }
 
     /**
