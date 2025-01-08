@@ -284,9 +284,7 @@ public class FTPManager {
 
         sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
-        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-        boolean success = client.retrieveFile(file.getName(), outputStream);
-        outputStream.close();
+        boolean isSuccessfulDownload = tryDownloadFileFromFTPorFTPS(client, file);
 
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
             File dFile = new File(Configuration.backupDestination + "//" + file.getPath());
@@ -302,7 +300,7 @@ public class FTPManager {
             }
         });
 
-        if (success) {
+        if (isSuccessfulDownload) {
             sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
         } else {
             sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
