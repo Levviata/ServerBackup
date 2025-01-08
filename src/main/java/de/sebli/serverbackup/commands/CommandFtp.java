@@ -20,7 +20,7 @@ class CommandFtp {
 
     public static void execute(CommandSender sender, String[] args) {
         if (args[1].equalsIgnoreCase("list")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
                 FtpManager ftpm = new FtpManager(sender);
 
                 List<String> backups = ftpm.getFtpBackupList(false);
@@ -78,16 +78,16 @@ class CommandFtp {
                 }
             });
         } else if (args[1].equalsIgnoreCase("download")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
                 FtpManager ftpm = new FtpManager(sender);
 
                 ftpm.downloadFileFromFtp(args[2]);
             });
         } else if (args[1].equalsIgnoreCase("upload")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
                 FtpManager ftpm = new FtpManager(sender);
 
-                ftpm.uploadFileToFtp(args[2], !ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.CompressBeforeUpload"));
+                ftpm.uploadFileToFtp(args[2], !ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("Ftp.CompressBeforeUpload"));
             });
         }
     }

@@ -14,7 +14,7 @@ import java.util.logging.Level;
 
 public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
 
-    private ServerBackupPlugin pluginInstance;
+    private static ServerBackupPlugin pluginInstance;
 
     private Dotenv envKeys;
 
@@ -55,7 +55,7 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
         }
     }
 
-    public ServerBackupPlugin getPluginInstance() {
+    public static ServerBackupPlugin getPluginInstance() {
         return pluginInstance;
     }
 
