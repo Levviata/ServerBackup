@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
@@ -172,9 +171,8 @@ public class FTPManager {
         } finally {
             disconnectClient(ftpsClient);
             disconnectClient(ftpClient);
-
-            return backups;
         }
+        return backups;
     }
 
     private void handleUploadToFTP(FTPClient client, File file) throws IOException {
@@ -187,18 +185,9 @@ public class FTPManager {
         sender.sendMessage(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
         OperationHandler.tasks.add("FTP UPLOAD {" + file.getPath() + "}"); // wont comply to java:S1192, we are never refactoring this
 
-        InputStream inputStream = new FileInputStream(file);
+        boolean success = tryUploadFileToFTPorFTPS(client, file, false);
 
-        boolean done = client.storeFile(file.getName(), inputStream);
-
-        // DEBUG
-        Bukkit.getLogger().info("(BETA) FTP-DEBUG INFO: " + client.getReplyString());
-        Bukkit.getLogger().info(
-                "Use this info for reporting ftp related bugs. Ignore it if everything is fine.");
-
-        inputStream.close();
-
-        if (done) {
+        if (success) {
             sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
 
             if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
@@ -209,7 +198,7 @@ public class FTPManager {
                 }
 
                 if (exists) {
-                    file.delete();
+                    tryDeleteFile(file);
                 } else {
                     sender.sendMessage(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"));
                 }
@@ -225,7 +214,7 @@ public class FTPManager {
         try {
             connectFTPorFTPS(client);
 
-            boolean isFileUploaded = tryUploadFileToFTPorFTPS(client, file);
+            boolean isFileUploaded = tryUploadFileToFTPorFTPS(client, file, true);
 
             if (isFileUploaded) {
                 sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
@@ -238,7 +227,7 @@ public class FTPManager {
                     }
 
                     if (exists) {
-                        file.delete();
+                        tryDeleteFile(file);
                     } else {
                         sender.sendMessage(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"));
                     }
@@ -275,8 +264,6 @@ public class FTPManager {
 
         sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
-        boolean isSuccessfulDownload = tryDownloadFileFromFTPorFTPS(client, file);
-
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
             File backupFile = new File(Configuration.backupDestination + "//" + file.getPath());
 
@@ -287,15 +274,13 @@ public class FTPManager {
             }
 
             if (backupFile.exists()) {
-                try  {
-                    Files.delete(Path.of(file.getPath()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                tryDeleteFile(file);
             }
         });
 
-        if (isSuccessfulDownload) {
+        boolean success = tryDownloadFileFromFTPorFTPS(client, file);
+
+        if (success) {
             sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
         } else {
             sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
@@ -320,8 +305,6 @@ public class FTPManager {
 
             sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
-            boolean isSuccessfulDownload = tryDownloadFileFromFTPorFTPS(client, file);
-
             Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
                 File backupFile = new File(Configuration.backupDestination + "//" + file.getPath());
 
@@ -332,15 +315,13 @@ public class FTPManager {
                 }
 
                 if (backupFile.exists()) {
-                    try  {
-                        Files.delete(Path.of(file.getPath()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    tryDeleteFile(file);
                 }
             });
 
-            if (isSuccessfulDownload) {
+            boolean success = tryDownloadFileFromFTPorFTPS(client, file);
+
+            if (success) {
                 sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
             } else {
                 sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
@@ -372,7 +353,7 @@ public class FTPManager {
 
         sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
-        boolean success = client.deleteFile(file.getPath());
+        boolean success = tryDeleteFile(file);
 
         if (success) {
             sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletionSuccess"));
@@ -399,7 +380,7 @@ public class FTPManager {
 
             sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
-            boolean success = client.deleteFile(file.getPath());
+            boolean success = tryDeleteFile(file);
 
             if (success) {
                 sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletionSuccess"));
@@ -460,13 +441,19 @@ public class FTPManager {
         }
     }
 
-    private boolean tryUploadFileToFTPorFTPS(FTPClient client, File file) {
+    private boolean tryUploadFileToFTPorFTPS(FTPClient client, File file, boolean isSSL) {
         try (InputStream inputStream = new FileInputStream(file)) {
-            // DEBUG
-            Bukkit.getLogger().info("(BETA) FTPS-DEBUG INFO: " + client.getReplyString());
-            Bukkit.getLogger().info(
-                    "Use this info for reporting ftp related bugs. Ignore it if everything is fine.");
-
+            if (isSSL) {
+                // DEBUG
+                Bukkit.getLogger().info("(BETA) FTPS-DEBUG INFO: " + client.getReplyString());
+                Bukkit.getLogger().info(
+                        "Use this info for reporting FTPS related bugs. Ignore if everything is fine.");
+            } else {
+                // DEBUG
+                Bukkit.getLogger().info("(BETA) FTP-DEBUG INFO: " + client.getReplyString());
+                Bukkit.getLogger().info(
+                        "Use this info for reporting FTP related bugs. Ignore if everything is fine.");
+            }
             return client.storeFile(file.getName(), inputStream);
         } catch (IOException e) {
             e.printStackTrace();
@@ -477,6 +464,16 @@ public class FTPManager {
     private boolean tryDownloadFileFromFTPorFTPS(FTPClient client, File file) {
         try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
             return client.retrieveFile(file.getName(), outputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean tryDeleteFile(File file) {
+        try  {
+            Files.delete(Path.of(file.getPath()));
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
