@@ -64,8 +64,7 @@ public class DropboxManager {
             Configuration.cloudInfo.set(CLOUD_RT, authFinish.getRefreshToken());
             Configuration.saveCloud();
         } else {
-            // TODO: Replace credential with an environment variable
-            credential = new DbxCredential("dummy-access-token", 0L, Configuration.cloudInfo.getString(CLOUD_RT), appKey, secretKey);
+            credential = new DbxCredential(ServerBackupPlugin.getInstance().getEnvKey().get("DROPBOX_KEY"), 0L, Configuration.cloudInfo.getString(CLOUD_RT), appKey, secretKey);
         }
 
         client = new DbxClientV2(config, credential);

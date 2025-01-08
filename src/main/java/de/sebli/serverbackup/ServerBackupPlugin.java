@@ -5,6 +5,7 @@ import de.sebli.serverbackup.commands.TabCompleter;
 import de.sebli.serverbackup.core.DynamicBackup;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.listeners.JoinListener;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -14,6 +15,8 @@ import java.util.logging.Level;
 public class ServerBackupPlugin extends JavaPlugin {
 
     private static ServerBackupPlugin serverBackupPlugin;
+
+    private Dotenv envKeys;
 
     public static ServerBackupPlugin getInstance() {
         return serverBackupPlugin;
@@ -47,6 +50,8 @@ public class ServerBackupPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new JoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new DynamicBackup(), this);
 
+        envKeys = Dotenv.load(); // Load our env keys
+
         Bukkit.getLogger().log(Level.INFO, "ServerBackup: Plugin enabled.");
 
         if (getConfig().getBoolean("UpdateAvailableMessage")) {
@@ -56,4 +61,7 @@ public class ServerBackupPlugin extends JavaPlugin {
         //BStats.initialize();
     }
 
+    public Dotenv getEnvKey() {
+        return envKeys;
+    }
 }
