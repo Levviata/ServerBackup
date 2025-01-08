@@ -247,9 +247,7 @@ public class FTPManager {
                 sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
             }
 
-            if (OperationHandler.tasks.contains("FTP UPLOAD {" + file.getPath() + "}")) {
-                OperationHandler.tasks.remove("FTP UPLOAD {" + file.getPath() + "}");
-            }
+            OperationHandler.tasks.remove("FTP UPLOAD {" + file.getPath() + "}");
         } catch (Exception e) {
             isSSL = false;
             uploadFileToFTP(file.getPath(), direct);
