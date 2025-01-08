@@ -463,7 +463,7 @@ public class FTPManager {
         }
     }
 
-    private boolean tryDownloadFileFromFTPorFTPS(FTPSClient client, File file) {
+    private boolean tryDownloadFileFromFTPorFTPS(FTPClient client, File file) {
         try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
             return client.retrieveFile(file.getName(), outputStream);
         } catch (IOException e) {
