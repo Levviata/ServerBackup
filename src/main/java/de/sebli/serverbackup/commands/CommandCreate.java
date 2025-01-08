@@ -37,7 +37,7 @@ class CommandCreate {
         File file = new File(fileName);
 
         if (!file.isDirectory() && !args[1].equalsIgnoreCase("@server")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), new Runnable() {
 
                 @Override
                 public void run() {

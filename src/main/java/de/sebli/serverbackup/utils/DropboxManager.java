@@ -64,15 +64,14 @@ public class DropboxManager {
             Configuration.cloudInfo.set(CLOUD_RT, authFinish.getRefreshToken());
             Configuration.saveCloud();
         } else {
-            // TODO: Replace credential with an environment variable
-            credential = new DbxCredential("dummy-access-token", 0L, Configuration.cloudInfo.getString(CLOUD_RT), appKey, secretKey);
+            credential = new DbxCredential(ServerBackupPlugin.getPluginInstance().getEnvKey().get("DROPBOX_KEY"), 0L, Configuration.cloudInfo.getString(CLOUD_RT), appKey, secretKey);
         }
 
         client = new DbxClientV2(config, credential);
 
         sender.sendMessage("Dropbox: Uploading backup [" + file.getName() + "] ...");
 
-        String des = ServerBackupPlugin.getInstance().getConfig().getString("CloudBackup.Options.Destination").replace("/", "");
+        String des = ServerBackupPlugin.getPluginInstance().getConfig().getString("CloudBackup.Options.Destination").replace("/", "");
         des = "/" + (des.equals("") ? "" : des + "/");
 
         if(file.length() > (100 * 1000 * 1000)) {
@@ -143,7 +142,7 @@ public class DropboxManager {
                 sender.sendMessage("Dropbox: Upload successfully. Backup stored on your dropbox account.");
                 getProgress(file.getName(), uploaded, size, true);
 
-                if (ServerBackupPlugin.getInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
+                if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                     file.delete();
                     System.out.println("File [" + file.getPath() + "] deleted.");
                 }
@@ -190,7 +189,7 @@ public class DropboxManager {
             sender.sendMessage("Dropbox: Upload successfully. Backup stored on your dropbox account.");
             OperationHandler.tasks.remove("DROPBOX UPLOAD {" + file.getName() + "}"); // same as line 178
 
-            if (ServerBackupPlugin.getInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
+            if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                 file.delete();
                 System.out.println("File [" + file.getPath() + "] deleted.");
             }

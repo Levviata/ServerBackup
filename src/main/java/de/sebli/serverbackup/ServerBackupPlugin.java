@@ -5,19 +5,18 @@ import de.sebli.serverbackup.commands.TabCompleter;
 import de.sebli.serverbackup.core.DynamicBackup;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.listeners.JoinListener;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.logging.Level;
 
-public class ServerBackupPlugin extends JavaPlugin {
+public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
 
-    private static ServerBackupPlugin serverBackupPlugin;
+    private static ServerBackupPlugin pluginInstance;
 
-    public static ServerBackupPlugin getInstance() {
-        return serverBackupPlugin;
-    }
+    private Dotenv envKeys;
 
     @Override
     public void onDisable() {
@@ -26,7 +25,7 @@ public class ServerBackupPlugin extends JavaPlugin {
         for (BukkitTask task : Bukkit.getScheduler().getPendingTasks()) {
             task.cancel();
 
-            this.getLogger().warning( "WARNING - ServerBackup: Task [" + task.getTaskId()
+            this.getLogger().warning("WARNING - ServerBackup: Task [" + task.getTaskId()
                     + "] cancelled due to server shutdown. There might be some unfinished Backups.");
         }
 
@@ -35,7 +34,7 @@ public class ServerBackupPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        serverBackupPlugin = this;
+        pluginInstance = this;
 
         Configuration.loadUp();
 
@@ -47,13 +46,20 @@ public class ServerBackupPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new JoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new DynamicBackup(), this);
 
-        Bukkit.getLogger().log(Level.INFO, "ServerBackup: Plugin enabled.");
+        envKeys = Dotenv.load(); // Load our env keys
+
+        Bukkit.getLogger().info("Plugin enabled.");
 
         if (getConfig().getBoolean("UpdateAvailableMessage")) {
             OperationHandler.checkVersion();
         }
-
-        //BStats.initialize();
     }
 
+    public static ServerBackupPlugin getPluginInstance() {
+        return pluginInstance;
+    }
+
+    public Dotenv getEnvKey() {
+        return envKeys;
+    }
 }
