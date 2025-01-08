@@ -280,16 +280,20 @@ public class FTPManager {
         boolean isSuccessfulDownload = tryDownloadFileFromFTPorFTPS(client, file);
 
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
-            File dFile = new File(Configuration.backupDestination + "//" + file.getPath());
+            File backupFile = new File(Configuration.backupDestination + "//" + file.getPath());
 
             try {
-                FileUtils.copyFile(file, dFile);
+                FileUtils.copyFile(file, backupFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            if (dFile.exists()) {
-                file.delete();
+            if (backupFile.exists()) {
+                try  {
+                    Files.delete(Path.of(file.getPath()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
