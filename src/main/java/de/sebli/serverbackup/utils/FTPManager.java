@@ -12,6 +12,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -328,7 +330,11 @@ public class FTPManager {
                 }
 
                 if (backupFile.exists()) {
-                    file.delete();
+                    try  {
+                        Files.delete(Path.of(file.getPath()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
 
