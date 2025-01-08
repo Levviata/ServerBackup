@@ -468,6 +468,7 @@ public class FTPManager {
             return client.retrieveFile(file.getName(), outputStream);
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 }
