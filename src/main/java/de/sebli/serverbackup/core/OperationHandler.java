@@ -30,19 +30,19 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
     }
 
     public static void startTimer() {
-        if (ServerBackupPlugin.getInstance().getConfig().getBoolean("AutomaticBackups")) {
-            Bukkit.getScheduler().runTaskTimerAsynchronously(ServerBackupPlugin.getInstance(), new Timer(), 20 * 20, 20 * 20);
+        if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("AutomaticBackups")) {
+            Bukkit.getScheduler().runTaskTimerAsynchronously(ServerBackupPlugin.getPluginInstance(), new Timer(), 20 * 20, 20 * 20);
         }
     }
 
     public static void stopTimer() {
-        Bukkit.getScheduler().cancelTasks(ServerBackupPlugin.getInstance());
+        Bukkit.getScheduler().cancelTasks(ServerBackupPlugin.getPluginInstance());
     }
 
     public static void checkVersion() {
-        ServerBackupPlugin.getInstance().getLogger().log(Level.INFO, "ServerBackup: Searching for updates...");
+        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "ServerBackup: Searching for updates...");
 
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
             try (InputStream inputStream = (new URL(
                     "https://api.spigotmc.org/legacy/update.php?resource=" + RESOURCE_ID)).openStream();
                  Scanner scanner = new Scanner(inputStream)) {
@@ -50,12 +50,12 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
                     String latest = scanner.next();
                     // Won't comply to java:S1874: getPluginMeta.getVersion() does the same but until paper doesn't go off snapshot
                     // and marks it off as unstable I'd rather not touch it
-                    String current = ServerBackupPlugin.getInstance().getDescription().getVersion();
+                    String current = ServerBackupPlugin.getPluginInstance().getDescription().getVersion();
 
                     int latestClean = 0;
                     int currentClean = 0;
 
-                    ServerBackupPlugin.getInstance().getLogger().info(
+                    ServerBackupPlugin.getPluginInstance().getLogger().info(
                             "Auto updating does nothing for now, we have not uploaded our plugin/fork to Spigot. I recommend turning automatic updates off in the config.");
 
                     /*if (extractVersion(latest) == null) {
@@ -64,25 +64,25 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
                     } else latestClean = Integer.parseInt(Objects.requireNonNull(extractVersion(latest)));*/ // Remove when we actually upload our plugin to spigot
 
                     if (extractVersion(current) == null) {
-                        ServerBackupPlugin.getInstance().getLogger().warning(
+                        ServerBackupPlugin.getPluginInstance().getLogger().warning(
                                 "Current version number extracted is null! Auto updating likely WON'T work.");
                     } else currentClean = Integer.parseInt(Objects.requireNonNull(extractVersion(current)));
 
-                    ServerBackupPlugin.getInstance().getLogger().info(MessageFormat.format("Latest clean version number is: {0}", latestClean)); // TEST CODE
+                    ServerBackupPlugin.getPluginInstance().getLogger().info(MessageFormat.format("Latest clean version number is: {0}", latestClean)); // TEST CODE
 
-                    ServerBackupPlugin.getInstance().getLogger().info(MessageFormat.format("Current clean version number is: {0}", currentClean)); // TEST CODE
+                    ServerBackupPlugin.getPluginInstance().getLogger().info(MessageFormat.format("Current clean version number is: {0}", currentClean)); // TEST CODE
 
                     latestClean = currentClean; // DISABLE AUTO UPDATING TODO: Remove when we actually have versions up and running in spigot
 
                     if (currentClean == latestClean) {
-                        ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
+                        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO,
                                 "ServerBackup: No updates found. The server is running the latest version.");
                     } else {
-                        ServerBackupPlugin.getInstance().getLogger().log(Level.INFO, "ServerBackup: There is a newer version available - " + latest
+                        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "ServerBackup: There is a newer version available - " + latest
                                 + ", you are on - " + current);
 
-                        if (ServerBackupPlugin.getInstance().getConfig().getBoolean("AutomaticUpdates")) {
-                            ServerBackupPlugin.getInstance().getLogger().log(Level.INFO, "ServerBackup: Downloading newest version...");
+                        if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("AutomaticUpdates")) {
+                            ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "ServerBackup: Downloading newest version...");
 
                             URL url = new URL("https://server-backup.net/assets/downloads/alt/ServerBackup.jar");
 
@@ -95,19 +95,19 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
                                  FileOutputStream fos = new FileOutputStream("plugins/ServerBackup.jar")) {
                                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 
-                                ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
+                                ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO,
                                         "ServerBackup: Download finished. Please reload the server to complete the update.");
 
                                 isUpdated = true;
                             }
                         } else {
-                            ServerBackupPlugin.getInstance().getLogger().log(Level.INFO,
+                            ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO,
                                     "ServerBackup: Please download the latest version - https://server-backup.net/");
                         }
                     }
                 }
             } catch (IOException exception) {
-                ServerBackupPlugin.getInstance().getLogger().log(Level.WARNING,
+                ServerBackupPlugin.getPluginInstance().getLogger().log(Level.WARNING,
                         "ServerBackup: Cannot search for updates - " + exception.getMessage());
             }
         });

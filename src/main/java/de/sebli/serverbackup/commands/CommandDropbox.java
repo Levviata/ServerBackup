@@ -12,7 +12,7 @@ class CommandDropbox {
 
     public static void execute(CommandSender sender, String[] args) {
         if(args[1].equalsIgnoreCase("upload")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
                 DropboxManager dm = new DropboxManager(sender);
 
                 dm.uploadToDropbox(args[2]);

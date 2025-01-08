@@ -77,7 +77,7 @@ public class Backup {
     }
 
     public void remove() {
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
             File file = new File(Configuration.backupDestination + "//" + backupFilePath);
 
             if (file.exists()) {

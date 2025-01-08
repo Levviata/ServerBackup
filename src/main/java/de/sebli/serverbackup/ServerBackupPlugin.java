@@ -14,13 +14,9 @@ import java.util.logging.Level;
 
 public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
 
-    private static ServerBackupPlugin serverBackupPlugin;
+    private ServerBackupPlugin pluginInstance;
 
     private Dotenv envKeys;
-
-    public static ServerBackupPlugin getInstance() {
-        return serverBackupPlugin;
-    }
 
     @Override
     public void onDisable() {
@@ -38,7 +34,7 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
 
     @Override
     public void onEnable() {
-        serverBackupPlugin = this;
+        pluginInstance = this;
 
         Configuration.loadUp();
 
@@ -57,6 +53,10 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
         if (getConfig().getBoolean("UpdateAvailableMessage")) {
             OperationHandler.checkVersion();
         }
+    }
+
+    public ServerBackupPlugin getPluginInstance() {
+        return pluginInstance;
     }
 
     public Dotenv getEnvKey() {

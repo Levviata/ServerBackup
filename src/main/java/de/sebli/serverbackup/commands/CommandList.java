@@ -21,7 +21,7 @@ class CommandList {
     }
 
     public static void execute(CommandSender sender, String[] args) {
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
             File[] backups = new File(Configuration.backupDestination + "").listFiles();
 
             if (backups.length == 0

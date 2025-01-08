@@ -27,15 +27,15 @@ public class JoinListener implements Listener {
         Player p = e.getPlayer();
 
         if (p.hasPermission("backup.update")) {
-            if (ServerBackupPlugin.getInstance().getConfig().getBoolean("UpdateAvailableMessage")) {
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+            if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("UpdateAvailableMessage")) {
+                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
                     int resourceID = 79320;
                     try (InputStream inputStream = (new URL(
                             "https://api.spigotmc.org/legacy/update.php?resource=" + resourceID)).openStream();
                          Scanner scanner = new Scanner(inputStream)) {
                         if (scanner.hasNext()) {
                             String latest = scanner.next();
-                            String current = ServerBackupPlugin.getInstance().getDescription().getVersion();
+                            String current = ServerBackupPlugin.getPluginInstance().getDescription().getVersion();
 
                             int late = Integer.parseInt(latest.replaceAll("\\.", ""));  // Somewhat reasonable replaceAll() usage
                             int curr = Integer.parseInt(current.replaceAll("\\.", "")); // This too
@@ -52,7 +52,7 @@ public class JoinListener implements Listener {
                                     p.sendMessage("");
                                     p.sendMessage(AUTHOR);
                                 } else {
-                                    if (ServerBackupPlugin.getInstance().getConfig().getBoolean("AutomaticUpdates")) {
+                                    if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("AutomaticUpdates")) {
                                         if (p.hasPermission("backup.admin")) {
                                             p.sendMessage(TITLE);
                                             p.sendMessage("");
