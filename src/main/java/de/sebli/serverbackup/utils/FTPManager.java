@@ -23,10 +23,10 @@ public class FTPManager {
 
     private final CommandSender sender;
 
-    private static final String SERVER_IP = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.IP");
-    private static final int SERVER_PORT = ServerBackupPlugin.getInstance().getConfig().getInt("Ftp.Server.Port");
-    private static final String SERVER_USER = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.User");
-    private static final String SERVER_PASSWORD = ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.Password");
+    private static final String SERVER_IP = ServerBackupPlugin.getPluginInstance().getConfig().getString("Ftp.Server.IP");
+    private static final int SERVER_PORT = ServerBackupPlugin.getPluginInstance().getConfig().getInt("Ftp.Server.Port");
+    private static final String SERVER_USER = ServerBackupPlugin.getPluginInstance().getConfig().getString("Ftp.Server.User");
+    private static final String SERVER_PASSWORD = ServerBackupPlugin.getPluginInstance().getConfig().getString("Ftp.Server.Password");
 
     // TODO: Convert all literal string messages to constants
     private static final String ERROR_FTP_DOWNLOAD_FAILED = "Error.FtpDownloadFailed";
@@ -39,7 +39,7 @@ public class FTPManager {
 
     boolean isSSL = true;
 
-    ServerBackupPlugin instance = ServerBackupPlugin.getInstance();
+    ServerBackupPlugin instance = ServerBackupPlugin.getPluginInstance();
 
     public void uploadFileToFTP(String filePath, boolean direct) { // OBJECTIVES: reduce complexity and move parts of code to their own methods
         File file = new File(filePath);
@@ -190,7 +190,7 @@ public class FTPManager {
         if (success) {
             sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
 
-            if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
+            if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
                 boolean exists = false;
                 for (FTPFile backup : client.listFiles()) {
                     if (backup.getName().equalsIgnoreCase(file.getName()))
@@ -219,7 +219,7 @@ public class FTPManager {
             if (isFileUploaded) {
                 sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
 
-                if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
+                if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
                     boolean exists = false;
                     for (FTPFile backup : client.listFiles()) {
                         if (backup.getName().equalsIgnoreCase(file.getName()))
@@ -264,7 +264,7 @@ public class FTPManager {
 
         sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
             File backupFile = new File(Configuration.backupDestination + "//" + file.getPath());
 
             try {
@@ -305,7 +305,7 @@ public class FTPManager {
 
             sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
 
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
                 File backupFile = new File(Configuration.backupDestination + "//" + file.getPath());
 
                 try {
@@ -419,7 +419,7 @@ public class FTPManager {
         client.setFileTransferMode(FTP.BINARY_FILE_TYPE);
 
         client.changeWorkingDirectory(
-                ServerBackupPlugin.getInstance().getConfig().getString("Ftp.Server.BackupDirectory"));
+                ServerBackupPlugin.getPluginInstance().getConfig().getString("Ftp.Server.BackupDirectory"));
     }
 
     /**
