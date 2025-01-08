@@ -12,7 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.logging.Level;
 
-public class ServerBackupPlugin extends JavaPlugin {
+public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
 
     private static ServerBackupPlugin serverBackupPlugin;
 
@@ -29,7 +29,7 @@ public class ServerBackupPlugin extends JavaPlugin {
         for (BukkitTask task : Bukkit.getScheduler().getPendingTasks()) {
             task.cancel();
 
-            this.getLogger().log(Level.WARNING, "WARNING - ServerBackup: Task [" + task.getTaskId()
+            this.getLogger().warning("WARNING - ServerBackup: Task [" + task.getTaskId()
                     + "] cancelled due to server shutdown. There might be some unfinished Backups.");
         }
 
@@ -52,13 +52,11 @@ public class ServerBackupPlugin extends JavaPlugin {
 
         envKeys = Dotenv.load(); // Load our env keys
 
-        Bukkit.getLogger().log(Level.INFO, "ServerBackup: Plugin enabled.");
+        Bukkit.getLogger().info("Plugin enabled.");
 
         if (getConfig().getBoolean("UpdateAvailableMessage")) {
             OperationHandler.checkVersion();
         }
-
-        //BStats.initialize();
     }
 
     public Dotenv getEnvKey() {
