@@ -223,18 +223,9 @@ public class FTPManager {
         try {
             connectFTPorFTPS(client);
 
-            InputStream inputStream = new FileInputStream(file);
+            boolean isFileUploaded = tryUploadFileToFTPorFTPS(client, file);
 
-            boolean done = client.storeFile(file.getName(), inputStream);
-
-            // DEBUG
-            Bukkit.getLogger().log(Level.INFO, "(BETA) FTPS-DEBUG INFO: " + client.getReplyString());
-            Bukkit.getLogger().log(Level.INFO,
-                    "Use this info for reporting ftp related bugs. Ignore it if everything is fine.");
-
-            inputStream.close();
-
-            if (done) {
+            if (isFileUploaded) {
                 sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
 
                 if (ServerBackupPlugin.getInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
@@ -458,6 +449,20 @@ public class FTPManager {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private boolean tryUploadFileToFTPorFTPS(FTPClient client, File file) {
+        try (InputStream inputStream = new FileInputStream(file)) {
+            // DEBUG
+            Bukkit.getLogger().info("(BETA) FTPS-DEBUG INFO: " + client.getReplyString());
+            Bukkit.getLogger().info(
+                    "Use this info for reporting ftp related bugs. Ignore it if everything is fine.");
+
+            return client.storeFile(file.getName(), inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
