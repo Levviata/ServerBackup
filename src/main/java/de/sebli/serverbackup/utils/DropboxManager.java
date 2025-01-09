@@ -11,12 +11,11 @@ import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.text.MessageFormat;
 import java.util.Date;
-import java.util.logging.Level;
+import java.util.Objects;
+import java.util.Optional;
 
 public class DropboxManager {
 
