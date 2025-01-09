@@ -33,12 +33,10 @@ public class DropboxManager {
 
         if (!file.getPath().contains(Configuration.backupDestination.replace("/", ""))) {
             file = new File(Configuration.backupDestination + "//" + filePath);
-            filePath = file.getPath();
         }
 
         if (!file.exists()) {
             sender.sendMessage("Dropbox: Backup '" + file.getName() + "' not found.");
-
             return;
         }
 
@@ -50,14 +48,14 @@ public class DropboxManager {
         DbxClientV2 client = null;
         DbxCredential credential = null;
 
-        if(!Configuration.cloudInfo.contains(CLOUD_RT)) {
+        if (!Configuration.cloudInfo.contains(CLOUD_RT)) {
             DbxAppInfo appInfo = new DbxAppInfo(appKey, secretKey);
             DbxWebAuth webAuth = new DbxWebAuth(config, appInfo);
             DbxAuthFinish authFinish = null;
             try {
                 authFinish = webAuth.finishFromCode(ACCESS_TOKEN);
             } catch (DbxException e) {
-                throw new RuntimeException(e);
+                ServerBackupPlugin.getPluginInstance().getLogger().warning(MessageFormat.format("Error during Dropbox authentication process: {0}", e.getMessage()));
             }
             credential = new DbxCredential(authFinish.getAccessToken(), 60L, authFinish.getRefreshToken(), appKey, secretKey);
 
@@ -71,10 +69,11 @@ public class DropboxManager {
 
         sender.sendMessage("Dropbox: Uploading backup [" + file.getName() + "] ...");
 
-        String des = ServerBackupPlugin.getPluginInstance().getConfig().getString("CloudBackup.Options.Destination").replace("/", "");
-        des = "/" + (des.equals("") ? "" : des + "/");
+        String des = Objects.requireNonNull(
+                ServerBackupPlugin.getPluginInstance().getConfig().getString("CloudBackup.Options.Destination")).replace("/", "");
+        des = "/" + (des.isEmpty() ? "" : des + "/");
 
-        if(file.length() > (100 * 1000 * 1000)) {
+        if (file.length() > (100 * 1000 * 1000)) {
             chunkedUploadFile(sender, client, file, des + file.getName());
         } else {
             uploadFile(sender, client, file, des + file.getName());
@@ -120,7 +119,7 @@ public class DropboxManager {
                     getProgress(file.getName(), uploaded, size, false);
                 }
 
-                UploadSessionCursor cursor = new UploadSessionCursor(sessionId, uploaded);
+                UploadSessionCursor cursor = new UploadSessionCursor(Objects.requireNonNull(sessionId), uploaded);
 
                 // Append
                 while ((size - uploaded) > CHUNKED_UPLOAD_CHUNK_SIZE) {
@@ -171,7 +170,7 @@ public class DropboxManager {
             }
         }
 
-        Bukkit.getLogger().log(Level.WARNING, "Dropbox: Too many upload attempts. Check your server's connection and try again." + "\n" + thrown.getMessage());
+        Bukkit.getLogger().warning( "Dropbox: Too many upload attempts. Check your server's connection and try again." + "\n" + thrown.getMessage());
     }
 
     private static void uploadFile(CommandSender sender, DbxClientV2 client, File file, String dbxPath) {
@@ -197,12 +196,12 @@ public class DropboxManager {
     }
 
     private static String getProgress(String fileName, long uploaded, long size, boolean finished) {
-        if(lastProgress != "") {
+        if (!lastProgress.isEmpty()) {
             OperationHandler.tasks.remove(lastProgress);
         }
 
-        if(!finished) {
             String progress = "DROPBOX UPLOAD {" + fileName + ", Progress: " + Math.round((uploaded / (double) size) * 100) + "%}"; // same as line 178
+        if (!finished) {
             OperationHandler.tasks.add(progress);
             lastProgress = progress;
 
