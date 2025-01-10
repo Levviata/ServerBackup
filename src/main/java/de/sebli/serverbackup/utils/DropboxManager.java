@@ -194,13 +194,16 @@ public class DropboxManager {
 
         try (InputStream in = new FileInputStream(file.getPath())) {
             client.files().uploadBuilder(dbxPath + file.getName()).uploadAndFinish(in);
-        } catch (UploadErrorException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (DbxException e) {
-            throw new RuntimeException(e);
-        } finally {
+        }
+
+        catch (UploadErrorException e) {
+            e.printStackTrace();
+        }
+        catch (DbxException | IOException e) {
+            e.printStackTrace();
+        }
+
+        finally {
             sender.sendMessage("Dropbox: Upload successfully. Backup stored on your dropbox account.");
             OperationHandler.getTasks().remove("DROPBOX UPLOAD {" + file.getName() + "}"); // same as line 178
 
