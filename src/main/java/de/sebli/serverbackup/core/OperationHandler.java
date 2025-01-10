@@ -20,10 +20,10 @@ import static de.sebli.serverbackup.utils.GlobalConstants.RESOURCE_ID;
 
 public class OperationHandler { // Won't comply to java:S1118, we actually instantiate this class
 
-    public static boolean shutdownProgress = false;
-    public static boolean isUpdated = false;
+    private static boolean shutdownProgress = false;
+    private static boolean isUpdated = false;
 
-    public static List<String> tasks = new ArrayList<>();
+    private static List<String> tasks = new ArrayList<>();
 
     public static String processMessage(String msgCode) {
         return (Configuration.prefix + Configuration.messages.getString(msgCode)).replace("&nl", "\n").replace("&", "§");
@@ -123,4 +123,18 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
         }
         return null; // Return null if no match is found.
     }
+
+    public static boolean getShutdownProgress() { return shutdownProgress; }
+
+    public static void setShutdownProgress(boolean shutdownProgressIn) {
+        OperationHandler.shutdownProgress = shutdownProgressIn;
+    }
+
+    public static boolean getIsUpdated() { return isUpdated; }
+
+    public static void setIsUpdated(boolean isUpdatedIn) {
+        OperationHandler.isUpdated = isUpdatedIn;
+    }
+
+    public static List<String> getTasks() { return tasks; }
 }

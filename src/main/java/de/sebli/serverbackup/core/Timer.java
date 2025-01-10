@@ -144,8 +144,8 @@ public class Timer implements Runnable {
             }
         }
 
-        if (OperationHandler.shutdownProgress) {
-            if (OperationHandler.tasks.size() == 0) {
+        if (OperationHandler.getShutdownProgress()) {
+            if (OperationHandler.getTasks().size() == 0) {
                 ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO,
                         "Backup tasks finished. Shutting down server...");
 

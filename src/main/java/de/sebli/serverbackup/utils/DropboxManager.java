@@ -173,7 +173,7 @@ public class DropboxManager {
     }
 
     private static void uploadFile(CommandSender sender, DbxClientV2 client, File file, String dbxPath) {
-        OperationHandler.tasks.add("DROPBOX UPLOAD {" + file.getName() + "}"); // wont comply to java:S1192, we are never refactoring this
+        OperationHandler.getTasks().add("DROPBOX UPLOAD {" + file.getName() + "}"); // wont comply to java:S1192, we are never refactoring this
 
         try (InputStream in = new FileInputStream(file.getPath())) {
             client.files().uploadBuilder(dbxPath + file.getName()).uploadAndFinish(in);
@@ -185,7 +185,7 @@ public class DropboxManager {
             throw new RuntimeException(e);
         } finally {
             sender.sendMessage("Dropbox: Upload successfully. Backup stored on your dropbox account.");
-            OperationHandler.tasks.remove("DROPBOX UPLOAD {" + file.getName() + "}"); // same as line 178
+            OperationHandler.getTasks().remove("DROPBOX UPLOAD {" + file.getName() + "}"); // same as line 178
 
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                 file.delete();
@@ -196,12 +196,12 @@ public class DropboxManager {
 
     private static String getProgress(File file, long uploaded, long size, boolean finished) {
         if (!lastProgress.isEmpty()) {
-            OperationHandler.tasks.remove(lastProgress);
+            OperationHandler.getTasks().remove(lastProgress);
         }
 
-            String progress = "DROPBOX UPLOAD {" + fileName + ", Progress: " + Math.round((uploaded / (double) size) * 100) + "%}"; // same as line 178
         if (!finished) {
-            OperationHandler.tasks.add(progress);
+            String progress = "DROPBOX UPLOAD {" + file.getName() + ", Progress: " + Math.round((uploaded / (double) size) * 100) + "%}"; // same as line 178
+            OperationHandler.getTasks().add(progress);
             lastProgress = progress;
 
             return progress;

@@ -183,7 +183,7 @@ public class FTPManager {
         connectFTPorFTPS(client);
 
         sender.sendMessage(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
-        OperationHandler.tasks.add("FTP UPLOAD {" + file.getPath() + "}"); // wont comply to java:S1192, we are never refactoring this
+        OperationHandler.getTasks().add("FTP UPLOAD {" + file.getPath() + "}"); // wont comply to java:S1192, we are never refactoring this
 
         boolean success = tryUploadFileToFTPorFTPS(client, file, false);
 
@@ -207,7 +207,7 @@ public class FTPManager {
             sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
         }
 
-        OperationHandler.tasks.remove("FTP UPLOAD {" + file.getPath() + "}");
+        OperationHandler.getTasks().remove("FTP UPLOAD {" + file.getPath() + "}");
     }
 
     private void handleUploadToFTPS(FTPSClient client, File file, boolean direct) {
@@ -236,7 +236,7 @@ public class FTPManager {
                 sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
             }
 
-            OperationHandler.tasks.remove("FTP UPLOAD {" + file.getPath() + "}");
+            OperationHandler.getTasks().remove("FTP UPLOAD {" + file.getPath() + "}");
         } catch (Exception e) {
             isSSL = false;
             uploadFileToFTP(file.getPath(), direct);

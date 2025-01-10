@@ -1,5 +1,6 @@
 package de.sebli.serverbackup.core;
 
+import com.dropbox.core.DbxException;
 import de.sebli.serverbackup.Configuration;
 import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.utils.DropboxManager;
@@ -162,7 +163,7 @@ public class ZipManager {
 
             sender.sendMessage(OperationHandler.processMessage("Command.Zip.Footer").replace(FILE_NAME_PLACEHOLDER, sourceFilePath));
 
-            OperationHandler.tasks.remove("CREATE {" + sourceFilePath.replace("\\", "/") + "}");
+            OperationHandler.getTasks().remove("CREATE {" + sourceFilePath.replace("\\", "/") + "}");
 
             if (!isFullBackup) {
                 if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("DynamicBackup")) {
@@ -203,7 +204,7 @@ public class ZipManager {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        if (OperationHandler.tasks.size() == 0) {
+                        if (OperationHandler.getTasks().size() == 0) {
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), ServerBackupPlugin.getPluginInstance().getConfig().getString(PATH_COMMAND_AFTER_AUTOMATIC_BACKUP).replace("/", ""));
 
                             isCommandTimerRunning = false;

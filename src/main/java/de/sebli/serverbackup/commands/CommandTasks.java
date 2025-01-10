@@ -9,10 +9,10 @@ class CommandTasks {
     }
 
     public static void execute(CommandSender sender, String[] args) {
-        if (OperationHandler.tasks.size() > 0) {
+        if (OperationHandler.getTasks().size() > 0) {
             sender.sendMessage(OperationHandler.processMessage("Command.Tasks.Header"));
 
-            for (String task : OperationHandler.tasks) {
+            for (String task : OperationHandler.getTasks()) {
                 sender.sendMessage(task);
             }
 

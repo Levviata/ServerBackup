@@ -42,7 +42,7 @@ public class JoinListener implements Listener {
 
                             if (curr >= late) {
                             } else {
-                                if (OperationHandler.isUpdated) {
+                                if (OperationHandler.getIsUpdated()) {
                                     p.sendMessage(TITLE);
                                     p.sendMessage("");
                                     p.sendMessage("§7There was a newer version available - §a" + latest
@@ -84,7 +84,7 @@ public class JoinListener implements Listener {
                                                 p.sendMessage(
                                                         "ServerBackup§7: Download finished. Please reload the server to complete the update.");
 
-                                                OperationHandler.isUpdated = true;
+                                                OperationHandler.setIsUpdated(true);
                                             }
                                         }
                                     } else {

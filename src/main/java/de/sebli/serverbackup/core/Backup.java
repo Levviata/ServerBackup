@@ -64,7 +64,7 @@ public class Backup {
 
                     zm.zip();
 
-                    OperationHandler.tasks.add("CREATE {" + filePath.replace("\\", "/") + "}");
+                    OperationHandler.getTasks().add("CREATE {" + filePath.replace("\\", "/") + "}");
                 } else {
                     Bukkit.getLogger().log(Level.WARNING, "Backup already exists.");
                 }
