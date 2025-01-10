@@ -114,8 +114,17 @@ public class DropboxManager {
                 );
             }
 
-            try (InputStream in = new FileInputStream(file)) {
-                in.skip(uploaded);
+            try (InputStream streamIn = new FileInputStream(file)) {
+                long bytesSkipped = streamIn.skip(uploaded);
+
+                if (bytesSkipped < uploaded) {
+                    ServerBackupPlugin.getPluginInstance().getLogger().warning(
+                            MessageFormat.format(
+                                    "Dropbox: Only skipped {0} bytes out of a total of {1}, this will likely cause issues!",
+                                    bytesSkipped,
+                                    uploaded
+                            ));
+                }
 
                 // Start
                 if (sessionId == null) {
