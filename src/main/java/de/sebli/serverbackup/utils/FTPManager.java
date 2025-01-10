@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
 public class FTPManager {
@@ -464,16 +465,6 @@ public class FTPManager {
     private boolean tryDownloadFileFromFTPorFTPS(FTPClient client, File file) {
         try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
             return client.retrieveFile(file.getName(), outputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private boolean tryDeleteFile(File file) {
-        try  {
-            Files.delete(Path.of(file.getPath()));
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
