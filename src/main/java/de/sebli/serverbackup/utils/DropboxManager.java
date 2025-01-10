@@ -17,6 +17,8 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
+import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
+
 public class DropboxManager {
 
     private CommandSender sender;
