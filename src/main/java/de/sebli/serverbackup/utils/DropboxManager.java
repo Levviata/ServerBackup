@@ -95,7 +95,7 @@ public class DropboxManager {
 
             @Override
             public void onProgress(long l) {
-                getProgress(file.getName(), l + uploadedBytes, size, false);
+                getProgress(file, l + uploadedBytes, size, false);
                 if (l == CHUNKED_UPLOAD_CHUNK_SIZE) uploadedBytes += CHUNKED_UPLOAD_CHUNK_SIZE;
             }
         };
@@ -138,7 +138,7 @@ public class DropboxManager {
                 dbxClient.files().uploadSessionFinish(cursor, commitInfo).uploadAndFinish(in, remaining, progressListener);
 
                 sender.sendMessage("Dropbox: Upload successfully. Backup stored on your dropbox account.");
-                getProgress(file.getName(), uploaded, size, true);
+                getProgress(file, uploaded, size, true);
 
                 if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                     file.delete();
@@ -194,7 +194,7 @@ public class DropboxManager {
         }
     }
 
-    private static String getProgress(String fileName, long uploaded, long size, boolean finished) {
+    private static String getProgress(File file, long uploaded, long size, boolean finished) {
         if (!lastProgress.isEmpty()) {
             OperationHandler.tasks.remove(lastProgress);
         }
@@ -207,7 +207,7 @@ public class DropboxManager {
             return progress;
         }
 
-        return "DROPBOX UPLOAD {" + fileName + ", Progress: finished}"; // same as line 178
+        return "DROPBOX UPLOAD {" + file.getName() + ", Progress: finished}"; // same as line 178
     }
 
 }
