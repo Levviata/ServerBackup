@@ -103,9 +103,15 @@ public class DropboxManager {
         };
 
         String sessionId = null;
-        for (int i = 0; i < CHUNKED_UPLOAD_MAX_ATTEMPTS; ++i) {
-            if (i > 0) {
-                Bukkit.getLogger().log(Level.INFO, "Dropbox: Chunk upload failed. Retrying (" + Integer.valueOf(i + 1) + "/" + CHUNKED_UPLOAD_MAX_ATTEMPTS + ")...");
+        for (int attemptNumber = 0; attemptNumber < CHUNKED_UPLOAD_MAX_ATTEMPTS; ++attemptNumber) {
+            if (attemptNumber > 0) {
+                Bukkit.getLogger().info(
+                        MessageFormat.format(
+                                "Dropbox: Chunk upload failed. Retrying ({0}/{1})...",
+                                attemptNumber + 1,
+                                CHUNKED_UPLOAD_MAX_ATTEMPTS
+                        )
+                );
             }
 
             try (InputStream in = new FileInputStream(file)) {
