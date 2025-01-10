@@ -158,7 +158,7 @@ public class DropboxManager {
                 getProgress(file, uploaded, size, true);
 
                 if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
-                    file.delete();
+                    tryDeleteFile(file);
                     System.out.println("File [" + file.getPath() + "] deleted.");
                 }
                 return;
@@ -205,7 +205,7 @@ public class DropboxManager {
             OperationHandler.getTasks().remove("DROPBOX UPLOAD {" + file.getName() + "}"); // same as line 178
 
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
-                file.delete();
+                tryDeleteFile(file);
                 System.out.println("File [" + file.getPath() + "] deleted.");
             }
         }
