@@ -66,6 +66,7 @@ public class DropboxManager {
             Configuration.saveCloud();
         } else {
             credential = new DbxCredential("isly", 0L, Configuration.cloudInfo.getString(CLOUD_RT), appKey, secretKey);
+            credential = new DbxCredential("dummy-token", 0L, Configuration.cloudInfo.getString(CLOUD_RT), appKey, secretKey);
         }
 
         client = new DbxClientV2(config, credential);
