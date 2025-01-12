@@ -16,8 +16,6 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
 
     private static ServerBackupPlugin pluginInstance;
 
-    private Dotenv envKeys;
-
     @Override
     public void onDisable() {
         OperationHandler.stopTimer();
@@ -46,8 +44,6 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
         Bukkit.getPluginManager().registerEvents(new JoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new DynamicBackup(), this);
 
-        envKeys = Dotenv.load(); // Load our env keys
-
         Bukkit.getLogger().info("Plugin enabled.");
 
         if (getConfig().getBoolean("UpdateAvailableMessage")) {
@@ -57,9 +53,5 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
 
     public static ServerBackupPlugin getPluginInstance() {
         return pluginInstance;
-    }
-
-    public Dotenv getEnvKey() {
-        return envKeys;
     }
 }
