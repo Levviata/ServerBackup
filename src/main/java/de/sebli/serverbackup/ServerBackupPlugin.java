@@ -5,7 +5,6 @@ import de.sebli.serverbackup.commands.TabCompleter;
 import de.sebli.serverbackup.core.DynamicBackup;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.listeners.JoinListener;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
