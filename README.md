@@ -6,12 +6,9 @@ A plugin that backups you minecraft server with a variety of features, learn mor
 
 In general, I want to fix bugs here and there, possibly improve code quality, basic documentation, and neatly pack everything together for better support down the line. 
 
-My main course of idea(s) is:  _If it works, **don't touch it**_ 
-<sub>(minimize rewriting code)</sub>
-
 May or may not rename fork for clarity in the future.
 
-_No promises._
+_No promises, no compromises._
 
 # Disclaimer
 
