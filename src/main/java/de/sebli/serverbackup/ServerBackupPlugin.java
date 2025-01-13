@@ -9,8 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.logging.Level;
-
 public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
 
     private static ServerBackupPlugin pluginInstance;
@@ -26,7 +24,7 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
                     + "] cancelled due to server shutdown. There might be some unfinished Backups.");
         }
 
-        Bukkit.getLogger().log(Level.INFO, "ServerBackup: Plugin disabled.");
+        Bukkit.getLogger().info("ServerBackup: Plugin disabled.");
     }
 
     @Override
