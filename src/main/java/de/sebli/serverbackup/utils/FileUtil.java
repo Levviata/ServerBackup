@@ -5,11 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-class FileUtil {
-
-    private FileUtil() {
-        throw new IllegalStateException("Utility class");
-    }
+public class FileUtil {
 
     /**
      * Attempts to delete the specified file.

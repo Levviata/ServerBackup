@@ -1,7 +1,7 @@
 package de.sebli.serverbackup.utils;
 
 /**
- * A utility class for hosting constants that are used in more than two files across the ServerBackup plugin.
+ * A utility class for hosting constants that are generally used all over.
  */
 
 public class GlobalConstants {

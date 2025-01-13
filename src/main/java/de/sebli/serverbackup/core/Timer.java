@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Level;
 
+import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
+
 public class Timer implements Runnable {
 
     List<String> worlds = ServerBackupPlugin.getPluginInstance().getConfig().getStringList("BackupWorlds");
@@ -130,7 +132,7 @@ public class Timer implements Runnable {
 
             while (backups.length > dobc) {
                 if (backups[c].exists()) {
-                    backups[c].delete();
+                    tryDeleteFile(backups[c]);
 
                     ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO,
                             "Backup [" + backups[c].getName() + "] removed.");
