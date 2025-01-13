@@ -103,7 +103,6 @@ public class DropboxManager {
         long size = file.length();
 
         long uploaded = 0L;
-        DbxException thrown = null;
 
         IOUtil.ProgressListener progressListener = new IOUtil.ProgressListener() {
             long uploadedBytes = 0;
@@ -115,17 +114,12 @@ public class DropboxManager {
             }
         };
 
-        String sessionId = null;
+        String sessionId;
         for (int attemptNumber = 0; attemptNumber < CHUNKED_UPLOAD_MAX_ATTEMPTS; ++attemptNumber) {
-            if (attemptNumber > 0) {
-                Bukkit.getLogger().info(
-                        MessageFormat.format(
-                                "Dropbox: Chunk upload failed. Retrying ({0}/{1})...",
-                                attemptNumber + 1,
-                                CHUNKED_UPLOAD_MAX_ATTEMPTS
-                        )
-                );
-            }
+
+            long retryDelayTicks = BASE_RETRY_DELAY_TICKS * (1L << attemptNumber); // Exponential backoff: baseDelay * 2^attempt
+
+            double retryDelaySeconds = retryDelayTicks / 20.0; // Convert to seconds
 
             try (InputStream streamIn = new FileInputStream(file)) {
                 long bytesSkipped = streamIn.skip(uploaded);
@@ -133,36 +127,56 @@ public class DropboxManager {
                 if (bytesSkipped < uploaded) { // bytes skipped are amount to less than the uploaded bytes
                     ServerBackupPlugin.getPluginInstance().getLogger().warning(
                             MessageFormat.format(
-                                    "Dropbox: Only skipped {0} bytes out of a total of {1}, this will likely cause issues!",
+                                    "Dropbox: Only skipped {0} bytes out of a total of {1}! Retrying in {2} seconds...",
                                     bytesSkipped,
-                                    uploaded
+                                    uploaded,
+                                    retryDelaySeconds
                             ));
+                    scheduleRetry(sender, dbxClient, file, dbxPath);
+                    return; // Stop current call
                 }
 
                 // Start
-                if (sessionId == null) {
-                    Optional<StartResult> result = startChunkedUpload(dbxClient, file, size, uploaded, streamIn);
+                Optional<StartResult> resultStart = startChunkedUpload(dbxClient, file, size, uploaded, streamIn);
 
-                    if (result.isPresent()) {
-                        sessionId = result.get().sessionId();
-                        uploaded = result.get().uploaded();
-                    } else {
-                        ServerBackupPlugin.getPluginInstance().getLogger().severe("Dropbox: Couldn't start chunked uploading to Dropbox because the result is missing!");
-                    }
+                if (resultStart.isPresent()) {
+                    sessionId = resultStart.get().sessionId();
+                    uploaded = resultStart.get().uploaded();
+                } else {
+                    ServerBackupPlugin.getPluginInstance().getLogger().severe(
+                            MessageFormat.format(
+                                    "Dropbox: Couldn''t start chunked uploading to Dropbox because the result is missing! Retrying in {0} seconds...",
+                                    retryDelaySeconds
+                            ));
+                    scheduleRetry(sender, dbxClient, file, dbxPath);
+                    return; // Stop current call
                 }
 
                 UploadSessionCursor cursor = new UploadSessionCursor(Objects.requireNonNull(sessionId), uploaded);
 
+                boolean appendFailed = false;
+
                 // Append
                 while ((size - uploaded) > CHUNKED_UPLOAD_CHUNK_SIZE) {
-                    Optional<AppendResult> result = appendChunkedUpload(dbxClient, file, sessionId, uploaded, size, streamIn, cursor);
+                    Optional<AppendResult> resultAppend = appendChunkedUpload(dbxClient, file, sessionId, uploaded, size, streamIn, cursor);
 
-                    if (result.isPresent()) {
-                        uploaded = result.get().uploaded();
-                        cursor = result.get().cursor();
+                    if (resultAppend.isPresent()) {
+                        uploaded = resultAppend.get().uploaded();
+                        cursor = resultAppend.get().cursor();
                     } else {
-                        ServerBackupPlugin.getPluginInstance().getLogger().severe("Dropbox: Couldn't append chunked upload to Dropbox because the result is missing!");
+                        ServerBackupPlugin.getPluginInstance().getLogger().severe(
+                                MessageFormat.format(
+                                        "Dropbox: Couldn''t start chunked uploading to Dropbox because the result is missing! Retrying in {0} seconds...",
+                                        retryDelaySeconds
+                                ));
+                        appendFailed = true;
+                        break; // Exit the while loop and retry the for loop
                     }
+                }
+
+                if (appendFailed) {
+                    scheduleRetry(sender, dbxClient, file, dbxPath);
+                    return; // Stop current call
                 }
 
                 // Finish
@@ -175,21 +189,20 @@ public class DropboxManager {
                     tryDeleteFile(file);
                     ServerBackupPlugin.getPluginInstance().getLogger().info("File [" + file.getPath() + "] deleted.");
                 }
-                return;
-            } catch (FileNotFoundException e) {
+
+                return; // success, stop retrying attempts
+            }
+            catch (FileNotFoundException e) {
                 e.printStackTrace();
-                return;
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
-                return;
             }
         }
-
-        Bukkit.getLogger().warning( "Dropbox: Too many upload attempts. Check your server's connection and try again." + "\n" + thrown.getMessage());
     }
 
-        OperationHandler.getTasks().add("DROPBOX UPLOAD {" + file.getName() + "}"); // wont comply to java:S1192, we are never refactoring this
     private void uploadFile(CommandSender sender, DbxClientV2 client, File file, String dbxPath) {
+        setCurrentTask(TaskHandler.addTask(TaskType.DROPBOX, TaskPurpose.UPLOAD, "Uploading " + file.getName()));
 
         try (InputStream streamIn = new FileInputStream(file.getPath())) {
             client.files().uploadBuilder(dbxPath + file.getName()).uploadAndFinish(streamIn);
@@ -203,8 +216,8 @@ public class DropboxManager {
         }
 
         finally {
-            OperationHandler.getTasks().remove("DROPBOX UPLOAD {" + file.getName() + "}"); // same as line 178
             sendMessageWithLogs(MESSAGE_SUCCESFUL_UPLOAD, sender);
+            removeTask(currentTask); // same as line 178
 
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                 tryDeleteFile(file);
@@ -213,20 +226,29 @@ public class DropboxManager {
         }
     }
 
-        if (!lastProgress.isEmpty()) {
-            OperationHandler.getTasks().remove(lastProgress);
-        }
     private void setProgress(File file, long uploaded, long size, boolean finished) {
+        List<Task> tasksToRemove = getTasks().stream()
+                .filter(task -> task.type() == TaskType.DROPBOX && task.purpose() == TaskPurpose.PROGRESS)
+                .toList(); // Collect matching tasks into a separate list
 
-        if (!finished) {
-            String progress = "DROPBOX UPLOAD {" + file.getName() + ", Progress: " + Math.round((uploaded / (double) size) * 100) + "%}"; // same as line 178
-            OperationHandler.getTasks().add(progress);
-            lastProgress = progress;
-
-            return progress;
+        for (Task task : tasksToRemove) {
+            removeTask(task); // remove old progress
         }
 
-        return "DROPBOX UPLOAD {" + file.getName() + ", Progress: finished}"; // same as line 178
+        if (finished) {
+            setCurrentTask(addTask(TaskType.DROPBOX, TaskPurpose.PROGRESS, file.getName() + ", Progress: Finished!"));
+        } else {
+            setCurrentTask(addTask(TaskType.DROPBOX, TaskPurpose.PROGRESS, file.getName() + ", Progress: " + Math.round((uploaded / (double) size) * 100) + "%"));
+        }
+    }
+
+    private void scheduleRetry(CommandSender sender, DbxClientV2 client, File file, String dbxPath) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                chunkedUploadFile(sender, client, file, dbxPath);
+            }
+        }.runTaskLater(ServerBackupPlugin.getPluginInstance(), BASE_RETRY_DELAY_TICKS);
     }
 
     private Optional<StartResult> startChunkedUpload(DbxClientV2 dbxClient,
@@ -348,5 +370,9 @@ public class DropboxManager {
         }
 
         return Optional.empty();
+    }
+
+    private static void setCurrentTask(Task taskIn) {
+        currentTask = taskIn;
     }
 }
