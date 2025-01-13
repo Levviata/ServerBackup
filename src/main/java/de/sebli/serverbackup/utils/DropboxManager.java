@@ -7,19 +7,25 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.*;
 import de.sebli.serverbackup.Configuration;
 import de.sebli.serverbackup.ServerBackupPlugin;
-import de.sebli.serverbackup.core.OperationHandler;
+import de.sebli.serverbackup.utils.enums.TaskPurpose;
+import de.sebli.serverbackup.utils.enums.TaskType;
 import de.sebli.serverbackup.utils.records.AppendResult;
 import de.sebli.serverbackup.utils.records.StartResult;
-import org.bukkit.Bukkit;
+import de.sebli.serverbackup.utils.records.Task;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
+import static de.sebli.serverbackup.utils.TaskHandler.*;
 
 public class DropboxManager {
 
