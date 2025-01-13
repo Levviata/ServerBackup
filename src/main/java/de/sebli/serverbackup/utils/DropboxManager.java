@@ -36,6 +36,14 @@ public class DropboxManager {
 
     private static final String ACCESS_TOKEN = Configuration.cloudInfo.getString("Cloud.Dropbox.AccessToken");
     private static final String CLOUD_RT = "Cloud.Dropbox.RT";
+    private static final String MESSAGE_SUCCESFUL_UPLOAD = "Dropbox: Upload successfully. Backup stored on your dropbox account.";
+
+    private static final long CHUNKED_UPLOAD_CHUNK_SIZE = 16L << 20;
+    private static final int CHUNKED_UPLOAD_MAX_ATTEMPTS = 5;
+
+    private static final long BASE_RETRY_DELAY_TICKS = 20L * 3;
+
+    private static Task currentTask;
 
     public void uploadToDropbox(String filePath) {
         File file = new File(filePath);
@@ -90,11 +98,6 @@ public class DropboxManager {
             uploadFile(sender, client, file, des + file.getName());
         }
     }
-
-    private static final long CHUNKED_UPLOAD_CHUNK_SIZE = 16L << 20;
-    private static final int CHUNKED_UPLOAD_MAX_ATTEMPTS = 5;
-
-    static String lastProgress = "";
 
     private void chunkedUploadFile(CommandSender sender, DbxClientV2 dbxClient, File file, String dbxPath) {
         long size = file.length();
