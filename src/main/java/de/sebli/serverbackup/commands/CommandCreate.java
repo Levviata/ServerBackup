@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import java.io.File;
 import java.io.IOException;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
 class CommandCreate {
@@ -54,9 +55,9 @@ class CommandCreate {
 
                         Files.copy(file, des);
 
-                        sender.sendMessage(OperationHandler.processMessage("Info.BackupFinished").replace(FILE_NAME_PLACEHOLDER, args[1]));
+                        sendMessageWithLogs(OperationHandler.processMessage("Info.BackupFinished").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
                     } catch (IOException e) {
-                        sender.sendMessage(OperationHandler.processMessage("Error.BackupFailed").replace(FILE_NAME_PLACEHOLDER, args[1]));
+                        sendMessageWithLogs(OperationHandler.processMessage("Error.BackupFailed").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
                         e.printStackTrace();
                     }
                 }

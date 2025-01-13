@@ -13,6 +13,8 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
+
 class CommandFTP {
     private CommandFTP() {
         throw new IllegalStateException("Utility class");
@@ -26,7 +28,7 @@ class CommandFTP {
                 List<String> backups = ftpm.getFTPBackupList(false);
 
                 if (backups.size() == 0) {
-                    sender.sendMessage(OperationHandler.processMessage("Error.NoFtpBackups"));
+                    sendMessageWithLogs(OperationHandler.processMessage("Error.NoFtpBackups"), sender);
 
                     return;
                 }
@@ -74,7 +76,7 @@ class CommandFTP {
                     sender.sendMessage("");
                     sender.sendMessage("--------- Page " + page + "/" + maxPages + " ---------");
                 } catch (Exception e) {
-                    sender.sendMessage(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[1]));
+                    sendMessageWithLogs(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[1]), sender);
                 }
             });
         } else if (args[1].equalsIgnoreCase("download")) {

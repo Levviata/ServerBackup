@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
+
 class CommandSearch {
     private CommandSearch() {
         throw new IllegalStateException("Utility class");
@@ -28,7 +30,7 @@ class CommandSearch {
 
             if (backups.length == 0
                     || backups.length == 1 && backups[0].getName().equalsIgnoreCase("Files")) {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackups"));
+                sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackups"), sender);
 
                 return;
             }
@@ -42,7 +44,7 @@ class CommandSearch {
             }
 
             if (backupsMatch.size() == 0) {
-                sender.sendMessage(OperationHandler.processMessage("NoBackupSearch").replace("%input%", args[1]));
+                sendMessageWithLogs(OperationHandler.processMessage("NoBackupSearch").replace("%input%", args[1]), sender);
 
                 return;
             }
@@ -101,7 +103,7 @@ class CommandSearch {
                 sender.sendMessage("");
                 sender.sendMessage("-------- Page " + page + "/" + maxPages + " --------");
             } catch (Exception e) {
-                sender.sendMessage(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[2]));
+                sendMessageWithLogs(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[2]), sender);
             }
         });
     }

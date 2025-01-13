@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 
 import java.io.File;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
 class CommandUnzip {
@@ -18,7 +19,7 @@ class CommandUnzip {
         String filePath = args[1];
 
         if (!args[1].contains(".zip")) {
-            sender.sendMessage(OperationHandler.processMessage("Error.NotAZip").replace(FILE_NAME_PLACEHOLDER, args[1]));
+            sendMessageWithLogs(OperationHandler.processMessage("Error.NotAZip").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
 
             return;
         }
@@ -29,7 +30,7 @@ class CommandUnzip {
                         .backupDestination + "//" + filePath.replaceAll(".zip", ""));
 
         if (!newFile.exists()) {
-            sender.sendMessage(OperationHandler.processMessage("Command.Unzip.Header"));
+            sendMessageWithLogs(OperationHandler.processMessage("Command.Unzip.Header"), sender);
 
             if (file.exists()) {
                 ZipManager zm = new ZipManager(file.getPath(),
@@ -38,10 +39,10 @@ class CommandUnzip {
 
                 zm.unzip();
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, args[1]));
+                sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
             }
         } else {
-            sender.sendMessage(OperationHandler.processMessage("Error.ZipExists").replace(FILE_NAME_PLACEHOLDER, args[1]));
+            sendMessageWithLogs(OperationHandler.processMessage("Error.ZipExists").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
         }
     }
 

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.GlobalConstants.CONFIG_BACKUP_DESTINATION;
 
 public class Configuration { // Wont comply to java:S1118, we actually instantiate this class
@@ -229,7 +230,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
 
         loadUp();
 
-        sender.sendMessage(OperationHandler.processMessage("Command.Reload"));
+        sendMessageWithLogs(OperationHandler.processMessage("Command.Reload"), sender);
     }
 
 }

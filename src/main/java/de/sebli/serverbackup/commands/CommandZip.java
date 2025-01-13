@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import java.io.File;
 import java.io.IOException;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
 class CommandZip {
@@ -19,7 +20,7 @@ class CommandZip {
         String filePath = args[1];
 
         if (args[1].contains(".zip")) {
-            sender.sendMessage(OperationHandler.processMessage("Error.AlreadyZip").replace(FILE_NAME_PLACEHOLDER, args[1]));
+            sendMessageWithLogs(OperationHandler.processMessage("Error.AlreadyZip").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
             return;
         }
 
@@ -39,10 +40,10 @@ class CommandZip {
                     e.printStackTrace();
                 }
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, args[1]));
+                sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
             }
         } else {
-            sender.sendMessage(OperationHandler.processMessage("Error.FolderExists").replace(FILE_NAME_PLACEHOLDER, args[1]));
+            sendMessageWithLogs(OperationHandler.processMessage("Error.FolderExists").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
         }
     }
 

@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
 public class Backup {
@@ -85,19 +86,19 @@ public class Backup {
                     try {
                         FileUtils.deleteDirectory(file);
 
-                        sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath));
+                        sendMessageWithLogs(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
                     } catch (IOException e) {
                         e.printStackTrace();
 
-                        sender.sendMessage(OperationHandler.processMessage("Error.DeletionFailed").replace(FILE_NAME_PLACEHOLDER, backupFilePath));
+                        sendMessageWithLogs(OperationHandler.processMessage("Error.DeletionFailed").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
                     }
                 } else {
                     file.delete();
 
-                    sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath));
+                    sendMessageWithLogs(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
                 }
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, backupFilePath));
+                sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
             }
         });
     }

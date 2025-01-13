@@ -3,6 +3,7 @@ package de.sebli.serverbackup.commands;
 import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.command.CommandSender;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.core.OperationHandler.getShutdownProgress;
 
 class CommandShutdown {
@@ -14,11 +15,11 @@ class CommandShutdown {
         if (getShutdownProgress()) {
             OperationHandler.setShutdownProgress(false);
 
-            sender.sendMessage(OperationHandler.processMessage("Command.Shutdown.Cancel"));
+            sendMessageWithLogs(OperationHandler.processMessage("Command.Shutdown.Cancel"), sender);
         } else {
             OperationHandler.setShutdownProgress(true);
 
-            sender.sendMessage(OperationHandler.processMessage("Command.Shutdown.Start"));
+            sendMessageWithLogs(OperationHandler.processMessage("Command.Shutdown.Start"), sender);
         }
     }
 

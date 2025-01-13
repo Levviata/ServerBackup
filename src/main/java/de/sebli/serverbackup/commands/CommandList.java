@@ -15,6 +15,8 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.util.Arrays;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
+
 class CommandList {
     private CommandList() {
         throw new IllegalStateException("Utility class");
@@ -26,7 +28,7 @@ class CommandList {
 
             if (backups.length == 0
                     || backups.length == 1 && backups[0].getName().equalsIgnoreCase("Files")) {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackups"));
+                sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackups"), sender);
 
                 return;
             }

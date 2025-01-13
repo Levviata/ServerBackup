@@ -7,6 +7,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
+
 public class Executor implements CommandExecutor {
 
     @Override
@@ -61,7 +63,7 @@ public class Executor implements CommandExecutor {
                 sendHelp(sender);
             }
         } else {
-            sender.sendMessage(OperationHandler.processMessage("Error.NoPermission"));
+            sendMessageWithLogs(OperationHandler.processMessage("Error.NoPermission"), sender);
         }
 
         return false;

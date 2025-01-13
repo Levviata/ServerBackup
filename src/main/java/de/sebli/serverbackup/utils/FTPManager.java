@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
@@ -50,7 +51,7 @@ public class FTPManager {
         }
 
         if (!file.exists()) {
-            sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+            sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
             return;
         }
@@ -66,7 +67,7 @@ public class FTPManager {
             }
         }
         catch (IOException e) {
-            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
+            sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED), sender);
             e.printStackTrace();
         }
         finally {
@@ -88,7 +89,7 @@ public class FTPManager {
                 handleDownloadFromFTP(ftpClient, file);
             }
         } catch (IOException e) {
-            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
+            sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED), sender);
             e.printStackTrace();
         } finally {
             disconnectClient(ftpsClient);
@@ -109,7 +110,7 @@ public class FTPManager {
                 handleDeleteFileFTP(ftpClient, file);
             }
         } catch (IOException e) {
-            sender.sendMessage(OperationHandler.processMessage("Error.FtpDeletionFailed"));
+            sendMessageWithLogs(OperationHandler.processMessage("Error.FtpDeletionFailed"), sender);
             e.printStackTrace();
         } finally {
             disconnectClient(ftpsClient);
@@ -183,13 +184,13 @@ public class FTPManager {
 
         connectFTPorFTPS(client);
 
-        sender.sendMessage(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
         OperationHandler.getTasks().add("FTP UPLOAD {" + file.getPath() + "}"); // wont comply to java:S1192, we are never refactoring this
+        sendMessageWithLogs(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
         boolean success = tryUploadFileToFTPorFTPS(client, file, false);
 
         if (success) {
-            sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
+            sendMessageWithLogs(OperationHandler.processMessage("Info.FtpUploadSuccess"), sender);
 
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
                 boolean exists = false;
@@ -201,11 +202,11 @@ public class FTPManager {
                 if (exists) {
                     tryDeleteFile(file);
                 } else {
-                    sender.sendMessage(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"));
+                    sendMessageWithLogs(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"), sender);
                 }
             }
         } else {
-            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
+            sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED), sender);
         }
 
         OperationHandler.getTasks().remove("FTP UPLOAD {" + file.getPath() + "}");
@@ -218,7 +219,7 @@ public class FTPManager {
             boolean isFileUploaded = tryUploadFileToFTPorFTPS(client, file, true);
 
             if (isFileUploaded) {
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpUploadSuccess"));
+                sendMessageWithLogs(OperationHandler.processMessage("Info.FtpUploadSuccess"), sender);
 
                 if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("Ftp.DeleteLocalBackup")) {
                     boolean exists = false;
@@ -230,11 +231,11 @@ public class FTPManager {
                     if (exists) {
                         tryDeleteFile(file);
                     } else {
-                        sender.sendMessage(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"));
+                        sendMessageWithLogs(OperationHandler.processMessage("Error.FtpLocalDeletionFailed"), sender);
                     }
                 }
             } else {
-                sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED));
+                sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED), sender);
             }
 
             OperationHandler.getTasks().remove("FTP UPLOAD {" + file.getPath() + "}");
@@ -258,12 +259,12 @@ public class FTPManager {
         }
 
         if (!exists) {
-            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
+            sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
             return;
         }
 
-        sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+        sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
             File backupFile = new File(Configuration.backupDestination + "//" + file.getPath());
@@ -282,9 +283,9 @@ public class FTPManager {
         boolean success = tryDownloadFileFromFTPorFTPS(client, file);
 
         if (success) {
-            sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
+            sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDownloadSuccess"), sender);
         } else {
-            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
+            sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED), sender);
         }
     }
 
@@ -299,12 +300,12 @@ public class FTPManager {
             }
 
             if (!exists) {
-                sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
+                sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
                 return;
             }
 
-            sender.sendMessage(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+            sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
             Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
                 File backupFile = new File(Configuration.backupDestination + "//" + file.getPath());
@@ -323,9 +324,9 @@ public class FTPManager {
             boolean success = tryDownloadFileFromFTPorFTPS(client, file);
 
             if (success) {
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpDownloadSuccess"));
+                sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDownloadSuccess"), sender);
             } else {
-                sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
+                sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED), sender);
             }
         } catch (Exception e) {
             isSSL = false;
@@ -347,19 +348,18 @@ public class FTPManager {
         }
 
         if (!exists) {
-            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
+            sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
             return;
         }
 
-        sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+        sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
         boolean success = tryDeleteFile(file);
 
         if (success) {
-            sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletionSuccess"));
         } else {
-            sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED));
+            sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED), sender);
         }
     }
 
@@ -374,19 +374,19 @@ public class FTPManager {
             }
 
             if (!exists) {
-                sender.sendMessage(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()));
+                sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_NOT_FOUND).replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
                 return;
             }
 
-            sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()));
+            sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDeletion").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
             boolean success = tryDeleteFile(file);
 
             if (success) {
-                sender.sendMessage(OperationHandler.processMessage("Info.FtpDeletionSuccess"));
+                sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDeletionSuccess"), sender);
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.FtpDeletionFailed"));
+                sendMessageWithLogs(OperationHandler.processMessage("Error.FtpDeletionFailed"), sender);
             }
         } catch (Exception e) {
             isSSL = false;

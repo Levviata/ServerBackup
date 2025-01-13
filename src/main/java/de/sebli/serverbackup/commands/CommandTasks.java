@@ -3,6 +3,7 @@ package de.sebli.serverbackup.commands;
 import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.command.CommandSender;
 
+import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 class CommandTasks {
     private CommandTasks() {
         throw new IllegalStateException("Utility class");
@@ -16,10 +17,9 @@ class CommandTasks {
                 sender.sendMessage(task);
             }
 
-            sender.sendMessage(OperationHandler.processMessage("Command.Tasks.Footer"));
+            sendMessageWithLogs(OperationHandler.processMessage("Command.Tasks.Footer"), sender);
         } else {
-            sender.sendMessage(OperationHandler.processMessage("Error.NoTasks"));
+            sendMessageWithLogs(OperationHandler.processMessage("Error.NoTasks"), sender);
         }
     }
-
 }
