@@ -10,71 +10,76 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TaskHandler {
-    private static List<Task> tasks = new ArrayList<>();
-    private static List<String> formattedTasks = new ArrayList<>();
+    private static final List<Task> tasks = new ArrayList<>();
+    private static final List<String> formattedTasks = new ArrayList<>();
 
+    // Add a task based on type, purpose, and description
     public static Task addTask(TaskType type, TaskPurpose purpose, String description) {
-        // Find the TaskIndex for the given TaskType
-        Task existingIndex = findTask(type, purpose, 0);
+        // Find tasks with the same type and purpose
+        int currentIndex = (int) tasks.stream()
+                .filter(task -> task.type() == type && task.purpose() == purpose)
+                .count() + 1;
 
-        int currentIndex;
-        if (existingIndex == null) {
-            // If no index exists for this type, start from 1
-            currentIndex = 1;
-            // Add a new TaskIndex for this type
-            tasks.add(new Task(type, purpose, currentIndex));
-        } else {
-            // If an index exists, increment it
-            currentIndex = existingIndex.index() + 1;
-            // Remove the old TaskIndex and add the updated one
-            tasks.remove(existingIndex);
-            tasks.add(new Task(type, purpose, currentIndex));
-        }
+        // Create and add the new task
+        Task newTask = new Task(type, purpose, currentIndex);
+        tasks.add(newTask);
 
-        // Format the task with the type and index
-        String formattedTask = type.getType() + " " + + " #" + currentIndex + " {" + description + " }";
-
-        // Add the task to the list
+        // Format the task and add to formattedTasks
+        String formattedTask = type.getType() + " " + purpose + " #" + currentIndex + " {" + description + "}";
         formattedTasks.add(formattedTask);
 
-        // Return the updated TaskIndex
-        return new Task(type, purpose, currentIndex);
+        return newTask;
     }
 
-    public static void removeTask(Task task) {
-        if (task.index() >= 0 && task.index() < formattedTasks.size()) {
-            // Remove the task at the specified index
-            formattedTasks.remove(task.index());
+    // Remove a specific task
+    public static boolean removeTask(Task task) {
+        if (tasks.remove(task)) {
+            // Update formattedTasks and re-index remaining tasks for the same type/purpose
+            reindexTasks(task.type(), task.purpose());
+            formattedTasks.removeIf(t -> t.contains(task.type().getType() + " #" + task.index()));
+
+            // Log removal
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendDebugMessages")) {
                 ServerBackupPlugin.getPluginInstance().getLogger().info(MessageFormat.format(
                         "Task: {0}\nType: {1}\nPurpose: {2}\nIndex: {3} was removed successfully.",
-                       task, task.type(), task.purpose(), task.index()
+                        task, task.type(), task.purpose(), task.index()
                 ));
             }
+            return true;
         } else {
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendDebugMessages")) {
                 ServerBackupPlugin.getPluginInstance().getLogger().warning(
-                        "Task not found or invalid task given, didn't remove designated task");
+                        "Task not found or invalid task given, didn't remove designated task."
+                );
+            }
+            return false;
+        }
+    }
+
+    // Find a specific task
+    public static Task findTask(TaskType type, TaskPurpose purpose, int index) {
+        return tasks.stream()
+                .filter(task -> task.type() == type && task.purpose() == purpose && task.index() == index)
+                .findFirst()
+                .orElse(null);
+    }
+
+    // Re-index tasks after removal
+    private static void reindexTasks(TaskType type, TaskPurpose purpose) {
+        int index = 1;
+        for (Task task : tasks) {
+            if (task.type() == type && task.purpose() == purpose) {
+                tasks.set(tasks.indexOf(task), new Task(type, purpose, index));
+                index++;
             }
         }
     }
 
-    private static Task findTask(TaskType type, TaskPurpose purpose, int index) {
-        boolean correctType;
-        boolean correctPurpose;
-        boolean correctIndex;
+    public static List<Task> getTasks() {
+        return tasks;
+    }
 
-        for (Task task : tasks) {
-            correctType = task.type() == type;
-
-            correctPurpose = task.purpose() == purpose;
-
-            correctIndex = task.index() == index;
-
-            if (correctType && correctPurpose && correctIndex) {
-                return task;
-            }
-        }
-        return null;
+    public static List<String> getFormattedTasks() {
+        return formattedTasks;
     }
 }

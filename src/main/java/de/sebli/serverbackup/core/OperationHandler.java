@@ -23,8 +23,6 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
     private static boolean shutdownProgress = false;
     private static boolean isUpdated = false;
 
-    private static List<String> tasks = new ArrayList<>();
-
     public static String processMessage(String msgCode) {
         return (Configuration.prefix + Configuration.messages.getString(msgCode)).replace("&nl", "\n").replace("&", "§");
     }
@@ -136,5 +134,5 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
         OperationHandler.isUpdated = isUpdatedIn;
     }
 
-    public static List<String> getTasks() { return tasks; }
+
 }
