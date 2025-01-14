@@ -13,10 +13,10 @@ import de.sebli.serverbackup.utils.records.AppendResult;
 import de.sebli.serverbackup.utils.records.StartResult;
 import de.sebli.serverbackup.utils.records.Task;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.Optional;
 
 import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
-import static de.sebli.serverbackup.utils.TaskHandler.*;
+import static de.sebli.serverbackup.utils.TaskUtils.*;
 
 public class DropboxManager {
 
@@ -36,7 +36,7 @@ public class DropboxManager {
 
     private static final String ACCESS_TOKEN = Configuration.cloudInfo.getString("Cloud.Dropbox.AccessToken");
     private static final String CLOUD_RT = "Cloud.Dropbox.RT";
-    private static final String MESSAGE_SUCCESFUL_UPLOAD = "Dropbox: Upload successfully. Backup stored on your dropbox account.";
+    private static final String MESSAGE_SUCCESSFUL_UPLOAD = "Dropbox: Upload successfully. Backup stored on your dropbox account.";
 
     private static final long CHUNKED_UPLOAD_CHUNK_SIZE = 16L << 20;
     private static final int CHUNKED_UPLOAD_MAX_ATTEMPTS = 5;
@@ -49,7 +49,7 @@ public class DropboxManager {
         File file = new File(filePath);
 
         if (!file.getPath().contains(Configuration.backupDestination.replace("/", ""))) {
-            file = new File(Configuration.backupDestination + "//" + filePath);
+            file = Paths.get(Configuration.backupDestination, filePath).toFile();
         }
 
         if (!file.exists()) {
@@ -64,8 +64,8 @@ public class DropboxManager {
         String appKey = Configuration.cloudInfo.getString("Cloud.Dropbox.AppKey");
         String secretKey = Configuration.cloudInfo.getString("Cloud.Dropbox.AppSecret");
 
-        DbxClientV2 client = null;
-        DbxCredential credential = null;
+        DbxClientV2 client;
+        DbxCredential credential;
 
         if (!Configuration.cloudInfo.contains(CLOUD_RT)) {
             DbxAppInfo appInfo = new DbxAppInfo(appKey, secretKey);
@@ -125,13 +125,14 @@ public class DropboxManager {
                 long bytesSkipped = streamIn.skip(uploaded);
 
                 if (bytesSkipped < uploaded) { // bytes skipped are amount to less than the uploaded bytes
-                    ServerBackupPlugin.getPluginInstance().getLogger().warning(
-                            MessageFormat.format(
-                                    "Dropbox: Only skipped {0} bytes out of a total of {1}! Retrying in {2} seconds...",
-                                    bytesSkipped,
-                                    uploaded,
-                                    retryDelaySeconds
-                            ));
+                    String formattedMessage = MessageFormat.format(
+                            "Dropbox: Only skipped {0} bytes out of a total of {1}! Retrying in {2} seconds...",
+                            bytesSkipped,
+                            uploaded,
+                            retryDelaySeconds
+                    );
+
+                    ServerBackupPlugin.getPluginInstance().getLogger().warning(formattedMessage);
                     scheduleRetry(sender, dbxClient, file, dbxPath);
                     return; // Stop current call
                 }
@@ -143,11 +144,12 @@ public class DropboxManager {
                     sessionId = resultStart.get().sessionId();
                     uploaded = resultStart.get().uploaded();
                 } else {
-                    ServerBackupPlugin.getPluginInstance().getLogger().severe(
-                            MessageFormat.format(
-                                    "Dropbox: Couldn''t start chunked uploading to Dropbox because the result is missing! Retrying in {0} seconds...",
-                                    retryDelaySeconds
-                            ));
+                    String formattedMessage = MessageFormat.format(
+                            "Dropbox: Couldn''t start chunked uploading to Dropbox because the result is missing! Retrying in {0} seconds...",
+                            retryDelaySeconds
+                    );
+
+                    ServerBackupPlugin.getPluginInstance().getLogger().severe(formattedMessage);
                     scheduleRetry(sender, dbxClient, file, dbxPath);
                     return; // Stop current call
                 }
@@ -164,13 +166,13 @@ public class DropboxManager {
                         uploaded = resultAppend.get().uploaded();
                         cursor = resultAppend.get().cursor();
                     } else {
-                        ServerBackupPlugin.getPluginInstance().getLogger().severe(
-                                MessageFormat.format(
-                                        "Dropbox: Couldn''t start chunked uploading to Dropbox because the result is missing! Retrying in {0} seconds...",
-                                        retryDelaySeconds
-                                ));
+                        String formattedMessage = MessageFormat.format(
+                                "Dropbox: Couldn''t start chunked uploading to Dropbox because the result is missing! Retrying in {0} seconds...",
+                                retryDelaySeconds);
+
+                                ServerBackupPlugin.getPluginInstance().getLogger().severe(formattedMessage);
                         appendFailed = true;
-                        break; // Exit the while loop and retry the for loop
+                        break; // Exit the while loop and stop the method call below
                     }
                 }
 
@@ -182,7 +184,7 @@ public class DropboxManager {
                 // Finish
                 finishChunkedUpload(dbxClient, file, dbxPath, uploaded, size, streamIn, cursor, progressListener);
 
-                sendMessageWithLogs(MESSAGE_SUCCESFUL_UPLOAD, sender);
+                sendMessageWithLogs(MESSAGE_SUCCESSFUL_UPLOAD, sender);
                 setProgress(file, uploaded, size, true);
 
                 if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
@@ -202,7 +204,7 @@ public class DropboxManager {
     }
 
     private void uploadFile(CommandSender sender, DbxClientV2 client, File file, String dbxPath) {
-        setCurrentTask(TaskHandler.addTask(TaskType.DROPBOX, TaskPurpose.UPLOAD, "Uploading " + file.getName()));
+        setCurrentTask(addTask(TaskType.DROPBOX, TaskPurpose.UPLOAD, "Uploading " + file.getName()));
 
         try (InputStream streamIn = new FileInputStream(file.getPath())) {
             client.files().uploadBuilder(dbxPath + file.getName()).uploadAndFinish(streamIn);
@@ -216,8 +218,8 @@ public class DropboxManager {
         }
 
         finally {
-            sendMessageWithLogs(MESSAGE_SUCCESFUL_UPLOAD, sender);
-            removeTask(currentTask); // same as line 178
+            sendMessageWithLogs(MESSAGE_SUCCESSFUL_UPLOAD, sender);
+            removeTask(currentTask);
 
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                 tryDeleteFile(file);
@@ -236,7 +238,7 @@ public class DropboxManager {
         }
 
         if (finished) {
-            setCurrentTask(addTask(TaskType.DROPBOX, TaskPurpose.PROGRESS, file.getName() + ", Progress: Finished!"));
+            removeTask(currentTask);
         } else {
             setCurrentTask(addTask(TaskType.DROPBOX, TaskPurpose.PROGRESS, file.getName() + ", Progress: " + Math.round((uploaded / (double) size) * 100) + "%"));
         }
@@ -252,24 +254,25 @@ public class DropboxManager {
     }
 
     private Optional<StartResult> startChunkedUpload(DbxClientV2 dbxClient,
-                                                            File file,
-                                                            long uploadedIn,
-                                                            long size,
-                                                            InputStream inputStream) {
+                                                     File file,
+                                                     long uploaded,
+                                                     long size,
+                                                     InputStream inputStream) {
         String sessionId;
-        long uploadedOut = uploadedIn;
+        long uploadedOut = uploaded;
         DbxException exception = null;
 
         try (UploadSessionStartUploader uploader = dbxClient.files().uploadSessionStart()) {
             sessionId = uploader.uploadAndFinish(inputStream).getSessionId();
         }
 
-        // Catch specific exceptions first
         catch (RetryException | NetworkIOException e) {
             exception = e;
             e.printStackTrace();
             return Optional.of(new StartResult(null, 0, exception));
-        }  catch (UploadSessionFinishErrorException e) {
+        }
+
+        catch (UploadSessionFinishErrorException e) {
             if (e.errorValue.isLookupFailed() && e.errorValue.getLookupFailedValue().isIncorrectOffset()) {
                 exception = e;
                 uploadedOut = e.errorValue
@@ -282,7 +285,6 @@ public class DropboxManager {
             return Optional.of(new StartResult(null, uploadedOut, exception));
         }
 
-        // Catch general exceptions
         catch (DbxException | IOException e) {
             e.printStackTrace();
             return Optional.empty();
@@ -294,27 +296,27 @@ public class DropboxManager {
     }
 
     private Optional<AppendResult> appendChunkedUpload(DbxClientV2 dbxClient,
-                                                              File file,
-                                                              String sessionIdIn,
-                                                              long uploadedIn,
-                                                              long size,
-                                                              InputStream inputStream,
-                                                              UploadSessionCursor cursorIn) {
-        UploadSessionCursor cursorOut = cursorIn;
-        long uploadedOut = uploadedIn;
+                                                       File file,
+                                                       String sessionId,
+                                                       long uploaded,
+                                                       long size,
+                                                       InputStream inputStream,
+                                                       UploadSessionCursor cursor) {
+        UploadSessionCursor cursorOut = cursor;
+        long uploadedOut = uploaded;
         DbxException exception = null;
 
-        try (InputStream streamIn = inputStream;
-             UploadSessionAppendV2Uploader uploader = dbxClient.files().uploadSessionAppendV2(cursorOut)) {
-            uploader.uploadAndFinish(streamIn);
+        try (UploadSessionAppendV2Uploader uploader = dbxClient.files().uploadSessionAppendV2(cursorOut)) {
+            uploader.uploadAndFinish(inputStream);
         }
 
-        // Catch specific exceptions first
         catch (RetryException | NetworkIOException e) {
             exception = e;
             e.printStackTrace();
             return Optional.of(new AppendResult(null, 0, exception));
-        }  catch (UploadSessionAppendErrorException e) {
+        }
+
+        catch (UploadSessionAppendErrorException e) {
             if (e.errorValue.isIncorrectOffset()) {
                 exception = e;
                 uploadedOut = e.errorValue
@@ -326,8 +328,6 @@ public class DropboxManager {
             return Optional.of(new AppendResult(null, uploadedOut, exception));
         }
 
-
-        // Catch general exceptions
         catch (DbxException | IOException e) {
             e.printStackTrace();
             return Optional.empty();
@@ -335,41 +335,50 @@ public class DropboxManager {
 
         uploadedOut += CHUNKED_UPLOAD_CHUNK_SIZE;
         setProgress(file, uploadedOut, size, false);
-        cursorOut = new UploadSessionCursor(sessionIdIn, uploadedOut);
+        cursorOut = new UploadSessionCursor(sessionId, uploadedOut);
         return Optional.of(new AppendResult(cursorOut, uploadedOut, null));
     }
 
-    private Optional<Exception> finishChunkedUpload(DbxClientV2 dbxClient,
-                                                    File file,
-                                                    String dbxPath,
-                                                    long uploadedIn,
-                                                    long size,
-                                                    InputStream inputStream,
-                                                    UploadSessionCursor cursorIn,
-                                                    IOUtil.ProgressListener progressListener) {
-        long remaining = size - uploadedIn;
+    private void finishChunkedUpload(DbxClientV2 dbxClient,
+                                     File file,
+                                     String dbxPath,
+                                     long uploaded,
+                                     long size,
+                                     InputStream inputStream,
+                                     UploadSessionCursor cursor,
+                                     IOUtil.ProgressListener progressListener) {
+        long remaining = size - uploaded;
+
+        if (remaining < 0) {
+            throw new IllegalStateException("Remaining bytes to upload cannot be negative. size=" + size + ", uploaded=" + uploaded);
+        }
 
         CommitInfo commitInfo = CommitInfo.newBuilder(dbxPath)
                 .withMode(WriteMode.ADD)
                 .withClientModified(new Date(file.lastModified()))
                 .build();
-        try (UploadSessionFinishUploader uploader = dbxClient.files().uploadSessionFinish(cursorIn, commitInfo)) {
+
+        try (UploadSessionFinishUploader uploader = dbxClient.files().uploadSessionFinish(cursor, commitInfo)) {
             uploader.uploadAndFinish(inputStream, remaining, progressListener);
         }
 
-        // Catch specific exceptions first
-        catch (RetryException | NetworkIOException e) {
-            e.printStackTrace(); // TODO: Add specific logging logic
-            return Optional.of(e);
+        catch (UploadSessionFinishErrorException e) {
+            if (e.errorValue.isLookupFailed() && e.errorValue.getLookupFailedValue().isIncorrectOffset()) {
+                long correctOffset = e.errorValue.getLookupFailedValue().getIncorrectOffsetValue().getCorrectOffset();
+                ServerBackupPlugin.getPluginInstance().getLogger().warning("Dropbox: Incorrect offset, adjusting to " + correctOffset);
+                finishChunkedUpload(dbxClient, file, dbxPath, correctOffset, size, inputStream, new UploadSessionCursor(cursor.getSessionId(), correctOffset), progressListener);
+            } else {
+                e.printStackTrace();
+            }
         }
 
-        // Catch general exceptions
+        catch (RetryException | NetworkIOException e) {
+            e.printStackTrace();
+        }
+
         catch (DbxException | IOException e) {
             e.printStackTrace();
-            return Optional.of(e);
         }
-
-        return Optional.empty();
     }
 
     private static void setCurrentTask(Task taskIn) {
