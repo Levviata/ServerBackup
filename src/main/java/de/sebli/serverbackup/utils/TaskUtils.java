@@ -9,7 +9,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskHandler {
+public class TaskUtils {
+    //TODO: Maybe use Collections.synchronizedList for the lists?
     private static final List<Task> tasks = new ArrayList<>();
     private static final List<String> formattedTasks = new ArrayList<>();
 
@@ -40,17 +41,22 @@ public class TaskHandler {
 
             // Log removal
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendDebugMessages")) {
-                ServerBackupPlugin.getPluginInstance().getLogger().info(MessageFormat.format(
-                        "Task: {0}\nType: {1}\nPurpose: {2}\nIndex: {3} was removed successfully.",
+                String formattedDebugMessage = MessageFormat.format(
+                        "Task: {0}\nType: {1}\nPurpose: {2}\nIndex: {3}\nThis task was removed successfully!",
                         task, task.type(), task.purpose(), task.index()
-                ));
+                );
+
+                ServerBackupPlugin.getPluginInstance().getLogger().info(formattedDebugMessage);
             }
             return true;
         } else {
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendDebugMessages")) {
-                ServerBackupPlugin.getPluginInstance().getLogger().warning(
-                        "Task not found or invalid task given, didn't remove designated task."
+                String formattedDebugMessage = MessageFormat.format(
+                        "Task: {0}\nType: {1}\nPurpose: {2}\nIndex: {3}\nTask not found or invalid task given, didn''t remove designated task.",
+                        task, task.type(), task.purpose(), task.index()
                 );
+
+                ServerBackupPlugin.getPluginInstance().getLogger().warning(formattedDebugMessage);
             }
             return false;
         }
