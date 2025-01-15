@@ -3,6 +3,9 @@ package de.sebli.serverbackup.utils;
 import de.sebli.serverbackup.Configuration;
 import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
+import de.sebli.serverbackup.utils.enums.TaskPurpose;
+import de.sebli.serverbackup.utils.enums.TaskType;
+import de.sebli.serverbackup.utils.records.Task;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -12,14 +15,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
+import static de.sebli.serverbackup.utils.TaskUtils.addTask;
+import static de.sebli.serverbackup.utils.TaskUtils.removeTask;
 
 public class FTPManager {
 
@@ -35,6 +39,8 @@ public class FTPManager {
     private static final String ERROR_FTP_UPLOAD_FAILED = "Error.FtpUploadFailed";
     private static final String ERROR_FTP_NOT_FOUND = "Error.FtpNotFound";
 
+    private static Task currentTask;
+
     public FTPManager(CommandSender sender) {
         this.sender = sender;
     }
@@ -43,11 +49,11 @@ public class FTPManager {
 
     ServerBackupPlugin instance = ServerBackupPlugin.getPluginInstance();
 
-    public void uploadFileToFTP(String filePath, boolean direct) { // OBJECTIVES: reduce complexity and move parts of code to their own methods
+    public void uploadFileToFTP(String filePath, boolean direct) {
         File file = new File(filePath);
 
         if (!file.getPath().contains(Configuration.backupDestination.replace("/", ""))) {
-            file = new File(Configuration.backupDestination + "//" + filePath);
+            file = Paths.get(Configuration.backupDestination, filePath).toFile();
         }
 
         if (!file.exists()) {
@@ -124,58 +130,59 @@ public class FTPManager {
         FTPSClient ftpsClient = new FTPSClient();
         FTPClient ftpClient = new FTPClient();
 
-        try {
-            connectFTPorFTPS(ftpClient);
+        boolean useSSL = false;
+        int attempts = 0;
+        boolean success = false;
 
-            FTPFile[] files = ftpClient.listFiles();
-
-            int c = 1;
-
-            for (FTPFile file : files) {
-                double fileSize = (double) file.getSize() / 1000 / 1000;
-                fileSize = Math.round(fileSize * 100.0) / 100.0;
-
-                if (rawList) {
-                    backups.add(file.getName() + ":" + file.getSize());
-                } else {
-                    backups.add("§7[" + c + "]§f " + file.getName() + " §7[" + fileSize + "MB]");
-                }
-
-                c++;
-            }
-        } catch (Exception e) {
-            isSSL = true;
-            getFTPBackupList(rawList);
-
+        while (attempts < 2 && !success) {
             try {
-                connectFTPorFTPS(ftpsClient);
-
-                FTPFile[] files = ftpsClient.listFiles();
-
-                int c = 1;
-
-                for (FTPFile file : files) {
-                    double fileSize = (double) file.getSize() / 1000 / 1000;
-                    fileSize = Math.round(fileSize * 100.0) / 100.0;
-
-                    if (rawList) {
-                        backups.add(file.getName() + ":" + fileSize);
-                    } else {
-                        backups.add("§7[" + c + "]§f " + file.getName() + " §7[" + fileSize + "MB]");
-                    }
-
-                    c++;
+                if (useSSL) {
+                    connectFTPorFTPS(ftpsClient);
+                    backups = fetchBackupList(ftpsClient, rawList);
+                } else {
+                    connectFTPorFTPS(ftpClient);
+                    backups = fetchBackupList(ftpClient, rawList);
                 }
-            } catch (Exception ex) {
-                isSSL = false;
-                getFTPBackupList(rawList);
+                success = true; // Mark success to exit the loop
+            } catch (Exception e) {
+                if (!useSSL) {
+                    useSSL = true; // Switch to SSL for the next attempt
+                } else {
+                    // Log the error and exit
+                    e.printStackTrace();
+                    break;
+                }
+            } finally {
+                disconnectClient(ftpsClient);
+                disconnectClient(ftpClient);
             }
-        } finally {
-            disconnectClient(ftpsClient);
-            disconnectClient(ftpClient);
+            attempts++; // Increment the attempts counter
         }
+
         return backups;
     }
+
+    private List<String> fetchBackupList(FTPClient client, boolean rawList) throws IOException {
+        List<String> backups = new ArrayList<>();
+        FTPFile[] files = client.listFiles();
+
+        int c = 1;
+        for (FTPFile file : files) {
+            double fileSize = (double) file.getSize() / 1000 / 1000;
+            fileSize = Math.round(fileSize * 100.0) / 100.0;
+
+            if (rawList) {
+                backups.add(file.getName() + ":" + fileSize);
+            } else {
+                backups.add("§7[" + c + "]§f " + file.getName() + " §7[" + fileSize + "MB]");
+            }
+
+            c++;
+        }
+
+        return backups;
+    }
+
 
     private void handleUploadToFTP(FTPClient client, File file) throws IOException {
         if (client instanceof FTPSClient) {
@@ -184,8 +191,9 @@ public class FTPManager {
 
         connectFTPorFTPS(client);
 
-        OperationHandler.getTasks().add("FTP UPLOAD {" + file.getPath() + "}"); // wont comply to java:S1192, we are never refactoring this
         sendMessageWithLogs(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
+
+        setCurrentTask(addTask(TaskType.FTP, TaskPurpose.UPLOAD, "Uploading " + file.getPath() + " to FTP server"));
 
         boolean success = tryUploadFileToFTPorFTPS(client, file, false);
 
@@ -209,12 +217,16 @@ public class FTPManager {
             sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED), sender);
         }
 
-        OperationHandler.getTasks().remove("FTP UPLOAD {" + file.getPath() + "}");
+        removeTask(currentTask);
     }
 
     private void handleUploadToFTPS(FTPSClient client, File file, boolean direct) {
         try {
             connectFTPorFTPS(client);
+
+            sendMessageWithLogs(OperationHandler.processMessage("Info.FtpUpload").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
+
+            setCurrentTask(addTask(TaskType.FTP, TaskPurpose.UPLOAD, "Uploading " + file.getPath() + " to FTPS server"));
 
             boolean isFileUploaded = tryUploadFileToFTPorFTPS(client, file, true);
 
@@ -238,7 +250,7 @@ public class FTPManager {
                 sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED), sender);
             }
 
-            OperationHandler.getTasks().remove("FTP UPLOAD {" + file.getPath() + "}");
+            removeTask(currentTask);
         } catch (Exception e) {
             isSSL = false;
             uploadFileToFTP(file.getPath(), direct);
@@ -267,7 +279,7 @@ public class FTPManager {
         sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
-            File backupFile = new File(Configuration.backupDestination + "//" + file.getPath());
+            File backupFile = Paths.get(Configuration.backupDestination, file.getPath()).toFile();
 
             try {
                 FileUtils.copyFile(file, backupFile);
@@ -308,7 +320,7 @@ public class FTPManager {
             sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDownload").replace(FILE_NAME_PLACEHOLDER, file.getName()), sender);
 
             Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
-                File backupFile = new File(Configuration.backupDestination + "//" + file.getPath());
+                File backupFile = Paths.get(Configuration.backupDestination, file.getPath()).toFile();
 
                 try {
                     FileUtils.copyFile(file, backupFile);
@@ -358,6 +370,7 @@ public class FTPManager {
         boolean success = tryDeleteFile(file);
 
         if (success) {
+            sendMessageWithLogs(OperationHandler.processMessage("Info.FtpDeletionSuccess"), sender);
         } else {
             sendMessageWithLogs(OperationHandler.processMessage(ERROR_FTP_DOWNLOAD_FAILED), sender);
         }
@@ -469,5 +482,9 @@ public class FTPManager {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private static void setCurrentTask(Task taskIn) {
+        currentTask = taskIn;
     }
 }
