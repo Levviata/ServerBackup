@@ -2,8 +2,6 @@ package de.sebli.serverbackup;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.IOException;
-
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
 class Messages {

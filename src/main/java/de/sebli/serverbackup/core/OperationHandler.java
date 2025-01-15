@@ -54,7 +54,7 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
                     int currentClean = 0;
 
                     ServerBackupPlugin.getPluginInstance().getLogger().info(
-                            "Auto updating does nothing for now, we have not uploaded our plugin/fork to Spigot. I recommend turning automatic updates off in the config.");
+                            "Auto updating does nothing for now, we have not uploaded our fork to Spigot. I recommend turning automatic updates off in the config.");
 
                     /*if (extractVersion(latest) == null) {
                         ServerBackupPlugin.getInstance().getLogger().warning(
