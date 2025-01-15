@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TabCompleter implements org.bukkit.command.TabCompleter {
+public class ServerBackupTabCompleter implements org.bukkit.command.TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
