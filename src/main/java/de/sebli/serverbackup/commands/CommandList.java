@@ -36,7 +36,7 @@ class CommandList {
             Arrays.sort(backups);
 
             try {
-                int page = Integer.valueOf(args[1]);
+                int page = Integer.parseInt(args[1]);
 
                 if ((backups.length - 1) < page * 10 - 9) {
                     sender.sendMessage("Try a lower value.");
@@ -62,8 +62,7 @@ class CommandList {
                     double fileSize = (double) FileUtils.sizeOf(backups[i]) / 1000 / 1000;
                     fileSize = Math.round(fileSize * 100.0) / 100.0;
 
-                    if (sender instanceof Player) {
-                        Player p = (Player) sender;
+                    if (sender instanceof Player p) {
 
                         TextComponent msg = new TextComponent("§7[" + Integer.valueOf(i + 1) + "] §r"
                                 + backups[i].getName() + " §7[" + fileSize + "MB]");

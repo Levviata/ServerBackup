@@ -27,14 +27,14 @@ class CommandFTP {
 
                 List<String> backups = ftpm.getFTPBackupList(false);
 
-                if (backups.size() == 0) {
+                if (backups.isEmpty()) {
                     sendMessageWithLogs(OperationHandler.processMessage("Error.NoFtpBackups"), sender);
 
                     return;
                 }
 
                 try {
-                    int page = Integer.valueOf(args[2]);
+                    int page = Integer.parseInt(args[2]);
 
                     if (backups.size() < page * 10 - 9) {
                         sender.sendMessage("Try a lower value.");
@@ -52,8 +52,7 @@ class CommandFTP {
                     sender.sendMessage("");
 
                     for (int i = page * 10 - 10; i < backups.size() && i < page * 10; i++) {
-                        if (sender instanceof Player) {
-                            Player p = (Player) sender;
+                        if (sender instanceof Player p) {
 
                             TextComponent msg = new TextComponent(backups.get(i));
                             msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,

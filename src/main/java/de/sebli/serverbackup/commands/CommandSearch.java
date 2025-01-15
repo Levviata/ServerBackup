@@ -43,7 +43,7 @@ class CommandSearch {
                 }
             }
 
-            if (backupsMatch.size() == 0) {
+            if (backupsMatch.isEmpty()) {
                 sendMessageWithLogs(OperationHandler.processMessage("NoBackupSearch").replace("%input%", args[1]), sender);
 
                 return;
@@ -52,7 +52,7 @@ class CommandSearch {
             Collections.sort(backupsMatch);
 
             try {
-                int page = Integer.valueOf(args[2]);
+                int page = Integer.parseInt(args[2]);
 
                 if (backups.length < page * 10 - 9) {
                     sender.sendMessage("Try a lower value.");
@@ -76,8 +76,7 @@ class CommandSearch {
                         double fileSize = (double) FileUtils.sizeOf(file) / 1000 / 1000;
                         fileSize = Math.round(fileSize * 100.0) / 100.0;
 
-                        if (sender instanceof Player) {
-                            Player p = (Player) sender;
+                        if (sender instanceof Player p) {
 
                             TextComponent msg = new TextComponent("§7[" + Integer.valueOf(count)
                                     + "] §r" + file.getName() + " §7[" + fileSize + "MB]");
