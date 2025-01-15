@@ -117,6 +117,9 @@ public class DropboxManager {
             try (UploadSessionFinishUploader finishUploader = client.files().uploadSessionFinish(cursor, commitInfo)) {
                 FileMetadata metadata = finishUploader.finish();
             }
+
+            // Success -> send message
+            sendMessageWithLogs(MESSAGE_SUCCESSFUL_UPLOAD, sender); // i think this shits out 'null' when we make a backup? i have no idea and im not dealing with this rn
         }
 
         catch (UploadErrorException e) {
@@ -140,7 +143,6 @@ public class DropboxManager {
         }
 
         finally {
-            sendMessageWithLogs(MESSAGE_SUCCESSFUL_UPLOAD, sender); // i think this shits out 'null' when we make a backup? i have no idea and im not dealing with this rn
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                 tryDeleteFile(file);
                 ServerBackupPlugin.getPluginInstance().getLogger().info("File [" + file.getPath() + "] deleted.");
