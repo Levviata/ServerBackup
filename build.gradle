@@ -9,7 +9,7 @@ plugins {
 }
 
 group 'de.sebli.serverbackup'
-version '2.10.0' // TODO: Clarify version formatting
+version '2.11.0' // TODO: Clarify version formatting
 
 static def getTime() {
     SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd-HHmm")
