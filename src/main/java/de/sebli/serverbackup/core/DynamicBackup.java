@@ -27,42 +27,37 @@ public class DynamicBackup  implements Listener {
                 int regX = e.getTo().getChunk().getX() >> 5;
                 int regZ = e.getTo().getChunk().getZ() >> 5;
 
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), new Runnable() {
+                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+                    String chunkInf = "Data." + e.getTo().getWorld().getName() + ".Chunk." + "r." + regX + "." // wont comply to java:S1192, we are never refactoring this
+                            + regZ + ".mca";
 
-                    @Override
-                    public void run() {
-                        String chunkInf = "Data." + e.getTo().getWorld().getName() + ".Chunk." + "r." + regX + "." // wont comply to java:S1192, we are never refactoring this
-                                + regZ + ".mca";
+                    if (!Bukkit.getWorldContainer().toString().equalsIgnoreCase(".")) {
+                        chunkInf = "Data." + Bukkit.getWorldContainer() + "\\" + e.getTo().getWorld().getName()
+                                + ".Chunk." + "r." + regX + "." + regZ + ".mca";
+                    }
 
-                        if (!Bukkit.getWorldContainer().toString().equalsIgnoreCase(".")) {
-                            chunkInf = "Data." + Bukkit.getWorldContainer() + "\\" + e.getTo().getWorld().getName()
-                                    + ".Chunk." + "r." + regX + "." + regZ + ".mca";
-                        }
+                    if (!chunks.contains(e.getTo().getChunk())) {
+                        if (!Configuration.backupInfo.contains(chunkInf)) {
+                            chunks.add(e.getTo().getChunk());
+                            Configuration.backupInfo.set(chunkInf, chunks.get(chunks.size() - 1).getX());
+                            Configuration.backupInfo.set(chunkInf, chunks.get(chunks.size() - 1).getZ());
 
-                        if (!chunks.contains(e.getTo().getChunk())) {
-                            if (!Configuration.backupInfo.contains(chunkInf)) {
-                                chunks.add(e.getTo().getChunk());
-                                Configuration.backupInfo.set(chunkInf, chunks.get(chunks.size() - 1).getX());
-                                Configuration.backupInfo.set(chunkInf, chunks.get(chunks.size() - 1).getZ());
+                            saveChanges();
+                            try {
+                                chunks.remove(e.getTo().getChunk());
+                            } catch (ArrayIndexOutOfBoundsException ex) {
+                            }
+                        } else {
+                            chunks.add(e.getTo().getChunk());
+                            Configuration.backupInfo.set(chunkInf, chunks.get(chunks.size() - 1).getWorld());
 
-                                saveChanges();
-                                try {
-                                    chunks.remove(e.getTo().getChunk());
-                                } catch (ArrayIndexOutOfBoundsException ex) {
-                                }
-                            } else {
-                                chunks.add(e.getTo().getChunk());
-                                Configuration.backupInfo.set(chunkInf, chunks.get(chunks.size() - 1).getWorld());
-
-                                saveChanges();
-                                try {
-                                    chunks.remove(e.getTo().getChunk());
-                                } catch (ArrayIndexOutOfBoundsException ex) {
-                                }
+                            saveChanges();
+                            try {
+                                chunks.remove(e.getTo().getChunk());
+                            } catch (ArrayIndexOutOfBoundsException ex) {
                             }
                         }
                     }
-
                 });
             }
         }
@@ -72,18 +67,13 @@ public class DynamicBackup  implements Listener {
         if (!isSaving) {
             isSaving = true;
 
-            Bukkit.getScheduler().runTaskLaterAsynchronously(ServerBackupPlugin.getPluginInstance(), new Runnable() {
-
-                @Override
-                public void run() {
-                    Configuration.saveBackupInfo();;
-                    if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendLogMessages")) {
-                        Bukkit.getLogger().log(Level.INFO, "DynamicBP: file saved.");
-                    }
-
-                    isSaving = false;
+            Bukkit.getScheduler().runTaskLaterAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+                Configuration.saveBackupInfo();;
+                if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendLogMessages")) {
+                    Bukkit.getLogger().log(Level.INFO, "DynamicBP: file saved.");
                 }
 
+                isSaving = false;
             }, 20 * 5);
         }
     }
@@ -96,36 +86,31 @@ public class DynamicBackup  implements Listener {
             int regX = p.getLocation().getChunk().getX() >> 5;
             int regZ = p.getLocation().getChunk().getZ() >> 5;
 
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+                String chunkInf = "Data." + p.getLocation().getWorld().getName() + ".Chunk." + "r." + regX + "."
+                        + regZ + ".mca";
 
-                @Override
-                public void run() {
-                    String chunkInf = "Data." + p.getLocation().getWorld().getName() + ".Chunk." + "r." + regX + "."
-                            + regZ + ".mca";
-
-                    if (!Bukkit.getWorldContainer().toString().equalsIgnoreCase(".")) {
-                        chunkInf = "Data." + Bukkit.getWorldContainer() + "\\" + p.getLocation().getWorld().getName()
-                                + ".Chunk." + "r." + regX + "." + regZ + ".mca";
-                    }
-
-                    if (!chunks.contains(p.getLocation().getChunk())) {
-                        if (!Configuration.backupInfo.contains(chunkInf)) {
-                            chunks.add(p.getLocation().getChunk());
-                            Configuration.backupInfo.set(chunkInf + ".X", p.getLocation().getChunk().getX());
-                            Configuration.backupInfo.set(chunkInf + ".Z", p.getLocation().getChunk().getZ());
-
-                            Configuration.saveBackupInfo();
-                            chunks.remove(p.getLocation().getChunk());
-                        } else {
-                            chunks.add(p.getLocation().getChunk());
-                            Configuration.backupInfo.set(chunkInf, p.getLocation().getChunk().getWorld());
-
-                            Configuration.saveBackupInfo();
-                            chunks.remove(p.getLocation().getChunk());
-                        }
-                    }
+                if (!Bukkit.getWorldContainer().toString().equalsIgnoreCase(".")) {
+                    chunkInf = "Data." + Bukkit.getWorldContainer() + "\\" + p.getLocation().getWorld().getName()
+                            + ".Chunk." + "r." + regX + "." + regZ + ".mca";
                 }
 
+                if (!chunks.contains(p.getLocation().getChunk())) {
+                    if (!Configuration.backupInfo.contains(chunkInf)) {
+                        chunks.add(p.getLocation().getChunk());
+                        Configuration.backupInfo.set(chunkInf + ".X", p.getLocation().getChunk().getX());
+                        Configuration.backupInfo.set(chunkInf + ".Z", p.getLocation().getChunk().getZ());
+
+                        Configuration.saveBackupInfo();
+                        chunks.remove(p.getLocation().getChunk());
+                    } else {
+                        chunks.add(p.getLocation().getChunk());
+                        Configuration.backupInfo.set(chunkInf, p.getLocation().getChunk().getWorld());
+
+                        Configuration.saveBackupInfo();
+                        chunks.remove(p.getLocation().getChunk());
+                    }
+                }
             });
         }
     }
