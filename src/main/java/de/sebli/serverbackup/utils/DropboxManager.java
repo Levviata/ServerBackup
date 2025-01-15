@@ -34,9 +34,6 @@ public class DropboxManager {
     private static final String CLOUD_RT = "Cloud.Dropbox.RT";
     private static final String MESSAGE_SUCCESSFUL_UPLOAD = "Dropbox: Upload successfully. Backup stored on your dropbox account.";
 
-    private static final long CHUNKED_UPLOAD_CHUNK_SIZE = 16L << 20;
-    private static final int CHUNKED_UPLOAD_MAX_ATTEMPTS = 5;
-
     private static final long BASE_RETRY_DELAY_TICKS = 20L * 3;
 
     private static Task currentTask;
@@ -88,9 +85,11 @@ public class DropboxManager {
 
         try (InputStream in = new FileInputStream(filePath)) {
             // Step 1: Upload session start
-            UploadSessionStartUploader uploadSessionStart = client.files().uploadSessionStart();
-            UploadSessionStartResult uploadSessionStartResult = uploadSessionStart.uploadAndFinish(in);
-            String sessionId = uploadSessionStartResult.getSessionId();
+            String sessionId;
+            try (UploadSessionStartUploader uploadSessionStart = client.files().uploadSessionStart()) {
+                UploadSessionStartResult uploadSessionStartResult = uploadSessionStart.uploadAndFinish(in);
+                sessionId = uploadSessionStartResult.getSessionId();
+            }
 
             // Step 2: Upload large file in chunks
             long fileSize = file.length();
@@ -102,8 +101,9 @@ public class DropboxManager {
                 ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buffer, 0, bytesRead);
                 UploadSessionCursor cursor = new UploadSessionCursor(sessionId, uploaded);
 
-                // Append data to the session
-                client.files().uploadSessionAppendV2(cursor).uploadAndFinish(byteArrayInputStream, bytesRead);
+                try (UploadSessionAppendV2Uploader uploader = client.files().uploadSessionAppendV2(cursor)) {
+                    uploader.uploadAndFinish(byteArrayInputStream, bytesRead);
+                }
                 uploaded += bytesRead;
             }
 
@@ -113,16 +113,34 @@ public class DropboxManager {
                     .withClientModified(new Date())
                     .withMode(WriteMode.ADD)
                     .build();
-            FileMetadata metadata = client.files().uploadSessionFinish(cursor, commitInfo).finish();
-        } catch (UploadErrorException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (DbxException e) {
-            throw new RuntimeException(e);
-        } finally {
-            sendMessageWithLogs(MESSAGE_SUCCESSFUL_UPLOAD, sender);
 
+            try (UploadSessionFinishUploader finishUploader = client.files().uploadSessionFinish(cursor, commitInfo)) {
+                FileMetadata metadata = finishUploader.finish();
+            }
+        }
+
+        catch (UploadErrorException e) {
+            throw new RuntimeException("Failed to upload to Dropbox: " + e.getMessage(), e);
+        }
+
+        catch (IOException e) {
+            throw new RuntimeException("I/O error occurred while handling file: " + filePath, e);
+        }
+
+        catch (DbxException e) {
+            switch (e) {
+                case BadRequestException badRequestException ->
+                        throw new RuntimeException("Bad request to Dropbox API: " + e.getMessage(), e);
+                case InvalidAccessTokenException invalidAccessTokenException ->
+                        throw new RuntimeException("Invalid Dropbox access token: " + e.getMessage(), e);
+                case RateLimitException rateLimitException ->
+                        throw new RuntimeException("Rate limit exceeded for Dropbox API: " + e.getMessage(), e);
+                default -> throw new RuntimeException("Dropbox API error: " + e.getMessage(), e);
+            }
+        }
+
+        finally {
+            sendMessageWithLogs(MESSAGE_SUCCESSFUL_UPLOAD, sender); // i think this shits out 'null' when we make a backup? i have no idea and im not dealing with this rn
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                 tryDeleteFile(file);
                 ServerBackupPlugin.getPluginInstance().getLogger().info("File [" + file.getPath() + "] deleted.");
