@@ -6,6 +6,7 @@ import de.sebli.serverbackup.core.ZipManager;
 import org.bukkit.command.CommandSender;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
@@ -24,10 +25,10 @@ class CommandUnzip {
             return;
         }
 
-        File file = new File(Configuration.backupDestination + "//" + filePath);
-        File newFile = new File(
-                Configuration
-                        .backupDestination + "//" + filePath.replaceAll(".zip", ""));
+        File file = Paths.get(
+                Configuration.backupDestination, filePath).toFile();
+        File newFile = Paths.get(
+                Configuration.backupDestination, filePath.replaceAll(".zip", "")).toFile();
 
         if (!newFile.exists()) {
             sendMessageWithLogs(OperationHandler.processMessage("Command.Unzip.Header"), sender);

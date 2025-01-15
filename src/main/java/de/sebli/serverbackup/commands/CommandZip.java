@@ -3,13 +3,18 @@ package de.sebli.serverbackup.commands;
 import de.sebli.serverbackup.Configuration;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.core.ZipManager;
+import de.sebli.serverbackup.utils.enums.TaskPurpose;
+import de.sebli.serverbackup.utils.enums.TaskType;
 import org.bukkit.command.CommandSender;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
+import static de.sebli.serverbackup.core.OperationHandler.formatPath;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
+import static de.sebli.serverbackup.utils.TaskUtils.addTask;
 
 class CommandZip {
     private CommandZip() {
@@ -24,21 +29,17 @@ class CommandZip {
             return;
         }
 
-        File file = new File(Configuration.backupDestination + "//" + filePath);
-        File newFile = new File(Configuration.backupDestination + "//" + filePath + ".zip");
+        File file = Paths.get(Configuration.backupDestination, filePath).toFile();
+        File newFile = Paths.get(Configuration.backupDestination, filePath + ".zip").toFile();
 
         if (!newFile.exists()) {
             sender.sendMessage(OperationHandler.processMessage("Command.Zip.Header"));
 
             if (file.exists()) {
-                try {
-                    ZipManager zm = new ZipManager(file.getPath(), newFile.getPath(), sender, true, false,
-                            true);
+                ZipManager zm = new ZipManager(file.getPath(), newFile.getPath(), sender, true, false,
+                        true);
 
-                    zm.zip();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                zm.zip(addTask(TaskType.PHYSICAL, TaskPurpose.ZIP, "Zipping via command " + formatPath(filePath)));
             } else {
                 sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
             }
