@@ -37,7 +37,7 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
         Bukkit.getScheduler().cancelTasks(ServerBackupPlugin.getPluginInstance());
     }
 
-    public static void checkVersion() {
+    public static void checkVersion() { // TODO: Send messages to player if this gets called by JoinListener.java
         ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "ServerBackup: Searching for updates...");
 
         Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
@@ -59,7 +59,7 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
                     /*if (extractVersion(latest) == null) {
                         ServerBackupPlugin.getInstance().getLogger().warning(
                                 "Latest version number extracted is null! Auto updating likely WON'T work.");
-                    } else latestClean = Integer.parseInt(Objects.requireNonNull(extractVersion(latest)));*/ // Remove when we actually upload our plugin to spigot
+                    } else latestClean = Integer.parseInt(Objects.requireNonNull(extractVersion(latest))); Remove commenting when we actually upload our fork to spigot*/
 
                     if (extractVersion(current) == null) {
                         ServerBackupPlugin.getPluginInstance().getLogger().warning(
@@ -76,8 +76,9 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
                         ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO,
                                 "ServerBackup: No updates found. The server is running the latest version.");
                     } else {
-                        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "ServerBackup: There is a newer version available - " + latest
-                                + ", you are on - " + current);
+                        String formattedMessage = MessageFormat.format("ServerBackup: There is a newer version available - {0}, you are on - {1}", latest, current);
+
+                        ServerBackupPlugin.getPluginInstance().getLogger().info(formattedMessage);
 
                         if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("AutomaticUpdates")) {
                             ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "ServerBackup: Downloading newest version...");
@@ -105,8 +106,9 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
                     }
                 }
             } catch (IOException exception) {
-                ServerBackupPlugin.getPluginInstance().getLogger().log(Level.WARNING,
-                        "ServerBackup: Cannot search for updates - " + exception.getMessage());
+                String formattedMessage = MessageFormat.format("ServerBackup: Cannot search for updates - {0}", exception.getMessage());
+
+                ServerBackupPlugin.getPluginInstance().getLogger().warning(formattedMessage);
             }
         });
     }
@@ -128,11 +130,8 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
         OperationHandler.shutdownProgress = shutdownProgressIn;
     }
 
-    public static boolean getIsUpdated() { return isUpdated; }
-
-    public static void setIsUpdated(boolean isUpdatedIn) {
-        OperationHandler.isUpdated = isUpdatedIn;
+    public static String formatPath(String filePath) {
+        return filePath.replace("\\", "/");
     }
-
 
 }
