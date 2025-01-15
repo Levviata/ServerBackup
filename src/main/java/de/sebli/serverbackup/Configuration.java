@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.GlobalConstants.CONFIG_BACKUP_DESTINATION;
@@ -57,18 +56,21 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
             files.mkdir();
         }
 
-        ServerBackupPlugin.getPluginInstance().getConfig().options()
-                .header("BackupTimer = At what time should a Backup be created? The format is: 'hh-mm' e.g. '12-30'."
-                        + "\nDeleteOldBackups = Deletes old backups automatically after a specific time (in days, standard = 7 days)"
-                        + "\nDeleteOldBackups - Type '0' at DeleteOldBackups to disable the deletion of old backups."
-                        + "\nBackupLimiter = Deletes old backups automatically if number of total backups is greater than this number (e.g. if you enter '5' - the oldest backup will be deleted if there are more than 5 backups, so you will always keep the latest 5 backups)"
-                        + "\nBackupLimiter - Type '0' to disable this feature. If you don't type '0' the feature 'DeleteOldBackups' will be disabled and this feature ('BackupLimiter') will be enabled."
-                        + "\nKeepUniqueBackups - Type 'true' to disable the deletion of unique backups. The plugin will keep the newest backup of all backed up worlds or folders, no matter how old it is."
-                        + "\nBlacklist - A list of files/directories that will not be backed up."
-                        + "\nIMPORTANT FTP information: Set 'UploadBackup' to 'true' if you want to store your backups on a ftp server (sftp does not work at the moment - if you host your own server (e.g. vps/root server) you need to set up a ftp server on it)."
-                        + "\nIf you use ftp backups, you can set 'DeleteLocalBackup' to 'true' if you want the plugin to remove the created backup from your server once it has been uploaded to your ftp server."
-                        + "\nCompressBeforeUpload compresses the backup to a zip file before uploading it. Set it to 'false' if you want the files to be uploaded directly to your ftp server."
-                        + "\nJoin the discord server if you need help or have a question: https://discord.gg/rNzngsCWFC");
+        StringBuilder headerText = new StringBuilder();
+        headerText.append("BackupTimer = At what time should a Backup be created? The format is: 'hh-mm' e.g. '12-30'.")
+                .append("\nDeleteOldBackups = Deletes old backups automatically after a specific time (in days, standard = 7 days)")
+                .append("\nDeleteOldBackups - Type '0' at DeleteOldBackups to disable the deletion of old backups.")
+                .append("\nBackupLimiter = Deletes old backups automatically if number of total backups is greater than this number (e.g. if you enter '5' - the oldest backup will be deleted if there are more than 5 backups, so you will always keep the latest 5 backups)")
+                .append("\nBackupLimiter - Type '0' to disable this feature. If you don't type '0' the feature 'DeleteOldBackups' will be disabled and this feature ('BackupLimiter') will be enabled.")
+                .append("\nKeepUniqueBackups - Type 'true' to disable the deletion of unique backups. The plugin will keep the newest backup of all backed up worlds or folders, no matter how old it is.")
+                .append("\nBlacklist - A list of files/directories that will not be backed up.")
+                .append("\nIMPORTANT FTP information: Set 'UploadBackup' to 'true' if you want to store your backups on a ftp server (sftp does not work at the moment - if you host your own server (e.g. vps/root server) you need to set up a ftp server on it).")
+                .append("\nIf you use ftp backups, you can set 'DeleteLocalBackup' to 'true' if you want the plugin to remove the created backup from your server once it has been uploaded to your ftp server.")
+                .append("\nCompressBeforeUpload compresses the backup to a zip file before uploading it. Set it to 'false' if you want the files to be uploaded directly to your ftp server.")
+                .append("\nJoin the discord server if you need help or have a question: https://discord.gg/rNzngsCWFC");
+
+        ServerBackupPlugin.getPluginInstance().getConfig().options().header(headerText.toString());
+
         ServerBackupPlugin.getPluginInstance().getConfig().options().copyDefaults(true);
 
         ServerBackupPlugin.getPluginInstance().getConfig().addDefault("AutomaticBackups", true);
@@ -126,6 +128,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
 
         ServerBackupPlugin.getPluginInstance().getConfig().addDefault("DynamicBackup", false);
         ServerBackupPlugin.getPluginInstance().getConfig().addDefault("SendLogMessages", false);
+        ServerBackupPlugin.getPluginInstance().getConfig().addDefault("SendDebuggingLogs", false);
 
         ServerBackupPlugin.getPluginInstance().saveConfig();
 
@@ -214,14 +217,15 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
 
         String oldDes = backupDestination;
 
-        if (!oldDes
-                .equalsIgnoreCase(ServerBackupPlugin.getPluginInstance().getConfig().getString(CONFIG_BACKUP_DESTINATION))) {
+        if (!oldDes.equalsIgnoreCase(
+                ServerBackupPlugin.getPluginInstance().getConfig().getString(CONFIG_BACKUP_DESTINATION))
+        ) {
             backupDestination = ServerBackupPlugin.getPluginInstance().getConfig()
                     .getString(CONFIG_BACKUP_DESTINATION);
 
-            ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO,
-                    "ServerBackup: Backup destination [" + oldDes + " >> "
-                            + backupDestination + "] updated successfully.");
+            String formattedMessage = String.format("ServerBackup: Backup destination [ [%s] >> [%s] ] updated successfully.", oldDes, backupDestination);
+
+            ServerBackupPlugin.getPluginInstance().getLogger().info(formattedMessage);
         }
 
         if (cloudInf.exists()) {
