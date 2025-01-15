@@ -8,104 +8,28 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.util.Scanner;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class JoinListener implements Listener {
 
-    static final String TITLE = "§8=====§fServerBackup§8=====";
-    static final String AUTHOR = "§8=====§9Plugin by Seblii§8=====";
-    static final String PAGE = "§7, you are on - §c";
+    private static final Set<UUID> checkedPlayers = new HashSet<>();
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
 
-        if (p.hasPermission("backup.update")) {
-            if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("UpdateAvailableMessage")) {
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
-                    int resourceID = 79320;
-                    try (InputStream inputStream = (new URL(
-                            "https://api.spigotmc.org/legacy/update.php?resource=" + resourceID)).openStream();
-                         Scanner scanner = new Scanner(inputStream)) {
-                        if (scanner.hasNext()) {
-                            String latest = scanner.next();
-                            String current = ServerBackupPlugin.getPluginInstance().getDescription().getVersion();
+        // Check if the player has update perms >
+        // check if we already told the player to update >
+        // add player uuid to checked players so the update message isnt sent every join >
+        // tell player to update or not
+        if (p.hasPermission("backup.update") &&
+                ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("UpdateAvailableMessage") && !checkedPlayers.contains(p.getUniqueId())
+        ) {
+                checkedPlayers.add(p.getUniqueId());
 
-                            int late = Integer.parseInt(latest.replaceAll("\\.", ""));  // Somewhat reasonable replaceAll() usage
-                            int curr = Integer.parseInt(current.replaceAll("\\.", "")); // This too
-
-                            if (curr >= late) {
-                            } else {
-                                if (OperationHandler.getIsUpdated()) {
-                                    p.sendMessage(TITLE);
-                                    p.sendMessage("");
-                                    p.sendMessage("§7There was a newer version available - §a" + latest
-                                            + PAGE + current);
-                                    p.sendMessage(
-                                            "\n§7The latest version has been downloaded automatically, please reload the server to complete the update.");
-                                    p.sendMessage("");
-                                    p.sendMessage(AUTHOR);
-                                } else {
-                                    if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("AutomaticUpdates")) {
-                                        if (p.hasPermission("backup.admin")) {
-                                            p.sendMessage(TITLE);
-                                            p.sendMessage("");
-                                            p.sendMessage("§7There is a newer version available - §a" + latest
-                                                    + PAGE + current);
-                                            p.sendMessage("");
-                                            p.sendMessage(AUTHOR);
-                                            p.sendMessage("");
-                                            p.sendMessage("ServerBackup§7: Automatic update started...");
-
-                                            URL url = new URL(
-                                                    "https://server-backup.net/assets/downloads/ServerBackup.jar");
-
-                                            int bVer = Integer.parseInt(
-                                                    Bukkit.getVersion().split(" ")[Bukkit.getVersion().split(" ").length
-                                                            - 1].replaceAll("\\)", "").replaceAll("\\.", "")); // Somewhat reasonable replaceAll() usage
-
-                                            if (bVer < 118) {
-                                                url = new URL(
-                                                        "https://server-backup.net/assets/downloads/alt/ServerBackup.jar");
-                                            }
-
-                                            try (InputStream in = url.openStream();
-                                                 ReadableByteChannel rbc = Channels.newChannel(in);
-                                                 FileOutputStream fos = new FileOutputStream(
-                                                         "plugins/ServerBackup.jar")) {
-                                                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-
-                                                p.sendMessage(
-                                                        "ServerBackup§7: Download finished. Please reload the server to complete the update.");
-
-                                                OperationHandler.setIsUpdated(true);
-                                            }
-                                        }
-                                    } else {
-                                        p.sendMessage(TITLE);
-                                        p.sendMessage("");
-                                        p.sendMessage("§7There is a newer version available - §a" + latest
-                                                + PAGE + current);
-                                        p.sendMessage(
-                                                "§7Please download the latest version - §4https://server-backup.net/");
-                                        p.sendMessage("");
-                                        p.sendMessage(AUTHOR);
-                                    }
-                                }
-                            }
-                        }
-                    } catch (IOException exception) {
-                        exception.printStackTrace();
-                    }
-                });
+                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), OperationHandler::checkVersion);
             }
-        }
     }
-
 }
