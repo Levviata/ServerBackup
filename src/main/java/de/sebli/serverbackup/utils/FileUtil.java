@@ -1,12 +1,19 @@
 package de.sebli.serverbackup.utils;
 
+import de.sebli.serverbackup.utils.enums.TaskPurpose;
+import de.sebli.serverbackup.utils.enums.TaskType;
+import de.sebli.serverbackup.utils.records.Task;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class FileUtil {
+import static de.sebli.serverbackup.core.OperationHandler.formatPath;
+import static de.sebli.serverbackup.utils.TaskUtils.addTask;
+import static de.sebli.serverbackup.utils.TaskUtils.removeTask;
 
+public class FileUtil {
     /**
      * Attempts to delete the specified file.
      *
@@ -18,12 +25,15 @@ public class FileUtil {
      * @return {@code true} if the file was successfully deleted, {@code false} otherwise
      */
     public static boolean tryDeleteFile(File file) {
+        Task currentTask = addTask(TaskType.PHYSICAL, TaskPurpose.DELETE, "Deleting " + formatPath(file.getPath()));
         try  {
             Files.delete(Path.of(file.getPath()));
             return true;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
+        } finally {
+            removeTask(currentTask);
         }
     }
 }
