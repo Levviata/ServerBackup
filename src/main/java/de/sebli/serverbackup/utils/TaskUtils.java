@@ -32,20 +32,21 @@ public class TaskUtils {
         return newTask;
     }
 
-    // Remove a specific task
     public static boolean removeTask(Task task) {
         if (tasks.remove(task)) {
-            // Update formattedTasks and re-index remaining tasks for the same type/purpose
+            // Remove the exact formatted task
+            String formattedTaskToRemove = task.type().getType() + " " + task.purpose() + " #" + task.index() + " {";
+            formattedTasks.removeIf(t -> t.startsWith(formattedTaskToRemove));
+
+            // Re-index remaining tasks for the same type and purpose
             reindexTasks(task.type(), task.purpose());
-            formattedTasks.removeIf(t -> t.contains(task.type().getType() + " #" + task.index()));
 
             // Log removal
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendDebugMessages")) {
                 String formattedDebugMessage = MessageFormat.format(
-                        "Task: {0}\nType: {1}\nPurpose: {2}\nIndex: {3}\nThis task was removed successfully!",
+                        "Task: {0}\nType: {1}\nPurpose: {2}\nIndex: {3}\nTask was removed successfully!",
                         task, task.type(), task.purpose(), task.index()
                 );
-
                 ServerBackupPlugin.getPluginInstance().getLogger().info(formattedDebugMessage);
             }
             return true;
@@ -55,12 +56,12 @@ public class TaskUtils {
                         "Task: {0}\nType: {1}\nPurpose: {2}\nIndex: {3}\nTask not found or invalid task given, didn''t remove designated task.",
                         task, task.type(), task.purpose(), task.index()
                 );
-
                 ServerBackupPlugin.getPluginInstance().getLogger().warning(formattedDebugMessage);
             }
             return false;
         }
     }
+
 
     // Find a specific task
     public static Task findTask(TaskType type, TaskPurpose purpose, int index) {
