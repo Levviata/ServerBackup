@@ -13,7 +13,7 @@ class CommandShutdown {
     }
 
     private static final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
-    
+
     public static void execute(CommandSender sender, String[] args) {
         if (getShutdownProgress()) {
             OperationHandler.setShutdownProgress(false);

@@ -36,7 +36,7 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
 
     public static void startTimer() {
         if (instance.getConfig().getBoolean("AutomaticBackups")) {
-            Bukkit.getScheduler().runTaskTimerAsynchronously(instance, new Timer(), (long)20 * 20, (long)20 * 20);
+            Bukkit.getScheduler().runTaskTimerAsynchronously(instance, new Timer(), (long) 20 * 20, (long) 20 * 20);
         }
     }
 
@@ -130,7 +130,9 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
         return null; // Return null if no match is found.
     }
 
-    public static boolean getShutdownProgress() { return shutdownProgress; }
+    public static boolean getShutdownProgress() {
+        return shutdownProgress;
+    }
 
     public static void setShutdownProgress(boolean shutdownProgressIn) {
         OperationHandler.shutdownProgress = shutdownProgressIn;

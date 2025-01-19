@@ -6,8 +6,8 @@ package de.sebli.serverbackup.utils;
 
 public class GlobalConstants {
 
-    private GlobalConstants (){
-      throw new IllegalStateException("Utility class");
+    private GlobalConstants() {
+        throw new IllegalStateException("Utility class");
     }
 
     public static final int RESOURCE_ID = 79320;

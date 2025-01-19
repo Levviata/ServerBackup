@@ -37,7 +37,7 @@ public class ServerBackupTabCompleter implements org.bukkit.command.TabCompleter
                 StringUtil.copyPartialMatches(args[0], commands, completions);
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("list")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
                     int maxPages = backups.length / 10;
 
@@ -49,10 +49,10 @@ public class ServerBackupTabCompleter implements org.bukkit.command.TabCompleter
                         commands.add(String.valueOf(i));
                     }
                 } else if (args[0].equalsIgnoreCase("remove")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
-                    for (int i = 0; i < backups.length; i++) {
-                        commands.add(backups[i].getName());
+                    for (File backup : backups) {
+                        commands.add(backup.getName());
                     }
                 } else if (args[0].equalsIgnoreCase("create")) {
                     for (World world : Bukkit.getWorlds()) {
@@ -63,7 +63,7 @@ public class ServerBackupTabCompleter implements org.bukkit.command.TabCompleter
 
                     commands.add("@server");
                 } else if (args[0].equalsIgnoreCase("zip")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
                     for (File backup : backups) {
                         if (!backup.getName().endsWith(".zip")) {
@@ -71,7 +71,7 @@ public class ServerBackupTabCompleter implements org.bukkit.command.TabCompleter
                         }
                     }
                 } else if (args[0].equalsIgnoreCase("unzip")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
                     for (File backup : backups) {
                         if (backup.getName().endsWith(".zip")) {
@@ -98,7 +98,7 @@ public class ServerBackupTabCompleter implements org.bukkit.command.TabCompleter
                             commands.add(backup.split(" ")[1]);
                         }
                     } else if (args[1].equalsIgnoreCase("upload")) {
-                        File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                        File[] backups = new File(Configuration.backupDestination).listFiles();
 
                         for (File backup : backups) {
                             if (backup.getName().endsWith(".zip")) {
@@ -108,7 +108,7 @@ public class ServerBackupTabCompleter implements org.bukkit.command.TabCompleter
                     }
 
                 } else if (args[0].equalsIgnoreCase("dropbox")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
                     for (File backup : backups) {
                         if (backup.getName().endsWith(".zip")) {

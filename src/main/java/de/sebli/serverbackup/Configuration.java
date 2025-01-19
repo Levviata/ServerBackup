@@ -18,13 +18,13 @@ public class Configuration {
     public static String prefix;
     public static String backupDestination = "Backups//";
 
-    private static File bpInf = new File("plugins//" + ServerBackupPlugin.getPluginInstance().getName() + "//backupInfo.yml"); // wont comply to java:S1192, possibly never refactoring this?
+    private static final File bpInf = new File("plugins//" + ServerBackupPlugin.getPluginInstance().getName() + "//backupInfo.yml"); // wont comply to java:S1192, possibly never refactoring this?
     public static YamlConfiguration backupInfo = YamlConfiguration.loadConfiguration(bpInf);
 
-    private static File cloudInf = new File("plugins//" + ServerBackupPlugin.getPluginInstance().getName() + "//cloudAccess.yml");
+    private static final File cloudInf = new File("plugins//" + ServerBackupPlugin.getPluginInstance().getName() + "//cloudAccess.yml");
     public static YamlConfiguration cloudInfo = YamlConfiguration.loadConfiguration(cloudInf);
 
-    private static File messagesFile = new File("plugins//" + ServerBackupPlugin.getPluginInstance().getName() + "//messages.yml");
+    private static final File messagesFile = new File("plugins//" + ServerBackupPlugin.getPluginInstance().getName() + "//messages.yml");
     public static YamlConfiguration messages = YamlConfiguration.loadConfiguration(messagesFile);
 
     private static final String CLOUD_KEY = "Cloud.Dropbox.AppKey";

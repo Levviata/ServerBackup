@@ -9,7 +9,7 @@ class Messages {
         throw new IllegalStateException("Utility class");
     }
 
-    private static YamlConfiguration messages = Configuration.messages;
+    private static final YamlConfiguration messages = Configuration.messages;
 
     public static void loadMessages() {
         messages.options().header("Use '&nl' to add a new line. Use '&' for color codes (e.g. '&4' for color red). For some messages you can use a placeholder (e.g. '" + FILE_NAME_PLACEHOLDER + "' for file name)." +

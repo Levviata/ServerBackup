@@ -49,6 +49,7 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
             OperationHandler.checkVersion(null);
         }
     }
+
     private static void setPluginInstance(ServerBackupPlugin instanceIn) {
         pluginInstance = instanceIn;
     }

@@ -27,7 +27,7 @@ class CommandList {
 
     public static void execute(CommandSender sender, String[] args) {
         Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
-            File[] backups = new File(Configuration.backupDestination + "").listFiles();
+            File[] backups = new File(Configuration.backupDestination).listFiles();
 
             if (backups.length == 0
                     || backups.length == 1 && backups[0].getName().equalsIgnoreCase("Files")) {
@@ -48,11 +48,11 @@ class CommandList {
                 }
 
                 if ((backups.length - 1) <= page * 10 && (backups.length - 1) >= page * 10 - 10) {
-                    sender.sendMessage("----- Backup " + Integer.valueOf(page * 10 - 9) + "-"
+                    sender.sendMessage("----- Backup " + (page * 10 - 9) + "-"
                             + (backups.length - 1) + "/" + (backups.length - 1) + " -----");
                 } else {
-                    sender.sendMessage("----- Backup " + Integer.valueOf(page * 10 - 9) + "-"
-                            + Integer.valueOf(page * 10) + "/" + (backups.length - 1) + " -----");
+                    sender.sendMessage("----- Backup " + (page * 10 - 9) + "-"
+                            + page * 10 + "/" + (backups.length - 1) + " -----");
                 }
                 sender.sendMessage("");
 
@@ -67,7 +67,7 @@ class CommandList {
 
                     if (sender instanceof Player p) {
 
-                        TextComponent msg = new TextComponent("§7[" + Integer.valueOf(i + 1) + "] §r"
+                        TextComponent msg = new TextComponent("§7[" + (i + 1) + "] §r"
                                 + backups[i].getName() + " §7[" + fileSize + "MB]");
                         msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                 new ComponentBuilder("Click to get Backup name").create()));

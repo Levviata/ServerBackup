@@ -28,7 +28,7 @@ public class Backup {
     private final String backupFilePath;
     private final CommandSender sender;
     private final boolean isFullBackup;
-    private LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
+    private final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
 
     public Backup(String backupFilePath, CommandSender sender, boolean isFullBackup) {
         this.backupFilePath = backupFilePath;
@@ -55,7 +55,7 @@ public class Backup {
 
         File backupFolder = Paths.get(Configuration.backupDestination, "backup-" + df.format(date) + "-" + filePath, filePath).toFile();
 
-        if(worldFolder.exists()) {
+        if (worldFolder.exists()) {
             if (!backupFolder.exists()) {
                 for (Player all : Bukkit.getOnlinePlayers()) {
                     if (all.hasPermission("backup.notification")) {

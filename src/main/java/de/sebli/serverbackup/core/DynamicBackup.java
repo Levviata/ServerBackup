@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
-public class DynamicBackup  implements Listener {
+public class DynamicBackup implements Listener {
 
     List<Chunk> chunks = Collections.synchronizedList(new ArrayList<>());
     public boolean isSaving = false;
@@ -68,7 +68,7 @@ public class DynamicBackup  implements Listener {
             isSaving = true;
 
             Bukkit.getScheduler().runTaskLaterAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
-                Configuration.saveBackupInfo();;
+                Configuration.saveBackupInfo();
                 if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendLogMessages")) {
                     Bukkit.getLogger().log(Level.INFO, "DynamicBP: file saved.");
                 }

@@ -24,6 +24,7 @@ import static de.sebli.serverbackup.utils.TaskUtils.*;
 public class DropboxManager {
 
     private final CommandSender sender;
+
     public DropboxManager(CommandSender sender) {
         this.sender = sender;
     }
@@ -120,21 +121,13 @@ public class DropboxManager {
 
             // Success -> send message
             logHandler.logInfo(MESSAGE_SUCCESSFUL_UPLOAD, sender); // i think this shits out 'null' when we make a backup? i have no idea and im not dealing with this rn
-        }
-
-        catch (UploadErrorException e) {
+        } catch (UploadErrorException e) {
             logHandler.logError("Upload error occurred", e.getMessage(), sender);
-        }
-
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             logHandler.logError("File not found", e.getMessage(), sender);
-        }
-
-        catch (IOException e) {
+        } catch (IOException e) {
             logHandler.logError("Error reading from file", e.getMessage(), sender);
-        }
-
-        catch (DbxException e) {
+        } catch (DbxException e) {
             switch (e) {
                 case BadRequestException badRequestException ->
                         logHandler.logError("Bad request to Dropbox API", e.getMessage(), sender);
@@ -144,9 +137,7 @@ public class DropboxManager {
                         logHandler.logError("Rate limit exceeded for Dropbox API", e.getMessage(), sender);
                 default -> logHandler.logError("Error occurred", e.getMessage(), sender);
             }
-        }
-
-        finally {
+        } finally {
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("CloudBackup.Options.DeleteLocalBackup")) {
                 tryDeleteFile(file);
                 ServerBackupPlugin.getPluginInstance().getLogger().info("File [" + file.getPath() + "] deleted.");

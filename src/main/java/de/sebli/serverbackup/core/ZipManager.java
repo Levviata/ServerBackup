@@ -82,7 +82,7 @@ public class ZipManager {
 
                             if (bl.isDirectory()) {
                                 if (path.toFile().getParent().startsWith(bl.toString())
-                                        || path.toFile().getParent().startsWith(".\\" + bl.toString())) {
+                                        || path.toFile().getParent().startsWith(".\\" + bl)) {
                                     return;
                                 }
                             } else {
@@ -100,29 +100,26 @@ public class ZipManager {
                                         || path.getParent().toString().endsWith("entities")
                                         || path.getParent().toString().endsWith("poi"))
                         ) {
-                                    boolean found = false;
-                                    if (Configuration.backupInfo
-                                            .contains("Data." + path.getParent().getParent().toString() + ".Chunk."
-                                                    + path.getFileName().toString())) {
-                                        found = true;
-                                    }
+                            boolean found = Configuration.backupInfo
+                                    .contains("Data." + path.getParent().getParent().toString() + ".Chunk."
+                                            + path.getFileName().toString());
 
-                                    if (!found)
-                                        return;
-                                }
+                            if (!found)
+                                return;
+                        }
 
 
                         try {
                             if (sendDebugMessage &&
                                     ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendLogMessages")
                             ) {
-                                    ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO,
-                                            "Zipping '" + path + "'");
+                                ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO,
+                                        "Zipping '" + path + "'");
 
-                                    if (Bukkit.getConsoleSender() != sender) {
-                                        sender.sendMessage("Zipping '" + path);
-                                    }
+                                if (Bukkit.getConsoleSender() != sender) {
+                                    sender.sendMessage("Zipping '" + path);
                                 }
+                            }
 
 
                             zs.putNextEntry(zipEntry);
@@ -174,15 +171,15 @@ public class ZipManager {
                     ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("DynamicBackup") &&
                     !sourceFilePath.equalsIgnoreCase(".")
             ) {
-                        Configuration.backupInfo.set("Data." + sourceFilePath, "");
+                Configuration.backupInfo.set("Data." + sourceFilePath, "");
 
-                        new File(targetFilePath).renameTo(new File(targetFilePath.split("backup")[0] + "dynamic-backup" // wont comply to java:S1192, no comment
-                                + targetFilePath.split("backup")[1]));
-                        targetFilePath = targetFilePath.split("backup")[0] + "dynamic-backup"
-                                + targetFilePath.split("backup")[1];
+                new File(targetFilePath).renameTo(new File(targetFilePath.split("backup")[0] + "dynamic-backup" // wont comply to java:S1192, no comment
+                        + targetFilePath.split("backup")[1]));
+                targetFilePath = targetFilePath.split("backup")[0] + "dynamic-backup"
+                        + targetFilePath.split("backup")[1];
 
-                        Configuration.saveBackupInfo();
-                    }
+                Configuration.saveBackupInfo();
+            }
 
 
             if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("Ftp.UploadBackup")) {
@@ -206,21 +203,21 @@ public class ZipManager {
                 ServerBackupPlugin.getPluginInstance().getConfig().getString(PATH_COMMAND_AFTER_AUTOMATIC_BACKUP) != null &&
                 !ServerBackupPlugin.getPluginInstance().getConfig().getString(PATH_COMMAND_AFTER_AUTOMATIC_BACKUP).equalsIgnoreCase("/")
         ) {
-                isCommandTimerRunning = true;
+            isCommandTimerRunning = true;
 
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        if (getTasks().isEmpty()) {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), ServerBackupPlugin.getPluginInstance().getConfig().getString(PATH_COMMAND_AFTER_AUTOMATIC_BACKUP).replace("/", ""));
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (getTasks().isEmpty()) {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), ServerBackupPlugin.getPluginInstance().getConfig().getString(PATH_COMMAND_AFTER_AUTOMATIC_BACKUP).replace("/", ""));
 
-                            isCommandTimerRunning = false;
+                        isCommandTimerRunning = false;
 
-                            cancel();
-                        }
+                        cancel();
                     }
-                }.runTaskTimer(ServerBackupPlugin.getPluginInstance(), (long)20 * 5, (long)20 * 5);
-            }
+                }
+            }.runTaskTimer(ServerBackupPlugin.getPluginInstance(), (long) 20 * 5, (long) 20 * 5);
+        }
 
     }
 
@@ -232,7 +229,6 @@ public class ZipManager {
             ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "");
             ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "ServerBackup | Start unzipping...");
             ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "");
-
 
 
             byte[] buffer = new byte[1024];
@@ -250,12 +246,12 @@ public class ZipManager {
                     if (sendDebugMessage &&
                             ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("SendLogMessages")
                     ) {
-                            ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "Unzipping '" + newFile.getPath());
+                        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "Unzipping '" + newFile.getPath());
 
-                            if (Bukkit.getConsoleSender() != sender) {
-                                sender.sendMessage("Unzipping '" + newFile.getPath());
-                            }
+                        if (Bukkit.getConsoleSender() != sender) {
+                            sender.sendMessage("Unzipping '" + newFile.getPath());
                         }
+                    }
 
 
                     new File(newFile.getParent()).mkdirs();

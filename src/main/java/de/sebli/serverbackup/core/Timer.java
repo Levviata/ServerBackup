@@ -128,9 +128,9 @@ public class Timer implements Runnable {
                 if (instance.getConfig().getBoolean("KeepUniqueBackups") &&
                         !backupNames.contains(backupName)) {
 
-                        backupNames.add(backupName);
-                        continue;
-                    }
+                    backupNames.add(backupName);
+                    continue;
+                }
 
 
                 if (backupDate.isBefore(date.plusDays(1))) {
@@ -158,17 +158,17 @@ public class Timer implements Runnable {
 
         String formattedMessage = String.format("ServerBackup | Backup deletion started... [ started at [%s] ]", startTime);
 
-        logHandler.logInfo( "", null);
+        logHandler.logInfo("", null);
         logHandler.logInfo(formattedMessage, null);
-        logHandler.logInfo( "", null);
+        logHandler.logInfo("", null);
     }
 
     private void logBackupDeletionEnd(long time) {
         String formattedMessage = String.format("ServerBackup | Backup deletion finished. [ finished in [%s]ms ]", (System.currentTimeMillis() - time));
 
-        logHandler.logInfo( "", null);
+        logHandler.logInfo("", null);
         logHandler.logInfo(formattedMessage, null);
-        logHandler.logInfo( "", null);
+        logHandler.logInfo("", null);
     }
 
     private void handleBackupLimiter() {

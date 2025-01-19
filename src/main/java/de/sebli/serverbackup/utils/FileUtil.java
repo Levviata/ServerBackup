@@ -31,7 +31,7 @@ public class FileUtil {
      */
     public static boolean tryDeleteFile(File file) {
         Task currentTask = addTask(TaskType.PHYSICAL, TaskPurpose.DELETE, "Deleting " + formatPath(file.getPath()));
-        try  {
+        try {
             Files.delete(Path.of(file.getPath()));
             return true;
         } catch (IOException e) {

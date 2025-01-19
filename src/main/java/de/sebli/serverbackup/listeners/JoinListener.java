@@ -27,11 +27,11 @@ public class JoinListener implements Listener {
         if (p.hasPermission("backup.update") &&
                 ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("UpdateAvailableMessage") && !checkedPlayers.contains(p.getUniqueId())
         ) {
-                checkedPlayers.add(p.getUniqueId());
+            checkedPlayers.add(p.getUniqueId());
 
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
-                    OperationHandler.checkVersion(p);
-                });
-            }
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+                OperationHandler.checkVersion(p);
+            });
+        }
     }
 }

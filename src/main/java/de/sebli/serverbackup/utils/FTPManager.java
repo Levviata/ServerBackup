@@ -71,11 +71,9 @@ public class FTPManager {
             } else { // is NOT FTPS
                 handleUploadToFTP(ftpClient, file);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             logHandler.logError(OperationHandler.processMessage(ERROR_FTP_UPLOAD_FAILED), e.getMessage(), sender);
-        }
-        finally {
+        } finally {
             disconnectClient(ftpsClient);
             disconnectClient(ftpClient);
         }

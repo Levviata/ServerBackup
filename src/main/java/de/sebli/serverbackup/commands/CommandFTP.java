@@ -31,7 +31,7 @@ class CommandFTP {
                 List<String> backups = ftpm.getFTPBackupList(false);
 
                 if (backups.isEmpty()) {
-                    logHandler.logInfo(OperationHandler.processMessage("Error.NoFtpBackups"), (Player)sender);
+                    logHandler.logInfo(OperationHandler.processMessage("Error.NoFtpBackups"), sender);
 
                     return;
                 }
@@ -46,11 +46,11 @@ class CommandFTP {
                     }
 
                     if (backups.size() <= page * 10 && backups.size() >= page * 10 - 10) {
-                        sender.sendMessage("----- Ftp-Backup " + Integer.valueOf(page * 10 - 9) + "-"
+                        sender.sendMessage("----- Ftp-Backup " + (page * 10 - 9) + "-"
                                 + backups.size() + "/" + backups.size() + " -----");
                     } else {
-                        sender.sendMessage("----- Ftp-Backup " + Integer.valueOf(page * 10 - 9) + "-"
-                                + Integer.valueOf(page * 10) + "/" + backups.size() + " -----");
+                        sender.sendMessage("----- Ftp-Backup " + (page * 10 - 9) + "-"
+                                + page * 10 + "/" + backups.size() + " -----");
                     }
                     sender.sendMessage("");
 
