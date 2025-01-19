@@ -7,7 +7,6 @@ import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.listeners.JoinListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -48,7 +47,7 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
         Bukkit.getLogger().info("Plugin enabled.");
 
         if (getConfig().getBoolean("UpdateAvailableMessage")) {
-            OperationHandler.checkVersion();
+            OperationHandler.checkVersion(null);
         }
     }
     private static void setPluginInstance(ServerBackupPlugin instanceIn) {
@@ -57,22 +56,5 @@ public class ServerBackupPlugin extends JavaPlugin { // Singleton implementation
 
     public static ServerBackupPlugin getPluginInstance() {
         return pluginInstance;
-    }
-
-    public static void sendMessageWithLogs(String message, CommandSender senderIn) {
-        if (senderIn instanceof ConsoleCommandSender) {
-            senderIn.sendMessage(message);
-        } else { // Command block or player
-            senderIn.sendMessage(message);
-
-            String formattedMessage =
-                    "\n" +
-                    "[START OF COMMAND LOGGER] " + "\n" +
-                    "[INFO] Executed by player " + senderIn.getName() + "\n" +
-                    "[INFO] Logged information: " + message + "\n" +
-                    "[END OF COMMAND LOGGER]";
-
-            ServerBackupPlugin.getPluginInstance().getLogger().info(formattedMessage);
-        }
     }
 }

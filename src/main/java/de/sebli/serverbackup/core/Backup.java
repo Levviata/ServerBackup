@@ -2,6 +2,7 @@ package de.sebli.serverbackup.core;
 
 import de.sebli.serverbackup.Configuration;
 import de.sebli.serverbackup.ServerBackupPlugin;
+import de.sebli.serverbackup.utils.LogUtils;
 import de.sebli.serverbackup.utils.enums.TaskPurpose;
 import de.sebli.serverbackup.utils.enums.TaskType;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +18,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
-import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.core.OperationHandler.formatPath;
 import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
@@ -28,6 +28,7 @@ public class Backup {
     private final String backupFilePath;
     private final CommandSender sender;
     private final boolean isFullBackup;
+    private LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
 
     public Backup(String backupFilePath, CommandSender sender, boolean isFullBackup) {
         this.backupFilePath = backupFilePath;
@@ -84,19 +85,17 @@ public class Backup {
                     try {
                         FileUtils.deleteDirectory(file);
 
-                        sendMessageWithLogs(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
+                        logHandler.logInfo(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
                     } catch (IOException e) {
-                        e.printStackTrace();
-
-                        sendMessageWithLogs(OperationHandler.processMessage("Error.DeletionFailed").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
+                        logHandler.logError(OperationHandler.processMessage("Error.DeletionFailed").replace(FILE_NAME_PLACEHOLDER, backupFilePath), e.getMessage(), sender);
                     }
                 } else {
                     tryDeleteFile(file);
 
-                    sendMessageWithLogs(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
+                    logHandler.logInfo(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
                 }
             } else {
-                sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
+                logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
             }
         });
     }

@@ -5,6 +5,7 @@ import de.sebli.serverbackup.Configuration;
 import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.Backup;
 import de.sebli.serverbackup.core.OperationHandler;
+import de.sebli.serverbackup.utils.LogUtils;
 import de.sebli.serverbackup.utils.enums.TaskPurpose;
 import de.sebli.serverbackup.utils.enums.TaskType;
 import de.sebli.serverbackup.utils.records.Task;
@@ -15,7 +16,6 @@ import org.bukkit.command.CommandSender;
 import java.io.File;
 import java.io.IOException;
 
-import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.core.OperationHandler.formatPath;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 import static de.sebli.serverbackup.utils.TaskUtils.addTask;
@@ -25,6 +25,8 @@ class CommandCreate {
     private CommandCreate() {
         throw new IllegalStateException("Utility class");
     }
+
+    private static final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
 
     public static void execute(CommandSender sender, String[] args) {
         StringBuilder fileNameBuilder = new StringBuilder(args[1]);
@@ -60,10 +62,9 @@ class CommandCreate {
 
                     Files.copy(file, destination);
 
-                    sendMessageWithLogs(OperationHandler.processMessage("Info.BackupFinished").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
+                    logHandler.logInfo(OperationHandler.processMessage("Info.BackupFinished").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
                 } catch (IOException e) {
-                    sendMessageWithLogs(OperationHandler.processMessage("Error.BackupFailed").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
-                    e.printStackTrace();
+                    logHandler.logError(OperationHandler.processMessage("Error.BackupFailed").replace(FILE_NAME_PLACEHOLDER, args[1]), e.getMessage(), sender);
                 } finally {
                     removeTask(currentTask);
                 }

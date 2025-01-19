@@ -2,6 +2,7 @@ package de.sebli.serverbackup.core;
 
 import de.sebli.serverbackup.Configuration;
 import de.sebli.serverbackup.ServerBackupPlugin;
+import de.sebli.serverbackup.utils.LogUtils;
 import org.bukkit.Bukkit;
 
 import java.io.File;
@@ -13,19 +14,22 @@ import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
 import static de.sebli.serverbackup.utils.TaskUtils.getTasks;
 
 public class Timer implements Runnable {
+    private static final ServerBackupPlugin instance = ServerBackupPlugin.getPluginInstance();
 
-    private static final List<String> worlds = ServerBackupPlugin.getPluginInstance().getConfig().getStringList("BackupWorlds");
-    private static final List<String> days = ServerBackupPlugin.getPluginInstance().getConfig().getStringList("BackupTimer.Days");
-    private static final List<String> times = ServerBackupPlugin.getPluginInstance().getConfig().getStringList("BackupTimer.Times");
+    private static final List<String> worlds = instance.getConfig().getStringList("BackupWorlds");
+    private static final List<String> days = instance.getConfig().getStringList("BackupTimer.Days");
+    private static final List<String> times = instance.getConfig().getStringList("BackupTimer.Times");
 
     private Calendar cal = Calendar.getInstance();
     private short checkMinute = 0;
+
+    private static final LogUtils logHandler = new LogUtils(instance);
 
     @Override
     public void run() {
         cal = Calendar.getInstance();
 
-        if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("AutomaticBackups")) {
+        if (instance.getConfig().getBoolean("AutomaticBackups")) {
             short timeCode = (short) (cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE));
 
             if (checkMinute != timeCode) {
@@ -34,14 +38,14 @@ public class Timer implements Runnable {
             }
         }
 
-        if (ServerBackupPlugin.getPluginInstance().getConfig().getInt("BackupLimiter") <= 0) {
+        if (instance.getConfig().getInt("BackupLimiter") <= 0) {
             handleOldBackupDeletion();
         } else {
             handleBackupLimiter();
         }
 
         if (OperationHandler.getShutdownProgress() && getTasks().isEmpty()) {
-            ServerBackupPlugin.getPluginInstance().getLogger().info("All tasks finished. Shutting down server...");
+            logHandler.logInfo("All tasks finished. Shutting down server...", null);
             Bukkit.shutdown();
         }
     }
@@ -63,8 +67,7 @@ public class Timer implements Runnable {
                         createBackupsForWorlds();
                     }
                 } catch (Exception e) {
-                    ServerBackupPlugin.getPluginInstance().getLogger().log(Level.WARNING,
-                            "Automatic Backup failed. Please check that you set the BackupTimer correctly.");
+                    logHandler.logError("Automatic Backup failed. Please check that you set the BackupTimer correctly.", e.getMessage(), null);
                 }
             }
         }
@@ -83,7 +86,7 @@ public class Timer implements Runnable {
     private void createBackupsForWorlds() {
         for (String world : worlds) {
             Backup backup = new Backup(world, Bukkit.getConsoleSender(),
-                    !ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("DynamicBackup"));
+                    !instance.getConfig().getBoolean("DynamicBackup"));
             backup.create();
         }
     }
@@ -106,7 +109,7 @@ public class Timer implements Runnable {
         Arrays.sort(backups, Collections.reverseOrder());
 
         LocalDate date = LocalDate.now()
-                .minusDays(ServerBackupPlugin.getPluginInstance().getConfig().getInt("DeleteOldBackups"));
+                .minusDays(instance.getConfig().getInt("DeleteOldBackups"));
 
         logBackupDeletionStart();
 
@@ -123,7 +126,7 @@ public class Timer implements Runnable {
                 LocalDate backupDate = LocalDate.parse(backupDateStr[1] + "-" + backupDateStr[2] + "-" + backupDateStr[3].split("~")[0]);
                 String backupName = backupDateStr[6];
 
-                if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("KeepUniqueBackups") &&
+                if (instance.getConfig().getBoolean("KeepUniqueBackups") &&
                         !backupNames.contains(backupName)) {
 
                         backupNames.add(backupName);
@@ -136,15 +139,15 @@ public class Timer implements Runnable {
                         tryDeleteFile(backup);
 
                         String formattedMessage = String.format("Backup [ [%s] ] removed.", backup.getName());
-                        ServerBackupPlugin.getPluginInstance().getLogger().info(formattedMessage);
+                        logHandler.logInfo(formattedMessage, null);
                     } else {
                         String formattedMessage = String.format("No Backup named [ [%s] ] found.", backup.getName());
-                        ServerBackupPlugin.getPluginInstance().getLogger().warning(formattedMessage);
+                        logHandler.logError(formattedMessage, "", null);
                     }
                 }
             } catch (Exception e) {
                 String formattedMessage = String.format("Failed to process backup file: [%s]. Reason: %s", backup.getName(), e.getMessage());
-                ServerBackupPlugin.getPluginInstance().getLogger().warning(formattedMessage);
+                logHandler.logError(formattedMessage, e.getMessage(), null);
             }
         }
 
@@ -152,31 +155,28 @@ public class Timer implements Runnable {
     }
 
     private void logBackupDeletionStart() {
-        // Get the current time in a readable format
         String startTime = java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss").format(java.time.LocalDateTime.now());
 
-        // Format the message with the start time
         String formattedMessage = String.format("ServerBackup | Backup deletion started... [ started at [%s] ]", startTime);
 
-        // Log the message
-        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "");
-        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, formattedMessage);
-        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "");
+        logHandler.logInfo( "", null);
+        logHandler.logInfo(formattedMessage, null);
+        logHandler.logInfo( "", null);
     }
 
     private void logBackupDeletionEnd(long time) {
         String formattedMessage = String.format("ServerBackup | Backup deletion finished. [ finished in [%s]ms ]", (System.currentTimeMillis() - time));
 
-        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "");
-        ServerBackupPlugin.getPluginInstance().getLogger().info(formattedMessage);
-        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "");
+        logHandler.logInfo( "", null);
+        logHandler.logInfo(formattedMessage, null);
+        logHandler.logInfo( "", null);
     }
 
     private void handleBackupLimiter() {
         File[] backups = new File(Configuration.backupDestination).listFiles();
         Arrays.sort(Objects.requireNonNull(backups));
 
-        int dobc = ServerBackupPlugin.getPluginInstance().getConfig().getInt("BackupLimiter");
+        int dobc = instance.getConfig().getInt("BackupLimiter");
         int c = 0;
 
         while (backups.length > dobc) {
@@ -185,11 +185,11 @@ public class Timer implements Runnable {
 
                 String formattedMessage = String.format("Backup [%s] removed.", backups[c].getName());
 
-                ServerBackupPlugin.getPluginInstance().getLogger().info(formattedMessage);
+                logHandler.logInfo(formattedMessage, null);
             } else {
                 String formattedMessage = String.format("No Backup named [%s] found.", backups[c].getName());
 
-                ServerBackupPlugin.getPluginInstance().getLogger().warning(formattedMessage);
+                logHandler.logInfo(formattedMessage, null);
             }
 
             c++;
@@ -202,7 +202,7 @@ public class Timer implements Runnable {
         if (dayNumber >= 1 && dayNumber <= 7) {
             return daysOfWeek[dayNumber - 1];
         }
-        Bukkit.getLogger().log(Level.WARNING, "Error while converting number in day.");
+        logHandler.logError("Error while converting number in day.", "", null);
         return null;
     }
 }

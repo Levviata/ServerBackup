@@ -2,7 +2,11 @@ package de.sebli.serverbackup;
 
 import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.command.CommandSender;
+import de.sebli.serverbackup.utils.LogUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,11 +15,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.GlobalConstants.CONFIG_BACKUP_DESTINATION;
 
-public class Configuration { // Wont comply to java:S1118, we actually instantiate this class
-
+public class Configuration {
     public static String prefix;
     public static String backupDestination = "Backups//";
 
@@ -29,6 +31,8 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
     public static YamlConfiguration messages = YamlConfiguration.loadConfiguration(messagesFile);
 
     private static final String CLOUD_KEY = "Cloud.Dropbox.AppKey";
+
+    private static final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
 
     public static void loadUp() {
         loadConfig();
@@ -46,14 +50,18 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
             try {
                 Files.createDirectories(Paths.get(backupDestination));
             } catch (IOException e) {
-                e.printStackTrace();
+                logHandler.logError("Caught an exception trying to create a path to [" + backupDestination + "]", e.getMessage(), null);
             }
         }
 
         File files = new File(backupDestination + "//Files");
 
         if (!files.exists()) {
-            files.mkdir();
+            try {
+                files.mkdir();
+            } catch (Exception e) {
+                logHandler.logError("Caught an exception trying to create a path to [" + files.getPath() + "]", e.getMessage(), null);
+            }
         }
 
         StringBuilder headerText = new StringBuilder();
@@ -136,11 +144,18 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
     }
 
     public static void loadCloud() {
+        boolean wasFileCreated = false;
+
         if (!cloudInf.exists()) {
             try {
-                cloudInf.createNewFile();
+                wasFileCreated = cloudInf.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                logHandler.logError("Caught an exception trying to load cloud info", e.getMessage(), null);
+            } finally {
+                if (wasFileCreated)
+                    logHandler.logInfo("Cloud info was loaded successfully", null);
+                else
+                    logHandler.logError("Cloud info was not loaded", "", null);
             }
         }
 
@@ -150,7 +165,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
             cloudInfo.set(CLOUD_KEY, "appKey");
             cloudInfo.set("Cloud.Dropbox.AppSecret", "appSecret");
         } else {
-            if (cloudInfo.getString(CLOUD_KEY) != "appKey" && !cloudInfo.contains("Cloud.Dropbox.ActivationLink")) {
+            if (!"appKey".equals(cloudInfo.getString(CLOUD_KEY)) && !cloudInfo.contains("Cloud.Dropbox.ActivationLink")) {
                 cloudInfo.set("Cloud.Dropbox.ActivationLink", "https://www.dropbox.com/oauth2/authorize?client_id=" + cloudInfo.getString(CLOUD_KEY) + "&response_type=code&token_access_type=offline");
                 if (!cloudInfo.contains("Cloud.Dropbox.AccessToken")) {
                     cloudInfo.set("Cloud.Dropbox.AccessToken", "accessToken");
@@ -165,16 +180,23 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
         try {
             cloudInfo.save(cloudInf);
         } catch (IOException e) {
-            e.printStackTrace();
+            logHandler.logError("Caught an exception trying to save cloud info", e.getMessage(), null);
         }
     }
 
     public static void loadBackupInfo() {
+        boolean wasFileCreated = false;
+
         if (!bpInf.exists()) {
             try {
-                bpInf.createNewFile();
+                wasFileCreated = bpInf.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                logHandler.logError("Caught an exception trying to load backup info", e.getMessage(), null);
+            } finally {
+                if (wasFileCreated)
+                    logHandler.logInfo("Backup info was successfully loaded", null);
+                else
+                    logHandler.logError("Backup info was not loaded", "", null);
             }
         }
 
@@ -182,11 +204,18 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
     }
 
     public static void loadMessages() {
+        boolean wasFileCreated = false;
+
         if (!messagesFile.exists()) {
             try {
-                messagesFile.createNewFile();
+                wasFileCreated = messagesFile.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                logHandler.logError("Caught an exception trying to create messages file", e.getMessage(), null);
+            } finally {
+                if (wasFileCreated)
+                    logHandler.logInfo("Messages file was successfully created", null);
+                else
+                    logHandler.logError("Messages file was not created", "", null);
             }
         }
 
@@ -197,7 +226,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
         try {
             backupInfo.save(bpInf);
         } catch (IOException e) {
-            e.printStackTrace();
+            logHandler.logError("Caught an exception trying to save backup info", e.getMessage(), null);
         }
     }
 
@@ -205,7 +234,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
         try {
             messages.save(messagesFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            logHandler.logError("Caught an exception trying to save messages file", e.getMessage(), null);
         }
     }
 
@@ -234,7 +263,7 @@ public class Configuration { // Wont comply to java:S1118, we actually instantia
 
         loadUp();
 
-        sendMessageWithLogs(OperationHandler.processMessage("Command.Reload"), sender);
+        logHandler.logInfo(OperationHandler.processMessage("Command.Reload"), sender);
     }
 
 }

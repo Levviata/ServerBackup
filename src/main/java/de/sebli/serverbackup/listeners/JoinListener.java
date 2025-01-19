@@ -29,7 +29,9 @@ public class JoinListener implements Listener {
         ) {
                 checkedPlayers.add(p.getUniqueId());
 
-                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), OperationHandler::checkVersion);
+                Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+                    OperationHandler.checkVersion(p);
+                });
             }
     }
 }

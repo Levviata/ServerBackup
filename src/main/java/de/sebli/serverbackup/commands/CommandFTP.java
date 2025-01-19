@@ -1,34 +1,37 @@
 package de.sebli.serverbackup.commands;
 
+import de.sebli.serverbackup.ServerBackupPlugin;
+import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.utils.FTPManager;
+import de.sebli.serverbackup.utils.LogUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import de.sebli.serverbackup.ServerBackupPlugin;
-import de.sebli.serverbackup.core.OperationHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
-import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
-
 class CommandFTP {
     private CommandFTP() {
         throw new IllegalStateException("Utility class");
     }
 
+    private static final ServerBackupPlugin instance = ServerBackupPlugin.getPluginInstance();
+
+    private static final LogUtils logHandler = new LogUtils(instance);
+
     public static void execute(CommandSender sender, String[] args) {
         if (args[1].equalsIgnoreCase("list")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
                 FTPManager ftpm = new FTPManager(sender);
 
                 List<String> backups = ftpm.getFTPBackupList(false);
 
                 if (backups.isEmpty()) {
-                    sendMessageWithLogs(OperationHandler.processMessage("Error.NoFtpBackups"), sender);
+                    logHandler.logInfo(OperationHandler.processMessage("Error.NoFtpBackups"), (Player)sender);
 
                     return;
                 }
@@ -75,7 +78,7 @@ class CommandFTP {
                     sender.sendMessage("");
                     sender.sendMessage("--------- Page " + page + "/" + maxPages + " ---------");
                 } catch (Exception e) {
-                    sendMessageWithLogs(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[1]), sender);
+                    logHandler.logError(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[1]), e.getMessage(), sender);
                 }
             });
         } else if (args[1].equalsIgnoreCase("download")) {

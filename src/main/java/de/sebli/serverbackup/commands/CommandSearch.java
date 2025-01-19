@@ -1,12 +1,13 @@
 package de.sebli.serverbackup.commands;
 
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackupPlugin;
+import de.sebli.serverbackup.core.OperationHandler;
+import de.sebli.serverbackup.utils.LogUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackupPlugin;
-import de.sebli.serverbackup.core.OperationHandler;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -17,20 +18,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
-
 class CommandSearch {
     private CommandSearch() {
         throw new IllegalStateException("Utility class");
     }
+    private static final ServerBackupPlugin instance = ServerBackupPlugin.getPluginInstance();
+
+    private static final LogUtils logHandler = new LogUtils(instance);
 
     public static void execute(CommandSender sender, String[] args) {
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
             File[] backups = new File(Configuration.backupDestination + "").listFiles();
 
             if (backups.length == 0
                     || backups.length == 1 && backups[0].getName().equalsIgnoreCase("Files")) {
-                sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackups"), sender);
+                logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NoBackups"), sender);
 
                 return;
             }
@@ -44,7 +46,7 @@ class CommandSearch {
             }
 
             if (backupsMatch.isEmpty()) {
-                sendMessageWithLogs(OperationHandler.processMessage("NoBackupSearch").replace("%input%", args[1]), sender);
+                logHandler.logCommandFeedback(OperationHandler.processMessage("NoBackupSearch").replace("%input%", args[1]), sender);
 
                 return;
             }
@@ -102,7 +104,7 @@ class CommandSearch {
                 sender.sendMessage("");
                 sender.sendMessage("-------- Page " + page + "/" + maxPages + " --------");
             } catch (Exception e) {
-                sendMessageWithLogs(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[2]), sender);
+                logHandler.logError(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[2]), e.getMessage(), sender);
             }
         });
     }

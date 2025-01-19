@@ -14,12 +14,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
 import static de.sebli.serverbackup.utils.TaskUtils.*;
 
@@ -38,6 +36,8 @@ public class DropboxManager {
 
     private static Task currentTask;
 
+    private final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
+
     public void uploadToDropbox(String filePath) {
         File file = new File(filePath);
 
@@ -48,7 +48,7 @@ public class DropboxManager {
         if (!file.exists()) {
             String backupNotFound = "Dropbox: Backup '" + file.getName() + "' not found.";
 
-            sendMessageWithLogs(backupNotFound, sender);
+            logHandler.logInfo(backupNotFound, sender);
             return;
         }
 
@@ -67,7 +67,7 @@ public class DropboxManager {
             try {
                 authFinish = webAuth.finishFromCode(ACCESS_TOKEN);
             } catch (DbxException e) {
-                ServerBackupPlugin.getPluginInstance().getLogger().warning(MessageFormat.format("Error during Dropbox authentication process: {0}", e.getMessage()));
+                logHandler.logError("Error during Dropbox authentication process", e.getMessage(), sender);
             }
             credential = new DbxCredential(Objects.requireNonNull(authFinish).getAccessToken(), 60L, authFinish.getRefreshToken(), appKey, secretKey);
 
@@ -79,7 +79,7 @@ public class DropboxManager {
 
         client = new DbxClientV2(config, credential);
 
-        sender.sendMessage("Dropbox: Uploading backup [" + file.getName() + "] ...");
+        logHandler.logInfo("Dropbox: Uploading backup [" + file.getName() + "] ...", sender);
 
         String des = ServerBackupPlugin.getPluginInstance().getConfig().getString("CloudBackup.Options.Destination").replace("/", "");
 
@@ -119,26 +119,30 @@ public class DropboxManager {
             }
 
             // Success -> send message
-            sendMessageWithLogs(MESSAGE_SUCCESSFUL_UPLOAD, sender); // i think this shits out 'null' when we make a backup? i have no idea and im not dealing with this rn
+            logHandler.logInfo(MESSAGE_SUCCESSFUL_UPLOAD, sender); // i think this shits out 'null' when we make a backup? i have no idea and im not dealing with this rn
         }
 
         catch (UploadErrorException e) {
-            throw new RuntimeException("Failed to upload to Dropbox: " + e.getMessage(), e);
+            logHandler.logError("Upload error occurred", e.getMessage(), sender);
+        }
+
+        catch (FileNotFoundException e) {
+            logHandler.logError("File not found", e.getMessage(), sender);
         }
 
         catch (IOException e) {
-            throw new RuntimeException("I/O error occurred while handling file: " + filePath, e);
+            logHandler.logError("Error reading from file", e.getMessage(), sender);
         }
 
         catch (DbxException e) {
             switch (e) {
                 case BadRequestException badRequestException ->
-                        throw new RuntimeException("Bad request to Dropbox API: " + e.getMessage(), e);
+                        logHandler.logError("Bad request to Dropbox API", e.getMessage(), sender);
                 case InvalidAccessTokenException invalidAccessTokenException ->
-                        throw new RuntimeException("Invalid Dropbox access token: " + e.getMessage(), e);
+                        logHandler.logError("Invalid access token for Dropbox API", e.getMessage(), sender);
                 case RateLimitException rateLimitException ->
-                        throw new RuntimeException("Rate limit exceeded for Dropbox API: " + e.getMessage(), e);
-                default -> throw new RuntimeException("Dropbox API error: " + e.getMessage(), e);
+                        logHandler.logError("Rate limit exceeded for Dropbox API", e.getMessage(), sender);
+                default -> logHandler.logError("Error occurred", e.getMessage(), sender);
             }
         }
 

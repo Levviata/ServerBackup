@@ -1,15 +1,17 @@
 package de.sebli.serverbackup.commands;
 
 import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
+import de.sebli.serverbackup.utils.LogUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
-
 public class Executor implements CommandExecutor {
+
+    private static final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -63,7 +65,7 @@ public class Executor implements CommandExecutor {
                 sendHelp(sender);
             }
         } else {
-            sendMessageWithLogs(OperationHandler.processMessage("Error.NoPermission"), sender);
+            logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NoPermission"), sender);
         }
 
         return false;

@@ -2,8 +2,11 @@ package de.sebli.serverbackup.core;
 
 import de.sebli.serverbackup.Configuration;
 import de.sebli.serverbackup.ServerBackupPlugin;
+import de.sebli.serverbackup.utils.LogUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +14,8 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Objects;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,38 +27,39 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
     private static boolean shutdownProgress = false;
     private static boolean isUpdated = false;
 
+    private static final ServerBackupPlugin instance = ServerBackupPlugin.getPluginInstance();
+    private static final LogUtils logHandler = new LogUtils(instance);
+
     public static String processMessage(String msgCode) {
         return (Configuration.prefix + Configuration.messages.getString(msgCode)).replace("&nl", "\n").replace("&", "§");
     }
 
     public static void startTimer() {
-        if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("AutomaticBackups")) {
-            Bukkit.getScheduler().runTaskTimerAsynchronously(ServerBackupPlugin.getPluginInstance(), new Timer(), 20 * 20, 20 * 20);
+        if (instance.getConfig().getBoolean("AutomaticBackups")) {
+            Bukkit.getScheduler().runTaskTimerAsynchronously(instance, new Timer(), (long)20 * 20, (long)20 * 20);
         }
     }
 
     public static void stopTimer() {
-        Bukkit.getScheduler().cancelTasks(ServerBackupPlugin.getPluginInstance());
+        Bukkit.getScheduler().cancelTasks(instance);
     }
 
-    public static void checkVersion() { // TODO: Send messages to player if this gets called by JoinListener.java
-        ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "ServerBackup: Searching for updates...");
+    public static void checkVersion(@Nullable Player player) { // TODO: Send messages to player if this gets called by JoinListener.java
+        instance.getLogger().info("ServerBackup: Searching for updates...");
 
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
             try (InputStream inputStream = (new URL(
                     "https://api.spigotmc.org/legacy/update.php?resource=" + RESOURCE_ID)).openStream();
                  Scanner scanner = new Scanner(inputStream)) {
                 if (scanner.hasNext()) {
                     String latest = scanner.next();
-                    // Won't comply to java:S1874: getPluginMeta.getVersion() does the same but until paper doesn't go off snapshot
-                    // and marks it off as unstable I'd rather not touch it
-                    String current = ServerBackupPlugin.getPluginInstance().getDescription().getVersion();
+                    String current = instance.getPluginMeta().getVersion();
 
                     int latestClean = 0;
                     int currentClean = 0;
 
-                    ServerBackupPlugin.getPluginInstance().getLogger().info(
-                            "Auto updating does nothing for now, we have not uploaded our fork to Spigot. I recommend turning automatic updates off in the config.");
+                    logHandler.logInfo("Auto updating does nothing for now, we have not uploaded our fork to Spigot. " +
+                            "I recommend turning automatic updates off in the config.", null);
 
                     /*if (extractVersion(latest) == null) {
                         ServerBackupPlugin.getInstance().getLogger().warning(
@@ -62,13 +67,14 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
                     } else latestClean = Integer.parseInt(Objects.requireNonNull(extractVersion(latest))); Remove commenting when we actually upload our fork to spigot*/
 
                     if (extractVersion(current) == null) {
-                        ServerBackupPlugin.getPluginInstance().getLogger().warning(
+                        instance.getLogger().warning(
                                 "Current version number extracted is null! Auto updating likely WON'T work.");
                     } else currentClean = Integer.parseInt(Objects.requireNonNull(extractVersion(current)));
 
-                    ServerBackupPlugin.getPluginInstance().getLogger().info(MessageFormat.format("Latest clean version number is: {0}", latestClean)); // TEST CODE
-
-                    ServerBackupPlugin.getPluginInstance().getLogger().info(MessageFormat.format("Current clean version number is: {0}", currentClean)); // TEST CODE
+                    if (instance.getConfig().getBoolean("SendDebugMessages")) {
+                        logHandler.logInfo(MessageFormat.format("Latest clean version number is: {0}", latestClean), null); // TEST CODE
+                        logHandler.logInfo(MessageFormat.format("Current clean version number is: {0}", currentClean), null); // TEST CODE
+                    }
 
                     latestClean = currentClean; // DISABLE AUTO UPDATING TODO: Remove when we actually have versions up and running in spigot
 
@@ -78,7 +84,7 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
                     } else {
                         String formattedMessage = MessageFormat.format("ServerBackup: There is a newer version available - {0}, you are on - {1}", latest, current);
 
-                        ServerBackupPlugin.getPluginInstance().getLogger().info(formattedMessage);
+                        logHandler.logInfo(formattedMessage, player);
 
                         if (ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("AutomaticUpdates")) {
                             ServerBackupPlugin.getPluginInstance().getLogger().log(Level.INFO, "ServerBackup: Downloading newest version...");
@@ -133,5 +139,4 @@ public class OperationHandler { // Won't comply to java:S1118, we actually insta
     public static String formatPath(String filePath) {
         return filePath.replace("\\", "/");
     }
-
 }

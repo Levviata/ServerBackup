@@ -1,14 +1,15 @@
 package de.sebli.serverbackup.commands;
 
 import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.core.ZipManager;
+import de.sebli.serverbackup.utils.LogUtils;
 import org.bukkit.command.CommandSender;
 
 import java.io.File;
 import java.nio.file.Paths;
 
-import static de.sebli.serverbackup.ServerBackupPlugin.sendMessageWithLogs;
 import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
 
 class CommandUnzip {
@@ -16,11 +17,13 @@ class CommandUnzip {
         throw new IllegalStateException("Utility class");
     }
 
+    private static final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
+
     public static void execute(CommandSender sender, String[] args) {
         String filePath = args[1];
 
         if (!args[1].contains(".zip")) {
-            sendMessageWithLogs(OperationHandler.processMessage("Error.NotAZip").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
+            logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NotAZip").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
 
             return;
         }
@@ -31,7 +34,7 @@ class CommandUnzip {
                 Configuration.backupDestination, filePath.replaceAll(".zip", "")).toFile();
 
         if (!newFile.exists()) {
-            sendMessageWithLogs(OperationHandler.processMessage("Command.Unzip.Header"), sender);
+            logHandler.logInfo(OperationHandler.processMessage("Command.Unzip.Header"), sender);
 
             if (file.exists()) {
                 ZipManager zm = new ZipManager(file.getPath(),
@@ -40,10 +43,10 @@ class CommandUnzip {
 
                 zm.unzip();
             } else {
-                sendMessageWithLogs(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
+                logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
             }
         } else {
-            sendMessageWithLogs(OperationHandler.processMessage("Error.ZipExists").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
+            logHandler.logCommandFeedback(OperationHandler.processMessage("Error.ZipExists").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
         }
     }
 

@@ -1,5 +1,6 @@
 package de.sebli.serverbackup.utils;
 
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.utils.enums.TaskPurpose;
 import de.sebli.serverbackup.utils.enums.TaskType;
 import de.sebli.serverbackup.utils.records.Task;
@@ -14,6 +15,10 @@ import static de.sebli.serverbackup.utils.TaskUtils.addTask;
 import static de.sebli.serverbackup.utils.TaskUtils.removeTask;
 
 public class FileUtil {
+    private static final ServerBackupPlugin instance = ServerBackupPlugin.getPluginInstance();
+
+    private static final LogUtils logHandler = new LogUtils(instance);
+
     /**
      * Attempts to delete the specified file.
      *
@@ -30,7 +35,7 @@ public class FileUtil {
             Files.delete(Path.of(file.getPath()));
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            logHandler.logError("Caught an exception trying to delete " + file + " file of/in path " + file.getPath(), e.getMessage(), null);
             return false;
         } finally {
             removeTask(currentTask);
