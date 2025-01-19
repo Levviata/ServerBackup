@@ -6,7 +6,6 @@ import de.sebli.serverbackup.core.DynamicBackup;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.listeners.JoinListener;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 

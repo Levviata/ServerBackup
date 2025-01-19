@@ -1,12 +1,9 @@
 package de.sebli.serverbackup;
 
 import de.sebli.serverbackup.core.OperationHandler;
-import org.bukkit.command.CommandSender;
 import de.sebli.serverbackup.utils.LogUtils;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;

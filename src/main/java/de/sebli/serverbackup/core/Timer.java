@@ -8,7 +8,6 @@ import org.bukkit.Bukkit;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.logging.Level;
 
 import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
 import static de.sebli.serverbackup.utils.TaskUtils.getTasks;
