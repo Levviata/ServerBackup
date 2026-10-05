@@ -1,6 +1,6 @@
 # Server Backup
 
-A plugin that backups you minecraft server with a variety of features, learn more on the [original website](https://server-backup.net/) or [original wiki](https://github.com/SF-Sudio/ServerBackup/wiki).
+left off in 2025 jan 19, revived now, changelog due
 
 # Objectives/Intentions
 
