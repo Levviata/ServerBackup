@@ -1,0 +1,225 @@
+import com.github.spotbugs.snom.SpotBugsTask
+import java.text.SimpleDateFormat
+import java.util.zip.ZipFile
+
+plugins {
+    id 'com.github.spotbugs' version "6.0.27"
+    id 'com.gradleup.shadow' version '8.3.5'
+    id 'java-library'
+}
+
+group 'de.sebli.serverbackup'
+version '2.11.0' // TODO: Clarify version formatting
+
+static def getTime() {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd-HHmm")
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return sdf.format(new Date()).toString()
+}
+
+String identifier = "" // Possibilities: rc-<number> (release candidate), release
+
+if (identifier == null || identifier == "") {
+    version = "v" + version + "-" + getTime() + "-SNAPSHOT" // We construct our version here
+} else
+    version = "v" + version + "-" + identifier
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    maven {
+        name 'papermc'
+        url 'https://repo.papermc.io/repository/maven-public/'
+        content {
+            includeModule("io.papermc.paper", "paper-api")
+            includeModule("io.papermc", "paperlib")
+            includeModule("net.md-5", "bungeecord-chat")
+        }
+    }
+
+    maven {
+        name 'minecraft'
+        url 'https://libraries.minecraft.net'
+        content {
+            includeModule("com.mojang", "brigadier")
+        }
+    }
+    
+    maven {
+        name 'sonatype'
+        url 'https://oss.sonatype.org/content/groups/public/'
+    }
+
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'commons-net:commons-net:3.9.0'
+    compileOnly 'org.junit.jupiter:junit-jupiter:5.8.2'
+    implementation 'com.dropbox.core:dropbox-core-sdk:5.4.4'
+
+    // Added dependencies
+    compileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
+    implementation 'io.papermc:paperlib:1.0.8'
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+processResources {
+    filesMatching("**/plugin.yml") {
+        expand ( NAME: rootProject.name, VERSION: version, PACKAGE: project.group.toString() )
+    }
+}
+
+tasks.withType(SpotBugsTask).configureEach {
+    reports.create("html") {
+        required = true
+    }
+    reports.create("xml") {
+        required = false
+    }
+}
+
+tasks.named('spotbugsMain') {
+    enabled = false
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    relocate 'io.papermc.lib', 'shadow.io.papermc.paperlib'
+    minimize()
+}
+
+// Disable jar and replace with shadowJar
+jar.enabled = false
+assemble.dependsOn(shadowJar)
+
+def checkPluginYmlInJar() {
+    // Path to the built .jar file
+    def jarFile = file("${layout.buildDirectory.get().toString()}/libs/${project.name}-${version}.jar")
+
+    // Path to plugin.yml inside the .jar
+    def pluginYmlPath = "plugin.yml"
+
+    if (!jarFile.exists()) {
+        throw new GradleException("The .jar file does not exist: ${jarFile}")
+    }
+
+    // Open the .jar file and extract plugin.yml content
+    def zipFile = new ZipFile(jarFile)
+    def pluginYmlEntry = zipFile.getEntry(pluginYmlPath)
+
+    if (pluginYmlEntry == null) {
+        throw new GradleException("plugin.yml not found in the .jar file.")
+    }
+
+    // Return both zipFile and pluginYmlEntry as a map
+    return [zipFile: zipFile, pluginYmlEntry: pluginYmlEntry]
+}
+
+tasks.register('printProjectName') {
+    doLast {
+        println rootProject.name
+    }
+}
+
+tasks.register('debugPluginYmlInJar') { // never run separately from debugBuild, will not work
+    group = 'debug'
+    description = 'Debugs plugin.yml content inside the .jar file.'
+
+    doLast {
+        // Call the method to get zipFile and pluginYmlEntry
+        def result = checkPluginYmlInJar()
+
+        // Access the zipFile and pluginYmlEntry from the map
+        def zipFile = result.zipFile
+        def pluginYmlEntry = result.pluginYmlEntry
+
+        // Read the content of plugin.yml
+        def pluginYmlContent = zipFile.getInputStream(pluginYmlEntry).text
+        println "plugin.yml content inside the .jar:"
+        println pluginYmlContent
+
+        // Ensure to close the ZipFile after you're done
+        zipFile.close()
+    }
+}
+
+
+tasks.register('verifyPluginYmlInJar') { // never run separately from debugBuild, will not work
+    group = 'debug'
+    description = 'Verifies plugin.yml content inside the .jar file.'
+
+    doLast {
+        // Call the method to get zipFile and pluginYmlEntry
+        def result = checkPluginYmlInJar()
+
+        // Access the zipFile and pluginYmlEntry from the map
+        def zipFile = result.zipFile
+        def pluginYmlEntry = result.pluginYmlEntry
+
+        // Read the content of plugin.yml
+        def pluginYmlContent = zipFile.getInputStream(pluginYmlEntry).text
+
+        // Expected values for comparison
+        def expectedMain = "de.sebli.serverbackup.ServerBackupPlugin"
+        def expectedName = "ServerBackupPlugin"
+        def expectedVersion = "${project.version}"
+
+        // Check if the 'main' entry matches
+        if (!pluginYmlContent.contains("main: ${expectedMain}")) {
+            throw new GradleException("plugin.yml 'main' value does not match the expected: ${expectedMain}")
+        }
+
+        // Check if the 'name' entry matches
+        if (!pluginYmlContent.contains("name: ${expectedName}")) {
+            throw new GradleException("plugin.yml 'name' value does not match the expected: ${expectedName}")
+        }
+
+        // Check if the 'version' entry matches
+        if (!pluginYmlContent.contains("version: \"${expectedVersion}\"")) {
+            throw new GradleException("plugin.yml 'version' value does not match the expected: ${expectedVersion}")
+        }
+
+        // If all checks pass
+        println "plugin.yml content is correct!"
+
+        // Ensure to close the ZipFile after you're done
+        zipFile.close()
+    }
+}
+
+tasks.register('debugBuild') {
+    group = 'debug'
+    description = 'Specialized build task for debugging.'
+
+    dependsOn build
+    dependsOn debugPluginYmlInJar
+    dependsOn verifyPluginYmlInJar
+}
+
+tasks.build {
+    tasks.build.mustRunAfter("clean") // we clean before building because plugin.yml caches wrong if we don't
+    dependsOn clean
+}
+
+tasks.register('release') {
+    dependsOn build
+
+    doLast {
+        if (!version.endsWith("-SNAPSHOT")) {
+            // Rename final JAR to trim off version information
+            shadowJar.archiveFile.get().getAsFile()
+                    .renameTo(layout.buildDirectory.get().toString() + File.separator + 'libs' + File.separator
+                            + rootProject.name + '.jar')
+        }
+    }
+}

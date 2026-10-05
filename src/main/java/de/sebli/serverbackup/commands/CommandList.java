@@ -1,12 +1,13 @@
 package de.sebli.serverbackup.commands;
 
+import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackupPlugin;
+import de.sebli.serverbackup.core.OperationHandler;
+import de.sebli.serverbackup.utils.LogUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
-import de.sebli.serverbackup.core.OperationHandler;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -15,15 +16,22 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.util.Arrays;
 
-public class CommandList {
+class CommandList {
+    private CommandList() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    private static final ServerBackupPlugin instance = ServerBackupPlugin.getPluginInstance();
+
+    private static final LogUtils logHandler = new LogUtils(instance);
 
     public static void execute(CommandSender sender, String[] args) {
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
-            File[] backups = new File(Configuration.backupDestination + "").listFiles();
+        Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
+            File[] backups = new File(Configuration.backupDestination).listFiles();
 
             if (backups.length == 0
                     || backups.length == 1 && backups[0].getName().equalsIgnoreCase("Files")) {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackups"));
+                logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NoBackups"), sender);
 
                 return;
             }
@@ -31,7 +39,7 @@ public class CommandList {
             Arrays.sort(backups);
 
             try {
-                int page = Integer.valueOf(args[1]);
+                int page = Integer.parseInt(args[1]);
 
                 if ((backups.length - 1) < page * 10 - 9) {
                     sender.sendMessage("Try a lower value.");
@@ -40,11 +48,11 @@ public class CommandList {
                 }
 
                 if ((backups.length - 1) <= page * 10 && (backups.length - 1) >= page * 10 - 10) {
-                    sender.sendMessage("----- Backup " + Integer.valueOf(page * 10 - 9) + "-"
+                    sender.sendMessage("----- Backup " + (page * 10 - 9) + "-"
                             + (backups.length - 1) + "/" + (backups.length - 1) + " -----");
                 } else {
-                    sender.sendMessage("----- Backup " + Integer.valueOf(page * 10 - 9) + "-"
-                            + Integer.valueOf(page * 10) + "/" + (backups.length - 1) + " -----");
+                    sender.sendMessage("----- Backup " + (page * 10 - 9) + "-"
+                            + page * 10 + "/" + (backups.length - 1) + " -----");
                 }
                 sender.sendMessage("");
 
@@ -57,10 +65,9 @@ public class CommandList {
                     double fileSize = (double) FileUtils.sizeOf(backups[i]) / 1000 / 1000;
                     fileSize = Math.round(fileSize * 100.0) / 100.0;
 
-                    if (sender instanceof Player) {
-                        Player p = (Player) sender;
+                    if (sender instanceof Player p) {
 
-                        TextComponent msg = new TextComponent("§7[" + Integer.valueOf(i + 1) + "] §r"
+                        TextComponent msg = new TextComponent("§7[" + (i + 1) + "] §r"
                                 + backups[i].getName() + " §7[" + fileSize + "MB]");
                         msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                 new ComponentBuilder("Click to get Backup name").create()));
@@ -82,7 +89,7 @@ public class CommandList {
                 sender.sendMessage("");
                 sender.sendMessage("-------- Page " + page + "/" + maxPages + " --------");
             } catch (Exception e) {
-                sender.sendMessage(OperationHandler.processMessage("Error.NotANumber").replaceAll("%input%", args[1]));
+                logHandler.logError(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[1]), e.getMessage(), sender);
             }
         });
     }

@@ -1,31 +1,40 @@
 package de.sebli.serverbackup.commands;
 
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
 import de.sebli.serverbackup.core.ZipManager;
+import de.sebli.serverbackup.utils.LogUtils;
 import org.bukkit.command.CommandSender;
 
 import java.io.File;
+import java.nio.file.Paths;
 
-public class CommandUnzip {
+import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
+
+class CommandUnzip {
+    private CommandUnzip() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    private static final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
 
     public static void execute(CommandSender sender, String[] args) {
         String filePath = args[1];
 
         if (!args[1].contains(".zip")) {
-            sender.sendMessage(OperationHandler.processMessage("Error.NotAZip").replaceAll("%file%", args[1]));
+            logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NotAZip").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
 
             return;
         }
 
-        File file = new File(Configuration.backupDestination + "//" + filePath);
-        File newFile = new File(
-                Configuration
-                        .backupDestination + "//" + filePath.replaceAll(".zip", ""));
+        File file = Paths.get(
+                Configuration.backupDestination, filePath).toFile();
+        File newFile = Paths.get(
+                Configuration.backupDestination, filePath.replaceAll(".zip", "")).toFile();
 
         if (!newFile.exists()) {
-            sender.sendMessage(OperationHandler.processMessage("Command.Unzip.Header"));
+            logHandler.logInfo(OperationHandler.processMessage("Command.Unzip.Header"), sender);
 
             if (file.exists()) {
                 ZipManager zm = new ZipManager(file.getPath(),
@@ -34,10 +43,10 @@ public class CommandUnzip {
 
                 zm.unzip();
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replaceAll("%file%", args[1]));
+                logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
             }
         } else {
-            sender.sendMessage(OperationHandler.processMessage("Error.ZipExists").replaceAll("%file%", args[1]));
+            logHandler.logCommandFeedback(OperationHandler.processMessage("Error.ZipExists").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
         }
     }
 

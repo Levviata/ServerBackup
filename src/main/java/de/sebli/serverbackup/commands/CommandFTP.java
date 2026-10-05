@@ -1,35 +1,43 @@
 package de.sebli.serverbackup.commands;
 
+import de.sebli.serverbackup.ServerBackupPlugin;
+import de.sebli.serverbackup.core.OperationHandler;
+import de.sebli.serverbackup.utils.FTPManager;
+import de.sebli.serverbackup.utils.LogUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import de.sebli.serverbackup.ServerBackup;
-import de.sebli.serverbackup.core.OperationHandler;
-import de.sebli.serverbackup.utils.FtpManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class CommandFtp {
+class CommandFTP {
+    private CommandFTP() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    private static final ServerBackupPlugin instance = ServerBackupPlugin.getPluginInstance();
+
+    private static final LogUtils logHandler = new LogUtils(instance);
 
     public static void execute(CommandSender sender, String[] args) {
         if (args[1].equalsIgnoreCase("list")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
-                FtpManager ftpm = new FtpManager(sender);
+            Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
+                FTPManager ftpm = new FTPManager(sender);
 
-                List<String> backups = ftpm.getFtpBackupList(false);
+                List<String> backups = ftpm.getFTPBackupList(false);
 
-                if (backups.size() == 0) {
-                    sender.sendMessage(OperationHandler.processMessage("Error.NoFtpBackups"));
+                if (backups.isEmpty()) {
+                    logHandler.logInfo(OperationHandler.processMessage("Error.NoFtpBackups"), sender);
 
                     return;
                 }
 
                 try {
-                    int page = Integer.valueOf(args[2]);
+                    int page = Integer.parseInt(args[2]);
 
                     if (backups.size() < page * 10 - 9) {
                         sender.sendMessage("Try a lower value.");
@@ -38,17 +46,16 @@ public class CommandFtp {
                     }
 
                     if (backups.size() <= page * 10 && backups.size() >= page * 10 - 10) {
-                        sender.sendMessage("----- Ftp-Backup " + Integer.valueOf(page * 10 - 9) + "-"
+                        sender.sendMessage("----- Ftp-Backup " + (page * 10 - 9) + "-"
                                 + backups.size() + "/" + backups.size() + " -----");
                     } else {
-                        sender.sendMessage("----- Ftp-Backup " + Integer.valueOf(page * 10 - 9) + "-"
-                                + Integer.valueOf(page * 10) + "/" + backups.size() + " -----");
+                        sender.sendMessage("----- Ftp-Backup " + (page * 10 - 9) + "-"
+                                + page * 10 + "/" + backups.size() + " -----");
                     }
                     sender.sendMessage("");
 
                     for (int i = page * 10 - 10; i < backups.size() && i < page * 10; i++) {
-                        if (sender instanceof Player) {
-                            Player p = (Player) sender;
+                        if (sender instanceof Player p) {
 
                             TextComponent msg = new TextComponent(backups.get(i));
                             msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
@@ -71,20 +78,20 @@ public class CommandFtp {
                     sender.sendMessage("");
                     sender.sendMessage("--------- Page " + page + "/" + maxPages + " ---------");
                 } catch (Exception e) {
-                    sender.sendMessage(OperationHandler.processMessage("Error.NotANumber").replaceAll("%input%", args[1]));
+                    logHandler.logError(OperationHandler.processMessage("Error.NotANumber").replace("%input%", args[1]), e.getMessage(), sender);
                 }
             });
         } else if (args[1].equalsIgnoreCase("download")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
-                FtpManager ftpm = new FtpManager(sender);
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+                FTPManager ftpm = new FTPManager(sender);
 
-                ftpm.downloadFileFromFtp(args[2]);
+                ftpm.downloadFileFromFTP(args[2]);
             });
         } else if (args[1].equalsIgnoreCase("upload")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
-                FtpManager ftpm = new FtpManager(sender);
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+                FTPManager ftpm = new FTPManager(sender);
 
-                ftpm.uploadFileToFtp(args[2], !ServerBackup.getInstance().getConfig().getBoolean("Ftp.CompressBeforeUpload"));
+                ftpm.uploadFileToFTP(args[2], !ServerBackupPlugin.getPluginInstance().getConfig().getBoolean("Ftp.CompressBeforeUpload"));
             });
         }
     }

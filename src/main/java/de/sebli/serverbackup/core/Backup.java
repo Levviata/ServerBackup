@@ -1,7 +1,10 @@
 package de.sebli.serverbackup.core;
 
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
+import de.sebli.serverbackup.utils.LogUtils;
+import de.sebli.serverbackup.utils.enums.TaskPurpose;
+import de.sebli.serverbackup.utils.enums.TaskType;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -9,16 +12,23 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Level;
 
+import static de.sebli.serverbackup.core.OperationHandler.formatPath;
+import static de.sebli.serverbackup.utils.FileUtil.tryDeleteFile;
+import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
+import static de.sebli.serverbackup.utils.TaskUtils.addTask;
+
 public class Backup {
 
     private final String backupFilePath;
-    private CommandSender sender;
+    private final CommandSender sender;
     private final boolean isFullBackup;
+    private final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
 
     public Backup(String backupFilePath, CommandSender sender, boolean isFullBackup) {
         this.backupFilePath = backupFilePath;
@@ -43,61 +53,50 @@ public class Backup {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'~'HH-mm-ss");
         df.setTimeZone(TimeZone.getDefault());
 
-        File backupFolder = new File(Configuration.backupDestination + "//backup-" + df.format(date) + "-"
-                + filePath + "//" + filePath);
+        File backupFolder = Paths.get(Configuration.backupDestination, "backup-" + df.format(date) + "-" + filePath, filePath).toFile();
 
-        if(worldFolder.exists()) {
-            try {
-                if (!backupFolder.exists()) {
-                    for (Player all : Bukkit.getOnlinePlayers()) {
-                        if (all.hasPermission("backup.notification")) {
-                            all.sendMessage(OperationHandler.processMessage("Info.BackupStarted").replaceAll("%file%", worldFolder.getName()));
-                        }
+        if (worldFolder.exists()) {
+            if (!backupFolder.exists()) {
+                for (Player all : Bukkit.getOnlinePlayers()) {
+                    if (all.hasPermission("backup.notification")) {
+                        all.sendMessage(OperationHandler.processMessage("Info.BackupStarted").replace(FILE_NAME_PLACEHOLDER, worldFolder.getName()));
                     }
-
-                    ZipManager zm = new ZipManager(
-                            worldFolder.getPath(), Configuration.backupDestination + "//backup-"
-                            + df.format(date) + "-" + filePath.replaceAll("/", "-") + ".zip",
-                            Bukkit.getConsoleSender(), true, true, isFullBackup);
-
-                    zm.zip();
-
-                    OperationHandler.tasks.add("CREATE {" + filePath.replace("\\", "/") + "}");
-                } else {
-                    Bukkit.getLogger().log(Level.WARNING, "Backup already exists.");
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
 
-                Bukkit.getLogger().log(Level.WARNING, "Backup failed.");
+
+                ZipManager zm = new ZipManager(
+                        worldFolder.getPath(), Configuration.backupDestination + "//backup-"
+                        + df.format(date) + "-" + filePath.replace("/", "-") + ".zip",
+                        Bukkit.getConsoleSender(), true, true, isFullBackup);
+
+                zm.zip(addTask(TaskType.PHYSICAL, TaskPurpose.ZIP, "Zipping " + formatPath(filePath)));
+            } else {
+                Bukkit.getLogger().log(Level.WARNING, "Backup already exists.");
             }
         }
     }
 
     public void remove() {
-        Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), () -> {
-            File file = new File(Configuration.backupDestination + "//" + backupFilePath);
+        Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+            File file = Paths.get(Configuration.backupDestination, backupFilePath).toFile();
 
             if (file.exists()) {
                 if (file.isDirectory()) {
                     try {
                         FileUtils.deleteDirectory(file);
 
-                        sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replaceAll("%file%", backupFilePath));
+                        logHandler.logInfo(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
                     } catch (IOException e) {
-                        e.printStackTrace();
-
-                        sender.sendMessage(OperationHandler.processMessage("Error.DeletionFailed").replaceAll("%file%", backupFilePath));
+                        logHandler.logError(OperationHandler.processMessage("Error.DeletionFailed").replace(FILE_NAME_PLACEHOLDER, backupFilePath), e.getMessage(), sender);
                     }
                 } else {
-                    file.delete();
+                    tryDeleteFile(file);
 
-                    sender.sendMessage(OperationHandler.processMessage("Info.BackupRemoved").replaceAll("%file%", backupFilePath));
+                    logHandler.logInfo(OperationHandler.processMessage("Info.BackupRemoved").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
                 }
             } else {
-                sender.sendMessage(OperationHandler.processMessage("Error.NoBackupFound").replaceAll("%file%", backupFilePath));
+                logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NoBackupFound").replace(FILE_NAME_PLACEHOLDER, backupFilePath), sender);
             }
         });
     }
-
 }

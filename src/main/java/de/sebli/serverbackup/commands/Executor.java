@@ -1,13 +1,17 @@
 package de.sebli.serverbackup.commands;
 
 import de.sebli.serverbackup.Configuration;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.OperationHandler;
+import de.sebli.serverbackup.utils.LogUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 public class Executor implements CommandExecutor {
+
+    private static final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -53,7 +57,7 @@ public class Executor implements CommandExecutor {
                 if (args[0].equalsIgnoreCase("search")) {
                     CommandSearch.execute(sender, args);
                 } else if (args[0].equalsIgnoreCase("ftp")) {
-                    CommandFtp.execute(sender, args);
+                    CommandFTP.execute(sender, args);
                 } else if (args[0].equalsIgnoreCase("dropbox")) {
                     CommandDropbox.execute(sender, args);
                 }
@@ -61,7 +65,7 @@ public class Executor implements CommandExecutor {
                 sendHelp(sender);
             }
         } else {
-            sender.sendMessage(OperationHandler.processMessage("Error.NoPermission"));
+            logHandler.logCommandFeedback(OperationHandler.processMessage("Error.NoPermission"), sender);
         }
 
         return false;

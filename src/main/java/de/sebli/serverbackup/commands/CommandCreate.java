@@ -2,9 +2,13 @@ package de.sebli.serverbackup.commands;
 
 import com.google.common.io.Files;
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.ServerBackup;
+import de.sebli.serverbackup.ServerBackupPlugin;
 import de.sebli.serverbackup.core.Backup;
 import de.sebli.serverbackup.core.OperationHandler;
+import de.sebli.serverbackup.utils.LogUtils;
+import de.sebli.serverbackup.utils.enums.TaskPurpose;
+import de.sebli.serverbackup.utils.enums.TaskType;
+import de.sebli.serverbackup.utils.records.Task;
 import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -12,11 +16,20 @@ import org.bukkit.command.CommandSender;
 import java.io.File;
 import java.io.IOException;
 
-public class CommandCreate {
+import static de.sebli.serverbackup.core.OperationHandler.formatPath;
+import static de.sebli.serverbackup.utils.GlobalConstants.FILE_NAME_PLACEHOLDER;
+import static de.sebli.serverbackup.utils.TaskUtils.addTask;
+import static de.sebli.serverbackup.utils.TaskUtils.removeTask;
+
+class CommandCreate {
+    private CommandCreate() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    private static final LogUtils logHandler = new LogUtils(ServerBackupPlugin.getPluginInstance());
 
     public static void execute(CommandSender sender, String[] args) {
-        String fileName = args[1];
-
+        StringBuilder fileNameBuilder = new StringBuilder(args[1]);
         boolean fullBackup = false;
 
         if (args.length > 2) {
@@ -24,38 +37,37 @@ public class CommandCreate {
                 if (args[i].equalsIgnoreCase("-full")) {
                     fullBackup = true;
                 } else {
-                    fileName = fileName + " " + args[i];
+                    fileNameBuilder.append(" ").append(args[i]);
                 }
             }
         }
+        String fileName = fileNameBuilder.toString();
 
         File file = new File(fileName);
 
         if (!file.isDirectory() && !args[1].equalsIgnoreCase("@server")) {
-            Bukkit.getScheduler().runTaskAsynchronously(ServerBackup.getInstance(), new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(ServerBackupPlugin.getPluginInstance(), () -> {
+                Task currentTask = addTask(TaskType.PHYSICAL, TaskPurpose.CREATE, "Creating backup via command " + formatPath(file.getPath()));
 
-                @Override
-                public void run() {
-                    try {
-                        File des = new File(Configuration.backupDestination + "//Files//"
-                                + file.getName().replaceAll("/", "-"));
+                try {
+                    File destination = new File(Configuration.backupDestination + "//Files//"
+                            + file.getName().replace("/", "-"));
 
-                        if (des.exists()) {
-                            des = new File(des.getPath()
-                                    .replaceAll("." + FilenameUtils.getExtension(des.getName()), "") + " "
-                                    + String.valueOf(System.currentTimeMillis() / 1000) + "."
-                                    + FilenameUtils.getExtension(file.getName()));
-                        }
-
-                        Files.copy(file, des);
-
-                        sender.sendMessage(OperationHandler.processMessage("Info.BackupFinished").replaceAll("%file%", args[1]));
-                    } catch (IOException e) {
-                        sender.sendMessage(OperationHandler.processMessage("Error.BackupFailed").replaceAll("%file%", args[1]));
-                        e.printStackTrace();
+                    if (destination.exists()) {
+                        destination = new File(destination.getPath()
+                                .replaceAll("." + FilenameUtils.getExtension(destination.getName()), "") + " "
+                                + (System.currentTimeMillis() / 1000) + "."
+                                + FilenameUtils.getExtension(file.getName()));
                     }
-                }
 
+                    Files.copy(file, destination);
+
+                    logHandler.logInfo(OperationHandler.processMessage("Info.BackupFinished").replace(FILE_NAME_PLACEHOLDER, args[1]), sender);
+                } catch (IOException e) {
+                    logHandler.logError(OperationHandler.processMessage("Error.BackupFailed").replace(FILE_NAME_PLACEHOLDER, args[1]), e.getMessage(), sender);
+                } finally {
+                    removeTask(currentTask);
+                }
             });
         } else {
             Backup backup = new Backup(fileName, sender, fullBackup);
@@ -63,5 +75,4 @@ public class CommandCreate {
             backup.create();
         }
     }
-
 }

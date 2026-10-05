@@ -1,7 +1,7 @@
 package de.sebli.serverbackup.commands;
 
 import de.sebli.serverbackup.Configuration;
-import de.sebli.serverbackup.utils.FtpManager;
+import de.sebli.serverbackup.utils.FTPManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TabCompleter implements org.bukkit.command.TabCompleter {
+public class ServerBackupTabCompleter implements org.bukkit.command.TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
@@ -37,7 +37,7 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                 StringUtil.copyPartialMatches(args[0], commands, completions);
             } else if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("list")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
                     int maxPages = backups.length / 10;
 
@@ -49,10 +49,10 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                         commands.add(String.valueOf(i));
                     }
                 } else if (args[0].equalsIgnoreCase("remove")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
-                    for (int i = 0; i < backups.length; i++) {
-                        commands.add(backups[i].getName());
+                    for (File backup : backups) {
+                        commands.add(backup.getName());
                     }
                 } else if (args[0].equalsIgnoreCase("create")) {
                     for (World world : Bukkit.getWorlds()) {
@@ -63,7 +63,7 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
 
                     commands.add("@server");
                 } else if (args[0].equalsIgnoreCase("zip")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
                     for (File backup : backups) {
                         if (!backup.getName().endsWith(".zip")) {
@@ -71,7 +71,7 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                         }
                     }
                 } else if (args[0].equalsIgnoreCase("unzip")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
                     for (File backup : backups) {
                         if (backup.getName().endsWith(".zip")) {
@@ -90,15 +90,15 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
             } else if (args.length == 3) {
                 if (args[0].equalsIgnoreCase("ftp")) {
                     if (args[1].equalsIgnoreCase("download")) {
-                        FtpManager ftpm = new FtpManager(sender);
+                        FTPManager ftpm = new FTPManager(sender);
 
-                        List<String> backups = ftpm.getFtpBackupList(false);
+                        List<String> backups = ftpm.getFTPBackupList(false);
 
                         for (String backup : backups) {
                             commands.add(backup.split(" ")[1]);
                         }
                     } else if (args[1].equalsIgnoreCase("upload")) {
-                        File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                        File[] backups = new File(Configuration.backupDestination).listFiles();
 
                         for (File backup : backups) {
                             if (backup.getName().endsWith(".zip")) {
@@ -108,7 +108,7 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                     }
 
                 } else if (args[0].equalsIgnoreCase("dropbox")) {
-                    File[] backups = new File(Configuration.backupDestination + "").listFiles();
+                    File[] backups = new File(Configuration.backupDestination).listFiles();
 
                     for (File backup : backups) {
                         if (backup.getName().endsWith(".zip")) {
