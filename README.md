@@ -2,14 +2,8 @@
 
 left off in 2025 jan 19, revived now, changelog due
 
-# Objectives/Intentions
-
-In general, I want to fix bugs here and there, possibly improve code quality, basic documentation, and neatly pack everything together for better support down the line. 
-
-May or may not rename fork for clarity in the future.
-
-_No promises, no compromises._
-
+# Features
+todo
 # Disclaimer
 
 Get the original plugin here: 
